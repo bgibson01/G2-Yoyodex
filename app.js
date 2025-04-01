@@ -67,12 +67,12 @@ function renderYoyos(yoyos) {
   elements.container.innerHTML = yoyos.map(yoyo => `
     <div class="yoyo-card">
       <img src="${yoyo.image_url || 'assets/placeholder.jpg'}" 
-           alt="${yoyo.model} ${yoyo.colorwar}" 
+           alt="${yoyo.model} ${yoyo.colorway}" 
            class="yoyo-image"
            loading="lazy">
       <div class="yoyo-info">
         <h2 class="yoyo-model">${yoyo.model}</h2>
-        <p class="yoyo-colorway">${yoyo.colorwar}</p>
+        <p class="yoyo-colorway">${yoyo.colorway}</p>
         
         <p><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>
         ${yoyo.quantity ? `<p><strong>Quantity:</strong> ${yoyo.quantity}</p>` : ''}
@@ -112,7 +112,7 @@ function setupEventListeners() {
     const term = e.target.value.toLowerCase();
     filteredYoyos = allYoyos.filter(yoyo => 
       yoyo.model.toLowerCase().includes(term) || 
-      yoyo.colorwar.toLowerCase().includes(term)
+      yoyo.colorway.toLowerCase().includes(term)
     );
     renderYoyos(filteredYoyos);
   });
