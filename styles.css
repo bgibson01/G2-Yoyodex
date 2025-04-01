@@ -177,29 +177,37 @@ header h1 {
   transition: max-height 0.3s ease-out;
   background: #f8f8f8;
   border-radius: 6px;
-  padding: 10px;
   margin-top: 8px;
 }
 
 .specs-container.expanded {
-  max-height: 500px;
+  max-height: 1000px; /* Increased to accommodate more specs */
+  padding: 15px;
 }
 
 .specs-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
   padding: 10px 0;
-  font-size: 0.9rem;
 }
 
 .spec-item {
   display: flex;
   justify-content: space-between;
-  padding: 5px 0;
-  border-bottom: 1px dashed #eee;
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
 }
 
+.spec-item span:first-child {
+  font-weight: bold;
+  color: #666;
+  margin-right: 10px;
+}
+
+.spec-item span:last-child {
+  text-align: right;
+}
 .spec-name {
   color: #666;
 }
@@ -245,19 +253,16 @@ header h1 {
 
 /* ===== RESPONSIVE ADJUSTMENTS ===== */
 @media (max-width: 768px) {
-  .yoyo-grid {
+  .specs-grid {
     grid-template-columns: 1fr;
   }
   
-  .controls {
+  .spec-item {
     flex-direction: column;
   }
   
-  #search {
-    width: 100%;
-  }
-
-  .specs-grid {
-    grid-template-columns: 1fr;
+  .spec-item span:last-child {
+    text-align: left;
+    margin-top: 2px;
   }
 }
