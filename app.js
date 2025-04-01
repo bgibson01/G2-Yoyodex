@@ -81,11 +81,18 @@ function mergeSpecs(yoyos, specs) {
 // RENDERING FUNCTIONS
 // ======================
 function renderSpecsSection(yoyo) {
-  console.log(`Rendering specs for ${yoyo.model}:`, yoyo);
-  
-  // Check if any specs exist
+  console.log(`Rendering specs for ${yoyo.model}:`, {
+    diameter: yoyo.diameter,
+    width: yoyo.width,
+    composition: yoyo.composition
+  });
+
+  // First check if we have any specs to show
   const hasSpecs = yoyo.diameter || yoyo.width || yoyo.composition;
-  if (!hasSpecs) return '';
+  if (!hasSpecs) {
+    console.log(`No specs found for ${yoyo.model}`);
+    return '';
+  }
 
   return `
     <button class="specs-toggle" onclick="toggleSpecs(this)">
