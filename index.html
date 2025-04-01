@@ -3,253 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>G² YoYo Pokédex</title>
-  <style>
-    /* CSS Reset and Base Styles */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Arial', sans-serif;
-      line-height: 1.6;
-      background: #f8f8f8;
-      color: #333;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-      margin: 20px 0;
-      color: #000;
-    }
-
-    #search {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 20px;
-      border: 2px solid #ddd;
-      border-radius: 4px;
-      font-size: 16px;
-    }
-
-    .filters {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    .filters button {
-      padding: 8px 16px;
-      background: #000;
-      color: #ff9900;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.3s;
-    }
-
-    .filters button:hover {
-      background: #ff9900;
-      color: #000;
-    }
-
-    #yoyo-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-    }
-
-    .yoyo-card {
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-      transition: transform 0.3s;
-    }
-
-    .yoyo-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .yoyo-card img {
-      width: 100%;
-      height: 250px;
-      object-fit: cover;
-      border-bottom: 1px solid #eee;
-    }
-
-    .yoyo-info {
-      padding: 15px;
-    }
-
-    .yoyo-info h2 {
-      font-size: 1.2rem;
-      margin-bottom: 8px;
-      color: #000;
-    }
-
-    .yoyo-info p {
-      margin: 5px 0;
-      font-size: 0.9rem;
-    }
-
-    .yoyo-info p strong {
-      color: #000;
-    }
-
-    .glitch-badge {
-      background: #ff3366;
-      color: white;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      margin-left: 5px;
-    }
-
-    /* Mobile Responsive */
-    @media (max-width: 768px) {
-      #yoyo-container {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+  <title>G² YoYodex</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="https://www.gsquaredyoyos.com/favicon.ico">
 </head>
 <body>
-  <h1>G² YoYo Pokédex</h1>
-  
-  <input type="text" id="search" placeholder="Search by model or colorway...">
-  
-  <div class="filters">
-    <button onclick="filterYoyos('all')">All Releases</button>
-    <button onclick="filterYoyos('weekly')">Weekly Drops</button>
-    <button onclick="filterYoyos('patreon')">Patreon Exclusives</button>
-    <button onclick="filterYoyos('limited')">Limited Editions</button>
-  </div>
-  
-  <div id="yoyo-container">
-    <!-- Yoyos will load here dynamically -->
-  </div>
+  <header>
+    <h1>
+      <img src="https://www.gsquaredyoyos.com/images/logo.png" alt="G² Logo" class="logo">
+      YoYo Pokédex
+    </h1>
+  </header>
 
-  <script>
-    // Global variables
-    let allYoyos = []; // Stores all yoyos from Google Sheet
-    let filteredYoyos = []; // Stores currently displayed yoyos
+  <main>
+    <div class="controls">
+      <input type="text" id="search" placeholder="Search models/colorways...">
+      <div class="filters">
+        <button data-filter="all">All</button>
+        <button data-filter="weekly">Weekly</button>
+        <button data-filter="patreon">Patreon</button>
+      </div>
+    </div>
 
-    // DOM elements
-    const searchInput = document.getElementById('search');
-    const yoyoContainer = document.getElementById('yoyo-container');
+    <div id="yoyo-container" class="yoyo-grid"></div>
+  </main>
 
-    // Fetch data from Google Apps Script
-    async function fetchYoyos() {
-      try {
-        const response = await fetch('https://script.google.com/macros/s/AKfycbxrN9pRzoObtPQvvl-Yny9EU4ROmIPpT7FAi1JfjQCErlCw30_EZ_dUmfiXooRZgN7KZQ/exec');
-        if (!response.ok) throw new Error('Network response was not ok');
-        
-        const data = await response.json();
-        
-        // Validate data structure
-        if (!Array.isArray(data)) {
-          throw new Error('Expected array but got:', typeof data);
-        }
-        
-        // Check if required fields exist
-        if (data.length > 0) {
-          const requiredFields = ['model', 'colorway', 'release_date', 'image_url'];
-          const missingFields = requiredFields.filter(field => !(field in data[0]));
-          
-          if (missingFields.length > 0) {
-            console.error('Missing required fields in spreadsheet:', missingFields);
-          }
-        }
-        
-        return data;
-      } catch (error) {
-        console.error('Error fetching yoyos:', error);
-        yoyoContainer.innerHTML = `
-          <div class="error">
-            <p>Failed to load yoyo data. Please check:</p>
-            <ul>
-              <li>Google Script URL is correct</li>
-              <li>Spreadsheet has required columns: model, colorway, release_date, image_url</li>
-              <li>Internet connection is active</li>
-            </ul>
-          </div>
-        `;
-        return [];
-      }
-    }
+  <footer>
+    <p>Data sourced from G² Yoyos • Not affiliated with G²</p>
+  </footer>
 
-    // Render yoyos to the page
-    function renderYoyos(yoyos) {
-      if (!yoyos || yoyos.length === 0) {
-        yoyoContainer.innerHTML = '<p>No yoyos found matching your criteria.</p>';
-        return;
-      }
-      
-      yoyoContainer.innerHTML = yoyos.map(yoyo => `
-        <div class="yoyo-card">
-          <img src="${yoyo.image_url || 'https://via.placeholder.com/300x200?text=No+Image'}" 
-               alt="${yoyo.model} - ${yoyo.colorway}">
-          <div class="yoyo-info">
-            <h2>${yoyo.model} <span style="color:#ff9900">${yoyo.colorway}</span></h2>
-            <p><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>
-            ${yoyo.composition ? `<p><strong>Material:</strong> ${yoyo.composition}</p>` : ''}
-            ${yoyo.quantity ? `<p><strong>Total Made:</strong> ${yoyo.quantity}</p>` : ''}
-            ${yoyo.glitch_quantity > 0 ? `<p><strong>Glitch Versions:</strong> <span class="glitch-badge">${yoyo.glitch_quantity}</span></p>` : ''}
-            ${yoyo.description ? `<p>${yoyo.description}</p>` : ''}
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // Helper functions
-    function formatDate(dateString) {
-      if (!dateString) return 'Unknown date';
-      const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      return new Date(dateString).toLocaleDateString(undefined, options);
-    }
-
-    // Filter functions
-    function filterYoyos(type) {
-      if (type === 'all') {
-        filteredYoyos = [...allYoyos];
-      } else {
-        filteredYoyos = allYoyos.filter(yoyo => yoyo.type === type);
-      }
-      renderYoyos(filteredYoyos);
-    }
-
-    // Search function
-    function handleSearch() {
-      const searchTerm = searchInput.value.toLowerCase();
-      
-      filteredYoyos = allYoyos.filter(yoyo => 
-        yoyo.model.toLowerCase().includes(searchTerm) || 
-        yoyo.colorway.toLowerCase().includes(searchTerm) ||
-        (yoyo.description && yoyo.description.toLowerCase().includes(searchTerm))
-      );
-      
-      renderYoyos(filteredYoyos);
-    }
-
-    // Initialize
-    async function init() {
-      allYoyos = await fetchYoyos();
-      filteredYoyos = [...allYoyos];
-      renderYoyos(filteredYoyos);
-      
-      // Event listeners
-      searchInput.addEventListener('input', handleSearch);
-    }
-
-    init();
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
