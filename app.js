@@ -49,6 +49,17 @@ function mergeSpecs(yoyos, specs) {
   }));
 }
 
+/*
+ - Formats date string (YYYY-MM-DD) to readable format
+ - @param {string} dateString - Date in YYYY-MM-DD format
+ - @returns {string} Formatted date (e.g. "Jan 1, 2023")
+ */
+function formatDate(dateString) {
+  if (!dateString) return 'Unknown date';
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+}
+
 // Rendering
 function renderYoyos(yoyos) {
   elements.container.innerHTML = yoyos.map(yoyo => `
