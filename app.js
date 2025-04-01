@@ -48,28 +48,52 @@ async function fetchData(url) {
 }
 
 function mergeSpecs(yoyos, specs) {
-  const specsMap = new Map(specs.map(spec => {
-    // Clean width value (remove weight if combined)
-    const rawWidth = spec.width?.toString() || '';
-    const cleanWidth = parseFloat(rawWidth.split(' ')[0]);
+  // Create a normalized specs map
+  const specsMap = new Map();
+  
+  specs.forEach(spec => {
+    if (!spec.model) return;
     
-    return [spec.model.trim().toLowerCase(), {
+    // Normalize model name (trim and lowercase)
+    const normalizedModel = spec.model.toString().trim().toLowerCase();
+    
+    // Parse combined width/weight if needed
+    let width = spec.width;
+    let weight = spec.weight;
+    
+    if (width && typeof width === 'string') {
+      const parts = width.split(' ');
+      width = parseFloat(parts[0]);
+      if (parts[1] && !weight) {
+        weight = parts[1].replace('g', '');
+      }
+    }
+    
+    specsMap.set(normalizedModel, {
       diameter: spec.diameter,
-      width: cleanWidth || spec.width,
-      weight: spec.weight || rawWidth.split(' ')[1]?.replace('g', ''),
+      width: width,
+      weight: weight,
       composition: spec.composition,
       pads: spec.pads,
       bearing: spec.bearing,
       axle: spec.axle,
       finish: spec.finish
-    }];
-  }));
+    });
+  });
 
+  // Merge with yoyos
   return yoyos.map(yoyo => {
-    const normalizedModel = yoyo.model.trim().toLowerCase();
+    const normalizedModel = yoyo.model.toString().trim().toLowerCase();
+    const specsData = specsMap.get(normalizedModel) || {};
+    
+    console.log(`Merging ${yoyo.model}`, {
+      found: specsMap.has(normalizedModel),
+      specs: specsData
+    });
+    
     return {
       ...yoyo,
-      ...(specsMap.get(normalizedModel) || {}),
+      ...specsData,
       id: `${normalizedModel}-${yoyo.colorway.toLowerCase()}-${Date.now()}`
     };
   });
@@ -80,25 +104,37 @@ function mergeSpecs(yoyos, specs) {
 // ======================
 function renderSpecsSection(yoyo) {
   const hasSpecs = yoyo.diameter || yoyo.width || yoyo.composition;
-  if (!hasSpecs) return '';
+  if (!hasSpecs) {
+    console.log(`No specs found for ${yoyo.model}`);
+    return '';
+  }
 
   return `
     <button class="specs-toggle" onclick="toggleSpecs(this)">
-      ▶ Show Full Specifications
+      ▶ Show Technical Specifications
     </button>
     <div class="specs-container">
       <div class="specs-grid">
-        ${yoyo.diameter ? `<div class="spec-item"><span>Diameter:</span> ${yoyo.diameter}mm</div>` : ''}
-        ${yoyo.width ? `<div class="spec-item"><span>Width:</span> ${yoyo.width}mm</div>` : ''}
-        ${yoyo.weight ? `<div class="spec-item"><span>Weight:</span> ${yoyo.weight}g</div>` : ''}
-        ${yoyo.composition ? `<div class="spec-item"><span>Material:</span> ${yoyo.composition}</div>` : ''}
-        ${yoyo.pads ? `<div class="spec-item"><span>Pads:</span> ${yoyo.pads}</div>` : ''}
-        ${yoyo.bearing ? `<div class="spec-item"><span>Bearing:</span> ${yoyo.bearing}</div>` : ''}
-        ${yoyo.axle ? `<div class="spec-item"><span>Axle:</span> ${yoyo.axle}</div>` : ''}
-        ${yoyo.finish ? `<div class="spec-item"><span>Finish:</span> ${yoyo.finish}</div>` : ''}
+        ${renderSpecItem('Diameter', yoyo.diameter, 'mm')}
+        ${renderSpecItem('Width', yoyo.width, 'mm')}
+        ${renderSpecItem('Weight', yoyo.weight, 'g')}
+        ${renderSpecItem('Material', yoyo.composition)}
+        ${renderSpecItem('Response Pads', yoyo.pads)}
+        ${renderSpecItem('Bearing', yoyo.bearing)}
+        ${renderSpecItem('Axle', yoyo.axle)}
+        ${renderSpecItem('Finish', yoyo.finish)}
       </div>
     </div>
   `;
+}
+
+function renderSpecItem(label, value, unit = '') {
+  return value ? `
+    <div class="spec-item">
+      <span>${label}:</span>
+      <span>${value}${unit}</span>
+    </div>
+  ` : '';
 }
 
 function renderYoyos(yoyos) {
@@ -209,11 +245,13 @@ async function init() {
     ]);
     
     // DEBUG: RAW DATA CHECK
-    console.log("=== RAW DATA DEBUG ===");
-    console.log("First 3 yoyos:", JSON.parse(JSON.stringify(yoyos.slice(0, 3))));
-    console.log("First 3 specs:", JSON.parse(JSON.stringify(specs.slice(0, 3))));
-    console.log("Does specs data have diameter property?", specs[0]?.diameter !== undefined);
-    console.log("Column headers from specs:", Object.keys(specs[0] || {}));
+    console.log("Raw specs data sample:", specs.slice(0, 3));
+    console.log("Sample model matching:", {
+      yoyoModel: yoyos[0].model,
+      specsModel: specs[0]?.model,
+      normalizedYoyo: yoyos[0].model.trim().toLowerCase(),
+      normalizedSpecs: specs[0]?.model?.trim().toLowerCase()
+    });
     
     allYoyos = mergeSpecs(yoyos, specs);
     filteredYoyos = [...allYoyos];
