@@ -75,6 +75,7 @@ header {
   overflow: hidden;
   box-shadow: 0 3px 15px rgba(0,0,0,0.1);
   transition: transform 0.3s;
+  position: relative; /* Required for absolute positioning */
 }
 
 .yoyo-card:hover {
@@ -133,6 +134,23 @@ header {
 
 .spec-value {
   font-weight: bold;
+}
+
+.specs-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 15px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none; /* Prevents interfering with hover */
+}
+
+.yoyo-card:hover .specs-container {
+  opacity: 1;
 }
 
 footer {
