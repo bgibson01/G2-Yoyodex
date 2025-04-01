@@ -48,11 +48,18 @@ async function fetchData(url) {
 }
 
 function mergeSpecs(yoyos, specs) {
-  //DEBUGGING START
-  console.log("Merging specs for:", yoyo.model, "Found:", specsMap.has(yoyo.model));
-  //DEBUGGING END
   const specsMap = new Map(specs.map(spec => [spec.model, spec]));
+  
+  // DEBUGGING: Log all available models with specs
+  console.log("Available specs for models:", [...specsMap.keys()]);
+  
   return yoyos.map((yoyo, index) => {
+    // DEBUGGING: Log merge status for each yoyo
+    console.log(`Merging ${yoyo.model}:`, {
+      hasSpecs: specsMap.has(yoyo.model),
+      diameter: specsMap.get(yoyo.model)?.diameter
+    });
+    
     if (!yoyo.model || !yoyo.colorway) {
       console.warn(`Missing data at row ${index + 1}`, yoyo);
       return null;
@@ -70,21 +77,26 @@ function mergeSpecs(yoyos, specs) {
 // RENDERING FUNCTIONS
 // ======================
 function renderSpecsSection(yoyo) {
-  if (!yoyo.diameter && !yoyo.width) return '';
-  
+  // Debug: Check what specs exist
+  const hasSpecs = yoyo.diameter || yoyo.width || yoyo.composition;
+  console.log(`Rendering specs for ${yoyo.model}:`, {
+    diameter: yoyo.diameter,
+    width: yoyo.width,
+    composition: yoyo.composition,
+    hasSpecs: hasSpecs
+  });
+
+  if (!hasSpecs) return '';
+
   return `
-    <button class="specs-toggle" onclick="toggleSpecs(this)">
-      ▶ Show Technical Specs
+    <button class="specs-toggle" style="background:red;color:white" onclick="toggleSpecs(this)">
+      ▶ DEBUG: Show Specs
     </button>
     <div class="specs-container">
       <div class="specs-grid">
-        ${yoyo.diameter ? `<div class="spec-item"><span class="spec-name">Diameter:</span> <span class="spec-value">${yoyo.diameter}mm</span></div>` : ''}
-        ${yoyo.width ? `<div class="spec-item"><span class="spec-name">Width:</span> <span class="spec-value">${yoyo.width}mm</span></div>` : ''}
-        ${yoyo.composition ? `<div class="spec-item"><span class="spec-name">Material:</span> <span class="spec-value">${yoyo.composition}</span></div>` : ''}
-        ${yoyo.finish ? `<div class="spec-item"><span class="spec-name">Finish:</span> <span class="spec-value">${yoyo.finish}</span></div>` : ''}
-        ${yoyo.pads ? `<div class="spec-item"><span class="spec-name">Pads:</span> <span class="spec-value">${yoyo.pads}</span></div>` : ''}
-        ${yoyo.bearing ? `<div class="spec-item"><span class="spec-name">Bearing:</span> <span class="spec-value">${yoyo.bearing}</span></div>` : ''}
-        ${yoyo.axle ? `<div class="spec-item"><span class="spec-name">Axle:</span> <span class="spec-value">${yoyo.axle}</span></div>` : ''}
+        ${yoyo.diameter ? `<div class="spec-item"><span>Diameter:</span> ${yoyo.diameter}mm</div>` : ''}
+        ${yoyo.width ? `<div class="spec-item"><span>Width:</span> ${yoyo.width}mm</div>` : ''}
+        ${yoyo.composition ? `<div class="spec-item"><span>Material:</span> ${yoyo.composition}</div>` : ''}
       </div>
     </div>
   `;
