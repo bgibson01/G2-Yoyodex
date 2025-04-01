@@ -32,7 +32,7 @@ function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString(undefined, options);
   } catch (e) {
     console.warn('Invalid date format:', dateString);
-    return dateString; // Return raw string if date parsing fails
+    return dateString;
   }
 }
 
@@ -158,7 +158,6 @@ function toggleSpecs(element) {
 // EVENT HANDLERS
 // ======================
 function setupEventListeners() {
-  // Search functionality
   elements.search.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase().trim();
     filteredYoyos = allYoyos.filter(yoyo => 
@@ -169,7 +168,6 @@ function setupEventListeners() {
     renderYoyos(filteredYoyos);
   });
 
-  // Filter buttons
   elements.filterButtons.forEach(button => {
     button.addEventListener('click', () => {
       const filter = button.dataset.filter;
