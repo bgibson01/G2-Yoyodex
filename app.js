@@ -48,6 +48,9 @@ async function fetchData(url) {
 }
 
 function mergeSpecs(yoyos, specs) {
+  //DEBUGGING START
+  console.log("Merging specs for:", yoyo.model, "Found:", specsMap.has(yoyo.model));
+  //DEBUGGING END
   const specsMap = new Map(specs.map(spec => [spec.model, spec]));
   return yoyos.map((yoyo, index) => {
     if (!yoyo.model || !yoyo.colorway) {
