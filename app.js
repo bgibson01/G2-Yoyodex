@@ -213,19 +213,16 @@ async function init() {
     const [yoyos, specs] = await Promise.all([
       fetchData(CONFIG.yoyosDataUrl),
       fetchData(CONFIG.specsDataUrl)
-]);
-
-console.log("Raw yoyos data:", yoyos);
-console.log("Raw specs data:", specs);
+    ]);
+    
+    // DEBUG: RAW DATA CHECK
+    console.log("=== RAW DATA DEBUG ===");
+    console.log("First 3 yoyos:", JSON.parse(JSON.stringify(yoyos.slice(0, 3))));
+    console.log("First 3 specs:", JSON.parse(JSON.stringify(specs.slice(0, 3))));
+    console.log("Does specs data have diameter property?", specs[0]?.diameter !== undefined);
+    console.log("Column headers from specs:", Object.keys(specs[0] || {}));
     
     allYoyos = mergeSpecs(yoyos, specs);
-    //DEBUGGING START
-    console.log("=== SPECS DEBUG ===");
-    console.log("Sample yoyo with specs:", allYoyos.find(y => y.model === "Loadout"));
-    console.log("All models with specs:", 
-      allYoyos.filter(y => y.diameter || y.width).map(y => y.model)
-    );
-    //DEBUGGING END
     filteredYoyos = [...allYoyos];
     
     renderYoyos(filteredYoyos);
