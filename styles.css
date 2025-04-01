@@ -1,14 +1,6 @@
-/* ===== BASE STYLES ===== */
-:root {
-  --g2-orange: #ff9900;
-  --g2-black: #000;
-  --shadow: 0 3px 10px rgba(0,0,0,0.1);
-  --transition: all 0.3s ease;
-}
-
+/* Reset & Base Styles */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.6;
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
@@ -16,189 +8,108 @@ body {
   color: #333;
 }
 
-/* ===== HEADER ===== */
-header {
+/* Header */
+header h1 {
   text-align: center;
   margin-bottom: 30px;
 }
 
-.logo {
-  height: 50px;
-  vertical-align: middle;
-}
-
-/* ===== CONTROLS ===== */
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-bottom: 25px;
-}
-
+/* Search & Filters */
 #search {
-  flex: 1;
-  min-width: 200px;
+  width: 100%;
   padding: 10px;
+  margin-bottom: 15px;
   border: 2px solid #ddd;
   border-radius: 6px;
-  font-size: 16px;
 }
 
 .filters {
   display: flex;
   gap: 10px;
-  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
 
 .filters button {
   padding: 8px 16px;
-  background: var(--g2-black);
-  color: var(--g2-orange);
+  background: #000;
+  color: #ff9900;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
-  transition: var(--transition);
 }
 
-.filters button:hover {
-  background: var(--g2-orange);
-  color: var(--g2-black);
-}
-
-/* ===== YOYO CARDS ===== */
+/* Yoyo Cards */
 .yoyo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
 }
 
 .yoyo-card {
   background: white;
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: var(--shadow);
-  transition: var(--transition);
-  display: flex;
-  flex-direction: column;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
-.yoyo-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-/* Fixed image sizing */
 .yoyo-image {
   width: 100%;
-  height: 200px; /* Fixed height */
-  object-fit: cover; /* Ensures images fill space without distortion */
+  height: 200px;
+  object-fit: cover;
   border-bottom: 1px solid #eee;
 }
 
 .yoyo-info {
   padding: 15px;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
 }
 
 .yoyo-model {
   font-size: 1.2rem;
-  margin: 0 0 5px 0;
-  color: var(--g2-black);
+  margin-bottom: 5px;
+  color: #000;
 }
 
 .yoyo-colorway {
-  color: var(--g2-orange);
+  color: #ff9900;
   font-weight: bold;
   margin-bottom: 10px;
 }
 
-/* ===== SPECS SECTION ===== */
+/* Specs Section */
 .specs-toggle {
+  color: #ff9900;
   background: none;
   border: none;
-  color: var(--g2-orange);
   padding: 5px 0;
   margin: 10px 0;
   cursor: pointer;
-  text-align: left;
-  font-size: 0.9rem;
-}
-
-.specs-container {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease-out;
-}
-
-.specs-container.expanded {
-  max-height: 300px;
 }
 
 .specs-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
-  font-size: 0.85rem;
-  padding: 5px 0;
+  font-size: 0.9rem;
 }
 
 .spec-item {
   display: flex;
   justify-content: space-between;
-  padding-bottom: 3px;
-  border-bottom: 1px dashed #eee;
 }
 
 .spec-name {
   color: #666;
 }
 
-.spec-value {
-  font-weight: bold;
-}
-
-/* ===== LOADING STATES ===== */
+/* Loading State */
 .loading {
   text-align: center;
   padding: 40px;
 }
 
-.loading-spinner {
-  display: inline-block;
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(255,153,0,0.2);
-  border-radius: 50%;
-  border-top-color: var(--g2-orange);
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.error {
-  background: #ffeeee;
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-  color: #cc0000;
-}
-
-/* ===== RESPONSIVE ===== */
+/* Mobile Responsive */
 @media (max-width: 768px) {
   .yoyo-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .controls {
-    flex-direction: column;
-  }
-  
-  #search {
-    width: 100%;
   }
 }
