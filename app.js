@@ -1,91 +1,82 @@
-/* ======================
-   CONSTANTS & CONFIGURATION
-   ====================== */
-
-/**
- * API endpoint configuration
- * @constant
- * @type {Object}
- * @property {string} yoyosDataUrl - URL for yoyos data
- * @property {string} specsDataUrl - URL for specs data
- */
+// --- CONFIGURATION ---
 const CONFIG = {
   yoyosDataUrl: 'https://script.google.com/macros/s/AKfycbxrN9pRzoObtPQvvl-Yny9EU4ROmIPpT7FAi1JfjQCErlCw30_EZ_dUmfiXooRZgN7KZQ/exec?sheet=yoyos',
   specsDataUrl: 'https://script.google.com/macros/s/AKfycbxrN9pRzoObtPQvvl-Yny9EU4ROmIPpT7FAi1JfjQCErlCw30_EZ_dUmfiXooRZgN7KZQ/exec?sheet=specs'
 };
 
-/* ======================
-   DOM ELEMENTS
-   ====================== */
-/**
- * Cached DOM elements for better performance
- * @constant
- * @type {Object}
- */
+// --- DOM ELEMENTS ---
 const elements = {
   search: document.getElementById('search'),
   container: document.getElementById('yoyo-container'),
   filterButtons: document.querySelectorAll('.filters button'),
-  loadingIndicator: document.createElement('div') // Dynamically created loading element
+  loadingIndicator: document.createElement('div')
 };
 
-/* ======================
-   APPLICATION STATE
-   ====================== */
-let allYoyos = [];       // Master list of all yoyos
-let filteredYoyos = [];  // Currently displayed yoyos
+// --- STATE ---
+let allYoyos = [];
+let filteredYoyos = [];
 
-/* ======================
-   CORE DATA FUNCTIONS
-   ====================== */
+// ======================
+// CORE FUNCTIONS (DEFINED FIRST)
+// ======================
 
-/**
- * Fetches JSON data from a URL
- * @async
- * @param {string} url - API endpoint
- * @returns {Promise<Object>} Parsed JSON data
- * @throws {Error} If network response is not OK
- */
+// Fetch data from URL
 async function fetchData(url) {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
   return await response.json();
 }
 
-/**
- * Merges yoyo data with specifications
- * @param {Array} yoyos - Yoyo colorway data
- * @param {Array} specs - Technical specifications
- * @returns {Array} Merged data with unique IDs
- */
+// Merge yoyo data with specs
 function mergeSpecs(yoyos, specs) {
-  // Create a Map for O(1) model lookups
   const specsMap = new Map(specs.map(spec => [spec.model, spec]));
-  
   return yoyos.map((yoyo, index) => {
-    // Data validation
     if (!yoyo.model || !yoyo.colorway) {
       console.warn(`Missing data at row ${index + 1}`, yoyo);
       return null;
     }
-
     return {
-      ...(specsMap.get(yoyo.model) || {}), // Spread specs first (default values)
-      ...yoyo,                            // Then spread yoyo data (overrides)
+      ...(specsMap.get(yoyo.model) || {}),
+      ...yoyo,
       id: `${yoyo.model.toLowerCase()}-${yoyo.colorway.toLowerCase()}-${index}`,
       image_url: yoyo.image_url || 'assets/placeholder.jpg'
     };
-  }).filter(Boolean); // Remove null entries
+  }).filter(Boolean);
 }
 
-/* ======================
-   UI RENDERING FUNCTIONS
-   ====================== */
+// ======================
+// UI FUNCTIONS
+// ======================
 
-/**
- * Renders yoyo cards to the DOM
- * @param {Array} yoyos - Array of yoyo objects to render
- */
+// Show loading spinner
+function showLoading() {
+  elements.loadingIndicator.className = 'loading';
+  elements.loadingIndicator.innerHTML = `
+    <div class="loading-spinner"></div>
+    <p>Loading yoyo database...</p>
+  `;
+  elements.container.replaceWith(elements.loadingIndicator);
+}
+
+// Hide loading spinner
+function hideLoading() {
+  if (elements.loadingIndicator.parentNode) {
+    elements.loadingIndicator.replaceWith(elements.container);
+  }
+}
+
+// Show error message
+function showError(error) {
+  console.error('Error:', error);
+  elements.container.innerHTML = `
+    <div class="error">
+      <p>Failed to load data. Please try again later.</p>
+      <p><small>${error.message}</small></p>
+    </div>
+  `;
+}
+
+// Render yoyo cards
 function renderYoyos(yoyos) {
   if (!yoyos.length) {
     elements.container.innerHTML = '<p class="no-results">No yoyos match your search.</p>';
@@ -107,14 +98,9 @@ function renderYoyos(yoyos) {
   `).join('');
 }
 
-/**
- * Generates HTML for specs section
- * @param {Object} yoyo - Yoyo data object
- * @returns {string} HTML string
- */
+// Render specs section HTML
 function renderSpecsSection(yoyo) {
   if (!yoyo.diameter && !yoyo.width) return '';
-  
   return `
     <button class="specs-toggle" onclick="toggleSpecs(this)">
       ▶ Show Technical Specs
@@ -123,50 +109,23 @@ function renderSpecsSection(yoyo) {
       <div class="specs-grid">
         ${yoyo.diameter ? `<div class="spec-item"><span class="spec-name">Diameter:</span> <span class="spec-value">${yoyo.diameter}mm</span></div>` : ''}
         ${yoyo.width ? `<div class="spec-item"><span class="spec-name">Width:</span> <span class="spec-value">${yoyo.width}mm</span></div>` : ''}
-        ${yoyo.composition ? `<div class="spec-item"><span class="spec-name">Material:</span> <span class="spec-value">${yoyo.composition}</span></div>` : ''}
       </div>
     </div>
   `;
 }
 
-/* ======================
-   UI STATE MANAGEMENT
-   ====================== */
-
-function showLoading() {
-  elements.loadingIndicator.className = 'loading';
-  elements.loadingIndicator.innerHTML = `
-    <div class="loading-spinner"></div>
-    <p>Loading yoyo database...</p>
-  `;
-  elements.container.replaceWith(elements.loadingIndicator);
+// Toggle specs visibility
+function toggleSpecs(element) {
+  const container = element.nextElementSibling;
+  container.classList.toggle('expanded');
+  element.textContent = container.classList.contains('expanded') 
+    ? '▼ Hide Technical Specs' 
+    : '▶ Show Technical Specs';
 }
 
-function hideLoading() {
-  if (elements.loadingIndicator.parentNode) {
-    elements.loadingIndicator.replaceWith(elements.container);
-  }
-}
-
-function showError(error) {
-  console.error('Error:', error);
-  elements.container.innerHTML = `
-    <div class="error">
-      <p>Failed to load data. Please try again later.</p>
-      <p><small>${error.message}</small></p>
-    </div>
-  `;
-}
-
-/* ======================
-   EVENT HANDLERS
-   ====================== */
-
-/**
- * Sets up all event listeners
- */
+// Set up event listeners
 function setupEventListeners() {
-  // Search input handler
+  // Search handler
   elements.search.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
     filteredYoyos = allYoyos.filter(yoyo => 
@@ -176,57 +135,34 @@ function setupEventListeners() {
     renderYoyos(filteredYoyos);
   });
   
-  // Filter button handlers
+  // Filter buttons
   elements.filterButtons.forEach(button => {
     button.addEventListener('click', () => {
       const filter = button.dataset.filter;
       elements.filterButtons.forEach(btn => btn.classList.remove('active'));
       button.classList.add('active');
-      
-      filteredYoyos = filter === 'all' 
-        ? [...allYoyos] 
-        : allYoyos.filter(yoyo => yoyo.type === filter);
-      
+      filteredYoyos = filter === 'all' ? [...allYoyos] : allYoyos.filter(yoyo => yoyo.type === filter);
       renderYoyos(filteredYoyos);
     });
   });
 }
 
-/**
- * Toggles specs visibility
- * @param {HTMLElement} element - The clicked toggle button
- */
-function toggleSpecs(element) {
-  const container = element.nextElementSibling;
-  container.classList.toggle('expanded');
-  element.textContent = container.classList.contains('expanded') 
-    ? '▼ Hide Technical Specs' 
-    : '▶ Show Technical Specs';
-}
+// ======================
+// INITIALIZATION
+// ======================
 
-/* ======================
-   APPLICATION BOOTSTRAP
-   ====================== */
-
-/**
- * Initializes the application
- * @async
- */
+// Main initialization function
 async function init() {
   showLoading();
   try {
-    // Fetch data in parallel
     const [yoyos, specs] = await Promise.all([
       fetchData(CONFIG.yoyosDataUrl),
       fetchData(CONFIG.specsDataUrl)
     ]);
-    
-    // Process and render data
     allYoyos = mergeSpecs(yoyos, specs);
     filteredYoyos = [...allYoyos];
     renderYoyos(filteredYoyos);
     setupEventListeners();
-    
   } catch (error) {
     showError(error);
   } finally {
@@ -234,7 +170,7 @@ async function init() {
   }
 }
 
-// Start the application when DOM is ready
+// Start the app when DOM loads
 document.addEventListener('DOMContentLoaded', init);
 
 // Make toggleSpecs available globally
