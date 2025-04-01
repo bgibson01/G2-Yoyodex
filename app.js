@@ -153,3 +153,8 @@ document.addEventListener('DOMContentLoaded', init);
 
 // Make toggleSpecs available globally
 window.toggleSpecs = toggleSpecs;
+
+// Refresh data every 5 minutes
+setInterval(async () => {
+  allYoyos = await loadData();
+}, 300000);
