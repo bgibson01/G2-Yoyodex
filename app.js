@@ -202,7 +202,8 @@ async function init() {
     console.log("=== SPECS DEBUG ===");
     console.log("Sample yoyo with specs:", allYoyos.find(y => y.model === "Loadout"));
     console.log("All models with specs:", 
-    allYoyos.filter(y => y.diameter || y.width).map(y => y.model)
+      allYoyos.filter(y => y.diameter || y.width).map(y => y.model)
+    );
     //DEBUGGING END
     filteredYoyos = [...allYoyos];
     
