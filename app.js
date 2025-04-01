@@ -48,51 +48,48 @@ async function fetchData(url) {
 }
 
 function mergeSpecs(yoyos, specs) {
-  console.log("Raw specs data sample:", specs.slice(0, 3)); // Log first 3 entries
+  console.log("=== MERGING SPECS ===");
+  console.log("First 3 yoyos:", yoyos.slice(0, 3));
+  console.log("First 3 specs:", specs.slice(0, 3));
   
-  const specsMap = new Map(specs.map(spec => {
-    // Debug each spec row
-    console.log(`Processing specs for ${spec.model}:`, {
-      diameter: spec.diameter || spec.Diameter,
-      width: spec.width || spec.Width,
-      hasData: !!spec.diameter || !!spec.width
-    });
-    return [spec.model.trim().toLowerCase(), spec]; // Normalize model names
-  }));
+  const specsMap = new Map();
+  
+  specs.forEach(spec => {
+    const normalizedModel = spec.model.trim().toLowerCase();
+    console.log(`Processing spec for ${normalizedModel}`, spec);
+    specsMap.set(normalizedModel, spec);
+  });
 
-  return yoyos.map((yoyo, index) => {
+  return yoyos.map(yoyo => {
     const normalizedModel = yoyo.model.trim().toLowerCase();
     const specsData = specsMap.get(normalizedModel) || {};
     
-    console.log(`Merging ${yoyo.model} (normalized: ${normalizedModel})`, {
-      foundSpecs: specsMap.has(normalizedModel),
-      specsData: specsData
+    console.log(`Merging ${yoyo.model} (${normalizedModel})`, {
+      found: specsMap.has(normalizedModel),
+      specs: specsData
     });
 
     return {
-      ...specsData,
       ...yoyo,
-      id: `${normalizedModel}-${yoyo.colorway.toLowerCase()}-${index}`,
-      image_url: yoyo.image_url || 'assets/placeholder.jpg'
+      ...specsData,
+      id: `${normalizedModel}-${yoyo.colorway.toLowerCase()}-${Date.now()}`
     };
-  }).filter(Boolean);
+  });
 }
+
 // ======================
 // RENDERING FUNCTIONS
 // ======================
 function renderSpecsSection(yoyo) {
-  console.log(`Rendering specs for ${yoyo.model}:`, {
-    diameter: yoyo.diameter,
-    typeOfDiameter: typeof yoyo.diameter,
-    width: yoyo.width,
-    composition: yoyo.composition
-  });
-
+  console.log(`Rendering specs for ${yoyo.model}:`, yoyo);
+  
+  // Check if any specs exist
+  const hasSpecs = yoyo.diameter || yoyo.width || yoyo.composition;
   if (!hasSpecs) return '';
 
   return `
-    <button class="specs-toggle" style="background:red;color:white" onclick="toggleSpecs(this)">
-      ▶ DEBUG: Show Specs
+    <button class="specs-toggle" onclick="toggleSpecs(this)">
+      ▶ Show Technical Specs
     </button>
     <div class="specs-container">
       <div class="specs-grid">
@@ -209,7 +206,10 @@ async function init() {
     const [yoyos, specs] = await Promise.all([
       fetchData(CONFIG.yoyosDataUrl),
       fetchData(CONFIG.specsDataUrl)
-    ]);
+]);
+
+console.log("Raw yoyos data:", yoyos);
+console.log("Raw specs data:", specs);
     
     allYoyos = mergeSpecs(yoyos, specs);
     //DEBUGGING START
