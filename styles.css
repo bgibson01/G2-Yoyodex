@@ -75,16 +75,11 @@ header {
   overflow: hidden;
   box-shadow: 0 3px 15px rgba(0,0,0,0.1);
   transition: transform 0.3s;
-  position: relative; /* Required for absolute positioning */
 }
 
 .yoyo-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-}
-
-.yoyo-card:hover .specs-container {
-  opacity: 1;
 }
 
 .yoyo-image {
@@ -140,23 +135,6 @@ header {
   font-weight: bold;
 }
 
-.specs-container {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.85);
-  color: white;
-  padding: 15px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none; /* Prevents interfering with hover */
-}
-
-.yoyo-card:hover .specs-container {
-  opacity: 1;
-}
-
 footer {
   text-align: center;
   margin-top: 40px;
@@ -177,4 +155,46 @@ footer {
   #search {
     width: 100%;
   }
+}  
+  /* Popup styles */
+.specs-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.specs-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 500px;
+  position: relative;
+  color: #333;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.specs-btn {
+  background: var(--g2-orange);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
 }
