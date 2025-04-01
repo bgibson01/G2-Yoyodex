@@ -157,4 +157,4 @@ window.toggleSpecs = toggleSpecs;
 // Refresh data every 5 minutes
 setInterval(async () => {
   allYoyos = await loadData();
-}, 300000);
+}, 60000);
