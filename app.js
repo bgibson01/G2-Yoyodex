@@ -48,42 +48,44 @@ async function fetchData(url) {
 }
 
 function mergeSpecs(yoyos, specs) {
-  const specsMap = new Map(specs.map(spec => [spec.model, spec]));
+  console.log("Raw specs data sample:", specs.slice(0, 3)); // Log first 3 entries
   
-  // DEBUGGING: Log all available models with specs
-  console.log("Available specs for models:", [...specsMap.keys()]);
-  
-  return yoyos.map((yoyo, index) => {
-    // DEBUGGING: Log merge status for each yoyo
-    console.log(`Merging ${yoyo.model}:`, {
-      hasSpecs: specsMap.has(yoyo.model),
-      diameter: specsMap.get(yoyo.model)?.diameter
+  const specsMap = new Map(specs.map(spec => {
+    // Debug each spec row
+    console.log(`Processing specs for ${spec.model}:`, {
+      diameter: spec.diameter || spec.Diameter,
+      width: spec.width || spec.Width,
+      hasData: !!spec.diameter || !!spec.width
     });
+    return [spec.model.trim().toLowerCase(), spec]; // Normalize model names
+  }));
+
+  return yoyos.map((yoyo, index) => {
+    const normalizedModel = yoyo.model.trim().toLowerCase();
+    const specsData = specsMap.get(normalizedModel) || {};
     
-    if (!yoyo.model || !yoyo.colorway) {
-      console.warn(`Missing data at row ${index + 1}`, yoyo);
-      return null;
-    }
+    console.log(`Merging ${yoyo.model} (normalized: ${normalizedModel})`, {
+      foundSpecs: specsMap.has(normalizedModel),
+      specsData: specsData
+    });
+
     return {
-      ...(specsMap.get(yoyo.model) || {}),
+      ...specsData,
       ...yoyo,
-      id: `${yoyo.model.toLowerCase()}-${yoyo.colorway.toLowerCase()}-${index}`,
+      id: `${normalizedModel}-${yoyo.colorway.toLowerCase()}-${index}`,
       image_url: yoyo.image_url || 'assets/placeholder.jpg'
     };
   }).filter(Boolean);
 }
-
 // ======================
 // RENDERING FUNCTIONS
 // ======================
 function renderSpecsSection(yoyo) {
-  // Debug: Check what specs exist
-  const hasSpecs = yoyo.diameter || yoyo.width || yoyo.composition;
   console.log(`Rendering specs for ${yoyo.model}:`, {
     diameter: yoyo.diameter,
+    typeOfDiameter: typeof yoyo.diameter,
     width: yoyo.width,
-    composition: yoyo.composition,
-    hasSpecs: hasSpecs
+    composition: yoyo.composition
   });
 
   if (!hasSpecs) return '';
