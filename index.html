@@ -1,42 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Add viewport and description -->
-  <meta name="description" content="G² YoYo Database - Track all models and colorways">
-  <!-- Rest of your head remains the same -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>G² YoYodex</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header>
-    <h1>
-      <img src="https://www.gsquaredyoyos.com/wp-content/uploads/2024/02/cropped-g2_black_clearbg-113x113.png" 
-           alt="G² Logo" 
-           class="logo">
-      YoYodex
-    </h1>
+    <h1>G² YoYodex</h1>
   </header>
 
   <main>
-    <div class="controls">
-      <!-- Added aria-label for accessibility -->
-      <input type="text" 
-             id="search" 
-             placeholder="Search models/colorways..."
-             aria-label="Search yoyos">
-      <div class="filters">
-        <!-- Fixed duplicate filter -->
-        <button data-filter="all">All</button>
-        <button data-filter="weekly">Weekly</button>
-        <button data-filter="patreon">Patreon</button>
-        <button data-filter="lottery">Lottery</button>
-      </div>
+    <input type="text" id="search" placeholder="Search models/colorways...">
+    
+    <div class="filters">
+      <button data-filter="all">All</button>
+      <button data-filter="weekly">Weekly</button>
+      <button data-filter="patreon">Patreon</button>
     </div>
 
     <div id="yoyo-container" class="yoyo-grid"></div>
   </main>
-
-  <footer>
-    <p>Data sourced from G² Yoyos • Not affiliated with G²</p>
-  </footer>
 
   <script src="app.js"></script>
 </body>
