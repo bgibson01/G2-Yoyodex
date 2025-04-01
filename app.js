@@ -48,35 +48,45 @@ async function fetchData(url) {
 }
 
 function mergeSpecs(yoyos, specs) {
-  console.log("=== MERGING SPECS ===");
-  console.log("First 3 yoyos:", yoyos.slice(0, 3));
-  console.log("First 3 specs:", specs.slice(0, 3));
+  console.log("=== MERGE SPECS DEBUG ===");
   
+  // Debug model name matching
+  const sampleYoyoModel = yoyos[0]?.model;
+  const sampleSpecModel = specs[0]?.model;
+  console.log(`Name matching test - Yoyo: "${sampleYoyoModel}" vs Spec: "${sampleSpecModel}"`);
+  console.log(`Normalized comparison: "${sampleYoyoModel?.toLowerCase()}" vs "${sampleSpecModel?.toLowerCase()}"`);
+
   const specsMap = new Map();
-  
   specs.forEach(spec => {
-    const normalizedModel = spec.model.trim().toLowerCase();
-    console.log(`Processing spec for ${normalizedModel}`, spec);
+    const normalizedModel = spec.model?.toString().trim().toLowerCase();
+    console.log(`Mapping specs for: ${normalizedModel}`, {
+      diameter: spec.diameter,
+      width: spec.width,
+      composition: spec.composition
+    });
     specsMap.set(normalizedModel, spec);
   });
 
-  return yoyos.map(yoyo => {
-    const normalizedModel = yoyo.model.trim().toLowerCase();
-    const specsData = specsMap.get(normalizedModel) || {};
+  // Debug first 3 matches
+  const merged = yoyos.map(yoyo => {
+    const normalizedModel = yoyo.model?.toString().trim().toLowerCase();
+    const foundSpecs = specsMap.get(normalizedModel);
     
-    console.log(`Merging ${yoyo.model} (${normalizedModel})`, {
-      found: specsMap.has(normalizedModel),
-      specs: specsData
+    console.log(`Matching ${normalizedModel}:`, {
+      found: !!foundSpecs,
+      specs: foundSpecs || 'NO SPECS FOUND'
     });
 
     return {
       ...yoyo,
-      ...specsData,
-      id: `${normalizedModel}-${yoyo.colorway.toLowerCase()}-${Date.now()}`
+      ...foundSpecs,
+      id: `${normalizedModel}-${yoyo.colorway?.toLowerCase()}-${Date.now()}`
     };
   });
-}
 
+  console.log("Final merged data sample:", merged.slice(0, 3));
+  return merged;
+}
 // ======================
 // RENDERING FUNCTIONS
 // ======================
