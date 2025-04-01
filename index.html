@@ -161,7 +161,7 @@
         
         // Check if required fields exist
         if (data.length > 0) {
-          const requiredFields = ['model', 'colorwar', 'release_date', 'image_url'];
+          const requiredFields = ['model', 'colorway', 'release_date', 'image_url'];
           const missingFields = requiredFields.filter(field => !(field in data[0]));
           
           if (missingFields.length > 0) {
@@ -177,7 +177,7 @@
             <p>Failed to load yoyo data. Please check:</p>
             <ul>
               <li>Google Script URL is correct</li>
-              <li>Spreadsheet has required columns: model, colorwar, release_date, image_url</li>
+              <li>Spreadsheet has required columns: model, colorway, release_date, image_url</li>
               <li>Internet connection is active</li>
             </ul>
           </div>
@@ -196,9 +196,9 @@
       yoyoContainer.innerHTML = yoyos.map(yoyo => `
         <div class="yoyo-card">
           <img src="${yoyo.image_url || 'https://via.placeholder.com/300x200?text=No+Image'}" 
-               alt="${yoyo.model} - ${yoyo.colorwar}">
+               alt="${yoyo.model} - ${yoyo.colorway}">
           <div class="yoyo-info">
-            <h2>${yoyo.model} <span style="color:#ff9900">${yoyo.colorwar}</span></h2>
+            <h2>${yoyo.model} <span style="color:#ff9900">${yoyo.colorway}</span></h2>
             <p><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>
             ${yoyo.composition ? `<p><strong>Material:</strong> ${yoyo.composition}</p>` : ''}
             ${yoyo.quantity ? `<p><strong>Total Made:</strong> ${yoyo.quantity}</p>` : ''}
@@ -232,7 +232,7 @@
       
       filteredYoyos = allYoyos.filter(yoyo => 
         yoyo.model.toLowerCase().includes(searchTerm) || 
-        yoyo.colorwar.toLowerCase().includes(searchTerm) ||
+        yoyo.colorway.toLowerCase().includes(searchTerm) ||
         (yoyo.description && yoyo.description.toLowerCase().includes(searchTerm))
       );
       
