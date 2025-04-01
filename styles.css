@@ -154,16 +154,17 @@ header h1 {
 /* ===== SPECS SECTION ===== */
 .specs-toggle {
   background: var(--g2-black);
-  color: white;
+  color: ff9900;
   border: none;
-  padding: 10px 15px;
-  border-radius: 6px;
-  margin: 15px 0 10px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-top: 10px;
   cursor: pointer;
   font-weight: bold;
   transition: var(--transition);
   width: 100%;
   text-align: left;
+  display: block; /* Ensure it's always visible */
 }
 
 .specs-toggle:hover {
@@ -174,6 +175,10 @@ header h1 {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease-out;
+  background: #f8f8f8;
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 8px;
 }
 
 .specs-container.expanded {
@@ -182,8 +187,8 @@ header h1 {
 
 .specs-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
   padding: 10px 0;
   font-size: 0.9rem;
 }
@@ -201,6 +206,11 @@ header h1 {
 
 .spec-value {
   font-weight: bold;
+}
+
+.spec-item span:first-child {
+  font-weight: bold;
+  color: #666;
 }
 
 /* ===== LOADING & ERROR STATES ===== */
