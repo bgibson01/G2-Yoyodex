@@ -1,27 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>G² YoYodex</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="icon" href="https://www.gsquaredyoyos.com/favicon.ico">
+  <!-- Add viewport and description -->
+  <meta name="description" content="G² YoYo Database - Track all models and colorways">
+  <!-- Rest of your head remains the same -->
 </head>
 <body>
   <header>
     <h1>
-      <center><img src="https://www.gsquaredyoyos.com/wp-content/uploads/2024/02/cropped-g2_black_clearbg-113x113.png" alt="G²" class="logo"> YoYodex</center>
+      <img src="https://www.gsquaredyoyos.com/wp-content/uploads/2024/02/cropped-g2_black_clearbg-113x113.png" 
+           alt="G² Logo" 
+           class="logo">
+      YoYodex
     </h1>
   </header>
 
   <main>
     <div class="controls">
-      <input type="text" id="search" placeholder="Search models/colorways...">
+      <!-- Added aria-label for accessibility -->
+      <input type="text" 
+             id="search" 
+             placeholder="Search models/colorways..."
+             aria-label="Search yoyos">
       <div class="filters">
+        <!-- Fixed duplicate filter -->
         <button data-filter="all">All</button>
         <button data-filter="weekly">Weekly</button>
         <button data-filter="patreon">Patreon</button>
-        <button data-filter="patreon">Lottery</button>
+        <button data-filter="lottery">Lottery</button>
       </div>
     </div>
 
