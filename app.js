@@ -50,11 +50,20 @@ async function fetchData(url) {
 }
 
 function mergeSpecs(yoyos, specs) {
-  const specsMap = new Map(specs.map(spec => [spec.model, spec]));
-  return yoyos.map(yoyo => ({
-    ...yoyo,
-    ...specsMap.get(yoyo.model)
-  }));
+  // Create a model-to-specs map
+  const specsMap = new Map();
+  specs.forEach(spec => {
+    specsMap.set(spec.model, spec);
+  });
+
+  // Merge while preserving all yoyo entries
+  return yoyos.map(yoyo => {
+    const modelSpecs = specsMap.get(yoyo.model) || {};
+    return {
+      ...modelSpecs, // Spread specs first (base properties)
+      ...yoyo        // Then spread yoyo (overrides any duplicates)
+    };
+  });
 }
 
 // Rendering
