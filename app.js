@@ -40,6 +40,9 @@ async function init() {
       </div>
     `;
   }
+console.log("Merged yoyos:", allYoyos);
+console.log("Duplicate check:", 
+  allYoyos.filter(y => y.model === "PROBLEM_MODEL"));
 }
 
 // Data functions
