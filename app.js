@@ -54,12 +54,23 @@ function renderYoyos(yoyos) {
   elements.container.innerHTML = yoyos.map(yoyo => `
     <div class="yoyo-card">
       <img src="${yoyo.image_url || 'assets/placeholder.jpg'}" 
-           alt="${yoyo.model}" 
-           class="yoyo-image">
+           alt="${yoyo.model}" ${yoyo.colorway}
+           class="yoyo-image"
+           loading="lazy">
+           
       <div class="yoyo-info">
         <h2 class="yoyo-model">${yoyo.model}</h2>
         <p class="yoyo-colorway">${yoyo.colorway}</p>
-        ${renderSpecs(yoyo)}
+        
+        <!-- Always visible info -->
+        <div class="yoyo-meta">
+          ${yoyo.release_date ? `<p><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
+          ${yoyo.quantity ? `<p><strong>Quantity:</strong> ${yoyo.quantity}</p>` : ''}
+        </div>
+        
+        ${yoyo.description ? `<p class="yoyo-description">${yoyo.description}</p>` : ''}
+        
+        ${renderSpecsSection(yoyo)}
       </div>
     </div>
   `).join('');
