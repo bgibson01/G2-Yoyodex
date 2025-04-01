@@ -2,8 +2,12 @@
 :root {
   --g2-orange: #ff9900;
   --g2-black: #000;
+  --shadow-sm: 0 3px 15px rgba(0,0,0,0.1);
+  --shadow-md: 0 5px 20px rgba(0,0,0,0.15);
+  --transition: all 0.3s ease;
 }
 
+/* Base Styles */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
@@ -12,19 +16,30 @@ body {
   padding: 20px;
   background: #f8f8f8;
   color: #333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Header */
 header {
   text-align: center;
   margin: 20px 0 40px;
+  position: relative;
 }
 
 .logo {
   height: 50px;
   vertical-align: middle;
   margin-right: 10px;
+  transition: transform 0.3s ease;
 }
 
+.logo:hover {
+  transform: rotate(-10deg);
+}
+
+/* Controls */
 .controls {
   display: flex;
   flex-wrap: wrap;
@@ -40,11 +55,19 @@ header {
   border-radius: 6px;
   font-size: 16px;
   min-width: 250px;
+  transition: var(--transition);
+}
+
+#search:focus {
+  outline: none;
+  border-color: var(--g2-orange);
+  box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.2);
 }
 
 .filters {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .filters button {
@@ -55,31 +78,35 @@ header {
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
-  transition: all 0.2s;
+  transition: var(--transition);
 }
 
-.filters button:hover {
+.filters button:hover, 
+.filters button.active {
   background: var(--g2-orange);
   color: var(--g2-black);
 }
 
+/* Yoyo Grid */
 .yoyo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 25px;
+  margin-bottom: 40px;
 }
 
 .yoyo-card {
   background: white;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 3px 15px rgba(0,0,0,0.1);
-  transition: transform 0.3s;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  position: relative;
 }
 
 .yoyo-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+  box-shadow: var(--shadow-md);
 }
 
 .yoyo-image {
@@ -87,6 +114,11 @@ header {
   height: 250px;
   object-fit: cover;
   border-bottom: 1px solid #eee;
+  transition: transform 0.5s ease;
+}
+
+.yoyo-card:hover .yoyo-image {
+  transform: scale(1.05);
 }
 
 .yoyo-info {
@@ -102,14 +134,32 @@ header {
 .yoyo-colorway {
   color: var(--g2-orange);
   font-weight: bold;
+  display: inline-block;
+  margin-bottom: 10px;
 }
 
+/* Specs Section */
 .specs-toggle {
   color: var(--g2-orange);
   cursor: pointer;
   margin: 10px 0;
   display: inline-block;
   font-size: 0.9rem;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+}
+
+.specs-container {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.specs-container.expanded {
+  max-height: 500px;
 }
 
 .specs-grid {
@@ -135,11 +185,50 @@ header {
   font-weight: bold;
 }
 
+/* Loading States */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 153, 0, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--g2-orange);
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error {
+  background: #ffeeee;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  color: #cc0000;
+  margin: 20px 0;
+}
+
+/* Footer */
 footer {
   text-align: center;
-  margin-top: 40px;
+  margin-top: auto;
+  padding: 20px 0;
   color: #666;
   font-size: 0.9rem;
+  border-top: 1px solid #eee;
 }
 
 /* Responsive */
@@ -150,51 +239,36 @@ footer {
   
   .controls {
     flex-direction: column;
+    align-items: stretch;
   }
   
   #search {
     width: 100%;
   }
-}  
-  /* Popup styles */
-.specs-popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+
+  .specs-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.specs-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  max-width: 500px;
-  position: relative;
-  color: #333;
+/* Animation for specs toggle */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.close-btn {
+.specs-container.expanded .specs-grid {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Image fallback styling */
+.yoyo-image:before {
+  content: "Image not available";
+  display: block;
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-.specs-btn {
-  background: var(--g2-orange);
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 10px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #999;
+  font-size: 0.9rem;
 }
