@@ -331,7 +331,7 @@ header {
   margin-top: 1rem;
 }
 
-.specs-toggle::before {
+/* .specs-toggle::before {
   content: '';
   display: inline-block;
   width: 0;
@@ -341,6 +341,7 @@ header {
   border-top: 5px solid currentColor;
   transition: transform 0.2s ease;
 }
+*/
 
 .specs-container.expanded + .specs-toggle::before {
   transform: rotate(180deg);
