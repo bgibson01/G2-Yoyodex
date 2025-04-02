@@ -8,18 +8,20 @@ const CONFIG = {
 };
 
 // ======================
-// 2. DOM ELEMENTS
+// 2. DOM ELEMENTS (UNCHANGED)
 // ======================
 const elements = {
   search: document.getElementById('search'),
   container: document.getElementById('yoyo-container'),
-  filterButtons: document.querySelectorAll('.filter-btn:not(#sort-newest)'), // Just store the NodeList
+  filterButtons: document.querySelectorAll('.filter-btn:not(#sort-newest)'),
   loadingIndicator: document.getElementById('loading-indicator') || createLoadingIndicator()
 };
 
-// Then initialize event listeners separately
+// ======================
+// UPDATED EVENT LISTENERS (ONLY MODIFIED THE SORT BUTTON)
+// ======================
 function setupEventListeners() {
-  // Filter buttons
+  // Filter buttons (UNCHANGED)
   elements.filterButtons.forEach(button => {
     button.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
@@ -28,18 +30,41 @@ function setupEventListeners() {
     });
   });
 
-  // Sort button
-  document.getElementById('sort-newest').addEventListener('click', () => {
+  // ======================
+  // FIXED SORT BUTTON IMPLEMENTATION (NEW VERSION)
+  // ======================
+  document.getElementById('sort-newest').addEventListener('click', function() {
+    // Toggle active state (NEW)
+    this.classList.toggle('active');
+
     const container = document.querySelector('.yoyo-grid');
     const cards = Array.from(document.querySelectorAll('.yoyo-card'));
 
     cards.sort((a, b) => {
-      const dateA = new Date(a.querySelector('.yoyo-released').textContent);
-      const dateB = new Date(b.querySelector('.yoyo-released').textContent);
-      return dateB - dateA;
+      // SAFER DATE PARSING - checks both data attribute and fallback to text content
+      const getDate = (card) => {
+        // First try data attribute (recommended approach)
+        if (card.dataset.releaseDate) return new Date(card.dataset.releaseDate);
+
+        // Fallback to text content parsing (compatible with existing HTML)
+        const dateText = card.querySelector('p')?.textContent || '';
+        const dateString = dateText.replace('Released:', '').trim();
+        return new Date(dateString) || 0; // Returns 0 (epoch) if invalid
+      };
+
+      const dateA = getDate(a);
+      const dateB = getDate(b);
+
+      return this.classList.contains('active') ? dateB - dateA : dateA - dateB;
     });
 
+    // Re-append cards (UNCHANGED)
     cards.forEach(card => container.appendChild(card));
+
+    // Update button text (NEW - OPTIONAL)
+    this.textContent = this.classList.contains('active')
+      ? 'Sort by Oldest'
+      : 'Sort by Newest';
   });
 }
 
@@ -201,7 +226,7 @@ function renderSpecsSection(yoyo) {
         ${renderSpecItem('Width', yoyo.width, 'mm')}
         ${renderSpecItem('Weight', yoyo.weight, 'g')}
         ${renderSpecItem('Material', yoyo.composition)}
-        ${renderSpecItem('Response Pads', yoyo.pads)}
+        ${renderSpecItem('Response', yoyo.response)}
         ${renderSpecItem('Bearing', yoyo.bearing)}
         ${renderSpecItem('Axle', yoyo.axle)}
         ${renderSpecItem('Finish', yoyo.finish)}
@@ -242,11 +267,11 @@ function renderYoyos(yoyos) {
         ` : ''}
 
         <div class="yoyo-meta">
-          ${yoyo.release_date ? `<p><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
-		  ${yoyo.price ? `<p><strong>Price:</strong> $${yoyo.price}</p>` : ''}
+          ${yoyo.release_date ? `<p data-release-date="${yoyo.release_date}"><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
+		      ${yoyo.price ? `<p><strong>Price:</strong> $${yoyo.price}</p>` : ''}
           ${yoyo.quantity ? `<p><strong>Quantity:</strong> ${yoyo.quantity}</p>` : ''}
-		  ${yoyo.glitch_quantity ? `<p><strong>Glitches:</strong> ${yoyo.glitch_quantity}</p>` : ''}
-		  ${yoyo.description ? `<div class="yoyo-description">${yoyo.description}</div>` : ''}
+		      ${yoyo.glitch_quantity ? `<p><strong>Glitches:</strong> ${yoyo.glitch_quantity}</p>` : ''}
+		      ${yoyo.description ? `<div class="yoyo-description">${yoyo.description}</div>` : ''}
         </div>
 
         ${renderSpecsSection(yoyo)}

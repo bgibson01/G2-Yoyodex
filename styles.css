@@ -102,6 +102,11 @@ header {
   cursor: pointer;
 }
 
+#sort-newest.active {
+  background: var(--g2-black);
+  color: var(--g2-blue);
+}
+
 /* ===== YOYO CARDS ===== */
 .yoyo-grid {
   display: grid;
