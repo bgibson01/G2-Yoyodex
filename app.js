@@ -48,6 +48,12 @@ function setupEventListeners() {
       const dateA = getDate(a);
       const dateB = getDate(b);
 
+      console.log("Sorting:", {
+        a: getDate(a).toISOString(),
+        b: getDate(b).toISOString(),
+        result: isActive ? dateB - dateA : dateA - dateB
+      });
+
       return isActive ? dateB - dateA : dateA - dateB;
     });
 
