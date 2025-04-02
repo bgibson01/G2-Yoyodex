@@ -57,7 +57,7 @@ header h1 {
 #search:focus {
   outline: none;
   border-color: var(--g2-blue);
-  box-shadow: 0 0 0 3px rgba(255,153,0,0.2);
+  box-shadow: 0 0 0 3px rgba(26, 167, 236, 0.2); /* NEW: Matched to --g2-blue */
 }
 
 .filters {
@@ -69,8 +69,8 @@ header h1 {
 .filters button {
   padding: 8px 16px;
   background: var(--g2-blue);
-  color: var(--g2-black);
-  border: 6px;
+  color: white; /* NEW: Better contrast */
+  border: none; /* NEW: Fixed typo (was 'border: 6px') */
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
@@ -80,7 +80,7 @@ header h1 {
 .filters button:hover,
 .filters button.active {
   background: var(--g2-black);
-  color: var(--g2-blue);
+  color: white; /* NEW: Consistent hover state */
 }
 
 /* ===== YOYO CARDS ===== */
@@ -96,6 +96,7 @@ header h1 {
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
+  position: relative; /* NEW: For potential badges/overlays */
 }
 
 .yoyo-card:hover {
@@ -105,13 +106,16 @@ header h1 {
 
 .yoyo-image {
   height: 250px;
-  object-fit: cover;
+  width: 100%; /* NEW: Ensure full width */
+  object-fit: contain; /* NEW: Prevents cropping (was 'cover') */
+  background: #f9f9f9; /* NEW: Placeholder if image missing */
+  padding: 15px; /* NEW: Breathing room */
   border-bottom: 1px solid #eee;
-  transition: transform 0.5s ease;
+  transition: transform 0.3s ease;
 }
 
 .yoyo-card:hover .yoyo-image {
-  transform: scale(1.02);
+  transform: scale(1.03); /* NEW: Subtler zoom */
 }
 
 .yoyo-info {
@@ -119,16 +123,18 @@ header h1 {
 }
 
 .yoyo-model {
-  font-size: 1.25rem;
-  margin: 0 0 5px 0;
+  font-size: 1.3rem; /* NEW: Slightly larger */
+  margin: 0 0 8px 0; /* NEW: Adjusted spacing */
   color: var(--g2-black);
+  font-weight: 600; /* NEW: Bolder */
 }
 
 .yoyo-colorway {
   color: var(--g2-blue);
   font-weight: bold;
-  margin-bottom: 15px;
+  margin-bottom: 12px; /* NEW: More spacing */
   display: block;
+  font-size: 0.95rem; /* NEW: Slightly smaller */
 }
 
 .yoyo-meta {
@@ -138,7 +144,7 @@ header h1 {
 }
 
 .yoyo-meta p {
-  margin: 5px 0;
+  margin: 7px 0; /* NEW: Increased spacing */
 }
 
 .yoyo-description {
@@ -148,26 +154,27 @@ header h1 {
   padding: 12px;
   background: #f9f9f9;
   border-radius: 6px;
+  border-left: 3px solid var(--g2-blue); /* NEW: Accent border */
 }
 
 /* ===== SPECS SECTION ===== */
 .specs-toggle {
   background: var(--g2-black);
-  color: var(--g2-blue);
+  color: white; /* NEW: Better contrast */
   border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  margin-top: 10px;
+  padding: 10px 15px; /* NEW: Slightly larger */
+  border-radius: 6px; /* NEW: Matched card radius */
+  margin-top: 12px;
   cursor: pointer;
   font-weight: bold;
   transition: var(--transition);
   width: 100%;
-  text-align: left;
-  display: block; /* Ensure it's always visible */
+  text-align: center; /* NEW: Centered text */
 }
 
 .specs-toggle:hover {
   background: var(--g2-blue);
+  color: var(--g2-black); /* NEW: Fun hover effect */
 }
 
 .specs-container {
@@ -175,12 +182,11 @@ header h1 {
   overflow: hidden;
   transition: max-height 0.3s ease-out;
   background: #f8f8f8;
-  border-radius: 6px;
-  margin-top: 8px;
+  border-radius: 0 0 6px 6px; /* NEW: Rounded bottom only */
 }
 
 .specs-container.expanded {
-  max-height: 1000px; /* Increased to accommodate more specs */
+  max-height: 1000px;
   padding: 15px;
 }
 
@@ -194,30 +200,18 @@ header h1 {
 .spec-item {
   display: flex;
   justify-content: space-between;
-  padding: 6px 0;
-  border-bottom: 1px solid #eee;
+  padding: 8px 0; /* NEW: More padding */
+  border-bottom: 1px dashed #ddd; /* NEW: Dashed for subtlety */
 }
 
-.spec-item span:first-child {
-  font-weight: bold;
-  color: #666;
-  margin-right: 10px;
-}
-
-.spec-item span:last-child {
-  text-align: right;
-}
 .spec-name {
   color: #666;
+  font-weight: 500; /* NEW: Semi-bold */
 }
 
 .spec-value {
   font-weight: bold;
-}
-
-.spec-item span:first-child {
-  font-weight: bold;
-  color: #666;
+  color: var(--g2-black); /* NEW: Darker for emphasis */
 }
 
 /* ===== LOADING & ERROR STATES ===== */
@@ -230,15 +224,11 @@ header h1 {
   display: inline-block;
   width: 40px;
   height: 40px;
-  border: 4px solid rgba(255,153,0,0.2);
+  border: 4px solid rgba(26, 167, 236, 0.1); /* NEW: Matched to --g2-blue */
   border-radius: 50%;
   border-top-color: var(--g2-blue);
   animation: spin 1s linear infinite;
   margin-bottom: 20px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 .error {
@@ -248,10 +238,16 @@ header h1 {
   text-align: center;
   color: #cc0000;
   margin: 20px 0;
+  border-left: 4px solid #cc0000; /* NEW: Accent border */
 }
 
 /* ===== RESPONSIVE ADJUSTMENTS ===== */
 @media (max-width: 768px) {
+  .yoyo-grid {
+    grid-template-columns: 1fr; /* NEW: Single column on mobile */
+    gap: 20px;
+  }
+
   .specs-grid {
     grid-template-columns: 1fr;
   }
@@ -262,6 +258,10 @@ header h1 {
   
   .spec-item span:last-child {
     text-align: left;
-    margin-top: 2px;
+    margin-top: 4px; /* NEW: Slightly more spacing */
+  }
+
+  .yoyo-image {
+    height: 200px; /* NEW: Slightly smaller on mobile */
   }
 }
