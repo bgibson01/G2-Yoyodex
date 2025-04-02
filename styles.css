@@ -238,7 +238,8 @@ header {
   }
   
   .yoyo-image {
-    height: 200px;
+    height: 250px;
+	width: 100%;
   }
   
   .toolbar {
