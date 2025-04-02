@@ -200,6 +200,37 @@ header {
   to { transform: rotate(360deg); }
 }
 
+/* ===== SPECS SECTION ===== */
+.specs-container {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  background: #f8f8f8;
+  border-radius: 0 0 6px 6px;
+}
+
+.specs-container.expanded {
+  max-height: 1000px;
+  padding: 15px;
+}
+
+.specs-toggle {
+  background: var(--g2-black);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: var(--transition);
+  width: 100%;
+}
+
+.specs-toggle:hover {
+  background: var(--g2-blue);
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .yoyo-grid {
@@ -219,3 +250,4 @@ header {
     justify-content: center;
   }
 }
+
