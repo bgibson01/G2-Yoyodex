@@ -59,7 +59,6 @@ function setupEventListeners() {
     container.offsetHeight; // Trigger reflow
     container.style.display = 'grid';
   });
-}
 
   // Re-append cards
   cards.forEach(card => container.appendChild(card));
