@@ -129,8 +129,8 @@ function renderYoyos(yoyos) {
            loading="lazy"
            onerror="this.src='assets/placeholder.jpg'">
       <div class="yoyo-info">
-        <h2 class="yoyo-model">${yoyo.model}</h2>
-        <p class="yoyo-colorway">${yoyo.colorway}</p>
+        <h2 class="yoyo-model">${yoyo.model}</h2> <p class="yoyo-colorway">${yoyo.colorway}</p>
+		<p class="yoyo-model">${yoyo.type}</p>
         
         <div class="yoyo-meta">
           ${yoyo.release_date ? `<p><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
