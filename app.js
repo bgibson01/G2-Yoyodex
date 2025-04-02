@@ -30,7 +30,6 @@ function setupEventListeners() {
     });
   });
 
-/* COMMENTING OUT FOR DEBUGGING, DEBUG PLACED ABOVE
   // Sort button
   document.getElementById('sort-newest').addEventListener('click', function() {
     this.classList.toggle('active');
@@ -56,8 +55,6 @@ function setupEventListeners() {
     container.offsetHeight;
     container.style.display = 'grid';
   });
-*/
-
 }
 
 
@@ -248,6 +245,7 @@ function renderYoyos(yoyos) {
   }
 
   elements.container.innerHTML = yoyos.map(yoyo => {
+    data-release-date="${new Date(yoyo.release_date).toISOString()}"
     // Ensure type is always an array
     const types = Array.isArray(yoyo.type)
       ? yoyo.type
