@@ -21,7 +21,7 @@ const elements = {
 // UPDATED EVENT LISTENERS (ONLY MODIFIED THE SORT BUTTON)
 // ======================
 function setupEventListeners() {
-  // Filter buttons (UNCHANGED)
+  // Filter buttons
   elements.filterButtons.forEach(button => {
     button.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
@@ -30,9 +30,7 @@ function setupEventListeners() {
     });
   });
 
-  // ======================
-  // CORRECTED SORT BUTTON IMPLEMENTATION
-  // ======================
+  // Sort button
   document.getElementById('sort-newest').addEventListener('click', function() {
     this.classList.toggle('active');
     const isActive = this.classList.contains('active');
@@ -41,36 +39,23 @@ function setupEventListeners() {
     const cards = Array.from(container.querySelectorAll('.yoyo-card'));
 
     cards.sort((a, b) => {
-      // Get release dates - using data attribute
       const dateA = new Date(a.querySelector('[data-release-date]')?.dataset.releaseDate || 0);
       const dateB = new Date(b.querySelector('[data-release-date]')?.dataset.releaseDate || 0);
-
       return isActive ? dateB - dateA : dateA - dateB;
     });
 
-    // Re-append cards (ONCE)
+    // Re-append cards (ONLY ONCE)
     cards.forEach(card => container.appendChild(card));
 
-    // Update button text (ONCE)
+    // Update button text (ONLY ONCE)
     this.textContent = isActive ? 'Sort by Oldest' : 'Sort by Newest';
 
-    // Force reflow (ONCE)
+    // Force reflow (ONLY ONCE)
     container.style.display = 'none';
-    container.offsetHeight; // Trigger reflow
+    container.offsetHeight;
     container.style.display = 'grid';
   });
-
-  // Re-append cards
-  cards.forEach(card => container.appendChild(card));
-
-  // Update button text
-  this.textContent = isActive ? 'Sort by Oldest' : 'Sort by Newest';
-
-  // Force reflow to ensure smooth transition
-  container.style.display = 'none';
-  container.offsetHeight; // Trigger reflow
-  container.style.display = 'grid';
-});
+}
 
 function filterYoyos(type) {
   const cards = document.querySelectorAll('.yoyo-card');
