@@ -27,6 +27,15 @@ header {
   margin-bottom: 2rem;
 }
 
+footer {
+  text-align: center;
+  margin-top: 3rem;
+  padding: 1rem;
+  font-size: 0.8rem;
+  color: #666;
+  border-top: 1px solid #eee;
+}
+
 .logo {
   height: 2.5rem;
   vertical-align: middle;
@@ -37,15 +46,6 @@ header {
   color: #666;
   margin-top: -0.8rem;
   font-size: 0.9rem;
-}
-
-.disclaimer {
-  text-align: center;
-  margin-top: 3rem;
-  padding: 1rem;
-  font-size: 0.8rem;
-  color: #666;
-  border-top: 1px solid #eee;
 }
 
 /* ===== SEARCH & FILTERS ===== */
