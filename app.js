@@ -23,7 +23,7 @@ const elements = {
       const filterValue = button.dataset.filter;
       filterYoyos(filterValue);
     });
-  });
+  }
 
   // Sort by newest (using "Released" field)
   document.getElementById('sort-newest').addEventListener('click', () => {
