@@ -202,7 +202,6 @@ function mergeSpecs(yoyos, specs) {
 // IMAGE LOADING UTILITY
 // ======================
 function handleImageLoad(imgElement) {
-   console.log('Image loaded:', imgElement.src);
   imgElement.classList.add('loaded');
 }
 
