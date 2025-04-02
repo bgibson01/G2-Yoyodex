@@ -126,9 +126,9 @@ header {
 .yoyo-image {
   width: 100%;
   height: 250px;
-  object-fit: contain;
+  object-fit: cover;
   background: #f9f9f9;
-  padding: 1rem;
+  padding: 0;
   border-bottom: 1px solid #eee;
 }
 
