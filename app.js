@@ -34,26 +34,20 @@ function setupEventListeners() {
   document.getElementById('sort-newest').addEventListener('click', function() {
     this.classList.toggle('active');
     const isActive = this.classList.contains('active');
-
     const container = document.querySelector('.yoyo-grid');
     const cards = Array.from(container.querySelectorAll('.yoyo-card'));
-
     cards.sort((a, b) => {
-      const dateA = new Date(a.querySelector('[data-release-date]')?.dataset.releaseDate || 0);
-      const dateB = new Date(b.querySelector('[data-release-date]')?.dataset.releaseDate || 0);
-      return isActive ? dateB - dateA : dateA - dateB;
+      // Parse dates from VISIBLE TEXT (no changes to HTML needed)
+      const parseDate = (card) => {
+        const text = card.querySelector('[data-release-date]')?.textContent || "";
+        const dateStr = text.replace('Released:', '').trim(); // "Feb 28, 2025" → "Feb 28 2025"
+        return dateStr ? new Date(dateStr) : new Date(0); // Fallback to epoch if empty
+      };
+      return isActive ? parseDate(b) - parseDate(a) : parseDate(a) - parseDate(b);
     });
-
-    // Re-append cards (ONLY ONCE)
+    // Re-append cards
     cards.forEach(card => container.appendChild(card));
-
-    // Update button text (ONLY ONCE)
     this.textContent = isActive ? 'Sort by Oldest' : 'Sort by Newest';
-
-    // Force reflow (ONLY ONCE)
-    container.style.display = 'none';
-    container.offsetHeight;
-    container.style.display = 'grid';
   });
 }
 
