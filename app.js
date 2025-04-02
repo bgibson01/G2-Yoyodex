@@ -46,14 +46,22 @@ async function fetchData(url) {
 
 // Data processing
 function mergeSpecs(yoyos, specs) {
+  // First, validate inputs
+  if (!Array.isArray(yoyos) || !Array.isArray(specs)) {
+    console.error('Invalid data format - expected arrays');
+    return [];
+  }
+
   const specsMap = new Map();
   
+  // Process specs with null checks
   specs.forEach(spec => {
-    if (!spec.model) return;
+    if (!spec || typeof spec !== 'object') return;
     
-    const normalizedModel = spec.model.toString().trim().toLowerCase();
+    const model = spec?.model?.toString().trim().toLowerCase();
+    if (!model) return;
     
-    specsMap.set(normalizedModel, {
+    specsMap.set(model, {
       diameter: spec.diameter,
       width: spec.width,
       weight: spec.weight,
@@ -65,16 +73,31 @@ function mergeSpecs(yoyos, specs) {
     });
   });
 
+  // Process yoyos with null checks
   return yoyos.map(yoyo => {
-    const normalizedModel = yoyo.model.toString().trim().toLowerCase();
-    const specsData = specsMap.get(normalizedModel) || {};
+    if (!yoyo || typeof yoyo !== 'object') {
+      console.warn('Invalid yoyo object:', yoyo);
+      return null;
+    }
+
+    const model = yoyo?.model?.toString().trim().toLowerCase();
+    const colorway = yoyo?.colorway?.toString().trim().toLowerCase() || 'unknown';
+    
+    if (!model) {
+      console.warn('Yoyo missing model:', yoyo);
+      return null;
+    }
+
+    const specsData = specsMap.get(model) || {};
     
     return {
       ...yoyo,
       ...specsData,
-      id: `${normalizedModel}-${yoyo.colorway.toLowerCase()}-${Date.now()}`
+      model: model, // Ensure model exists
+      colorway: colorway, // Ensure colorway exists
+      id: `${model}-${colorway}-${Date.now()}`.replace(/\s+/g, '-')
     };
-  });
+  }).filter(Boolean); // Remove any null entries
 }
 
 // ======================
