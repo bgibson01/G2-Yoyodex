@@ -179,8 +179,8 @@ function toggleSpecs(element) {
   const container = element.nextElementSibling;
   container.classList.toggle('expanded');
   element.textContent = container.classList.contains('expanded') 
-    ? '▼ Hide Technical Specs' 
-    : '▶ Show Technical Specs';
+    ? '▼ Hide Specs' 
+    : '▶ Show Specs';
 }
 
 // ======================
