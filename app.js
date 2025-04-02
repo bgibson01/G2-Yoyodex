@@ -156,7 +156,13 @@ function renderYoyos(yoyos) {
     return;
   }
 
-  elements.container.innerHTML = yoyos.map(yoyo => `
+  elements.container.innerHTML = yoyos.map(yoyo => {
+    // Ensure type is always an array
+    const types = Array.isArray(yoyo.type) 
+      ? yoyo.type 
+      : (typeof yoyo.type === 'string' ? yoyo.type.split(',') : []);
+
+    return `
     <div class="yoyo-card" data-id="${yoyo.id}">
       <img src="${yoyo.image_url || CONFIG.placeholderImage}" 
            alt="${yoyo.model} ${yoyo.colorway}" 
@@ -169,9 +175,9 @@ function renderYoyos(yoyos) {
           <span class="yoyo-colorway">${yoyo.colorway}</span>
         </div>
         
-        ${yoyo.type?.length ? `
+        ${types.length ? `
           <div class="yoyo-types">
-            ${yoyo.type.map(t => `<span class="yoyo-type">${t}</span>`).join('')}
+            ${types.map(t => `<span class="yoyo-type" data-type="${t.trim().toLowerCase()}">${t.trim()}</span>`).join('')}
           </div>
         ` : ''}
         
@@ -183,7 +189,8 @@ function renderYoyos(yoyos) {
         ${renderSpecsSection(yoyo)}
       </div>
     </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // ======================
