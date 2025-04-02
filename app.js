@@ -184,6 +184,8 @@ function renderYoyos(yoyos) {
         <div class="yoyo-meta">
           ${yoyo.release_date ? `<p><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
           ${yoyo.quantity ? `<p><strong>Quantity:</strong> ${yoyo.quantity}</p>` : ''}
+		  ${yoyo.glitch_quantity ? `<p><strong>Glitch Versions:</strong> ${yoyo.glitch_quantity}</p>` : ''}
+		  ${yoyo.description ? `<div class="yoyo-description">${yoyo.description}</div>` : ''}
         </div>
         
         ${renderSpecsSection(yoyo)}
