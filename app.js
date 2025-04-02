@@ -136,7 +136,7 @@ function renderYoyos(yoyos) {
           ${yoyo.release_date ? `<p><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
           ${yoyo.quantity ? `<p><strong>Quantity:</strong> ${yoyo.quantity}</p>` : ''}
           ${yoyo.glitch_quantity > 0 ? `<p><strong>Glitch Versions:</strong> ${yoyo.glitch_quantity}</p>` : ''}
-          ${yoyo.price ? `<p><strong>Price:</strong> ${yoyo.price}</p>` : ''}
+          ${yoyo.price ? `<p><strong>Price: $</strong> ${yoyo.price}</p>` : ''}
         </div>
         
         ${yoyo.description ? `<div class="yoyo-description">${yoyo.description}</div>` : ''}
