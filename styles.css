@@ -154,7 +154,7 @@ header h1 {
 /* ===== SPECS SECTION ===== */
 .specs-toggle {
   background: var(--g2-black);
-  color: ff9900;
+  color: var(--g2-orange);
   border: none;
   padding: 8px 12px;
   border-radius: 4px;
