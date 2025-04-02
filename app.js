@@ -38,8 +38,7 @@ const elements = {
     });
     // Re-append sorted cards
     cards.forEach(card => container.appendChild(card));
-  });
-
+  });,
   loadingIndicator: document.getElementById('loading-indicator') || createLoadingIndicator()
 };
 
