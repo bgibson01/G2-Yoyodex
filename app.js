@@ -239,7 +239,6 @@ function renderYoyos(yoyos) {
   }
 
   elements.container.innerHTML = yoyos.map(yoyo => {
-    data-release-date="${new Date(yoyo.release_date).toISOString()}"
     // Ensure type is always an array
     const types = Array.isArray(yoyo.type)
       ? yoyo.type
@@ -266,11 +265,11 @@ function renderYoyos(yoyos) {
         ` : ''}
 
         <div class="yoyo-meta">
-          ${yoyo.release_date ? `<p data-release-date="${yoyo.release_date}"><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
-		      ${yoyo.price ? `<p><strong>Price:</strong> $${yoyo.price}</p>` : ''}
+          ${yoyo.release_date ? `<p data-release-date="${new Date(yoyo.release_date).toISOString()}"><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
+          ${yoyo.price ? `<p><strong>Price:</strong> $${yoyo.price}</p>` : ''}
           ${yoyo.quantity ? `<p><strong>Quantity:</strong> ${yoyo.quantity}</p>` : ''}
-		      ${yoyo.glitch_quantity ? `<p><strong>Glitches:</strong> ${yoyo.glitch_quantity}</p>` : ''}
-		      ${yoyo.description ? `<div class="yoyo-description">${yoyo.description}</div>` : ''}
+          ${yoyo.glitch_quantity ? `<p><strong>Glitches:</strong> ${yoyo.glitch_quantity}</p>` : ''}
+          ${yoyo.description ? `<div class="yoyo-description">${yoyo.description}</div>` : ''}
         </div>
 
         ${renderSpecsSection(yoyo)}
