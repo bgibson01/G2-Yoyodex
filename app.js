@@ -53,12 +53,34 @@ async function fetchData(url) {
 
 function formatDate(dateString) {
   if (!dateString) return 'Unknown date';
+  
   try {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    // First try parsing as mm/dd/yy (Google Sheets US format)
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+      // Handle 2-digit year (assume 21st century)
+      const year = parts[2].length === 2 ? `20${parts[2]}` : parts[2];
+      const isoDate = `${year}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+      const date = new Date(isoDate);
+      
+      // Only proceed if date is valid
+      if (!isNaN(date.getTime())) {
+        const options = { year: 'numeric', month: 'short', day: 'numeric' };
+        return date.toLocaleDateString(undefined, options);
+      }
+    }
+    
+    // Fallback to default Date parsing if format doesn't match
+    const date = new Date(dateString);
+    if (!isNaN(date.getTime())) {
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return date.toLocaleDateString(undefined, options);
+    }
+    
+    throw new Error('Unknown date format');
   } catch (e) {
     console.warn('Invalid date format:', dateString);
-    return dateString;
+    return dateString; // Return raw string if parsing fails
   }
 }
 
