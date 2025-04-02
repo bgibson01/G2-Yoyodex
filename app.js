@@ -45,7 +45,7 @@ async function fetchData(url) {
 }
 
 // Data processing
-function mergeSpecs(yoyos, specs) {
+ffunction mergeSpecs(yoyos, specs) {
   // First, validate inputs
   if (!Array.isArray(yoyos) || !Array.isArray(specs)) {
     console.error('Invalid data format - expected arrays');
@@ -80,22 +80,33 @@ function mergeSpecs(yoyos, specs) {
       return null;
     }
 
-    const model = yoyo?.model?.toString().trim().toLowerCase();
-    const colorway = yoyo?.colorway?.toString().trim().toLowerCase() || 'unknown';
+    // Preserve original casing while using lowercase for matching
+    const originalModel = yoyo?.model?.toString().trim();
+    const normalizedModel = originalModel?.toLowerCase();
+    const originalColorway = yoyo?.colorway?.toString().trim();
+    const normalizedColorway = originalColorway?.toLowerCase() || 'unknown';
     
-    if (!model) {
+    if (!originalModel || !normalizedModel) {
       console.warn('Yoyo missing model:', yoyo);
       return null;
     }
 
-    const specsData = specsMap.get(model) || {};
+    const specsData = specsMap.get(normalizedModel) || {};
     
+    // Process type to handle both strings and arrays
+    const processedType = yoyo.type 
+      ? Array.isArray(yoyo.type) 
+        ? yoyo.type.map(t => t.trim()).filter(t => t)
+        : yoyo.type.split(',').map(t => t.trim()).filter(t => t)
+      : [];
+
     return {
       ...yoyo,
       ...specsData,
-      model: model, // Ensure model exists
-      colorway: colorway, // Ensure colorway exists
-      id: `${model}-${colorway}-${Date.now()}`.replace(/\s+/g, '-')
+      model: originalModel, // Preserve original casing
+      colorway: originalColorway, // Preserve original casing
+      type: processedType, // Standardized array format
+      id: `${normalizedModel}-${normalizedColorway}-${Date.now()}`.replace(/\s+/g, '-')
     };
   }).filter(Boolean); // Remove any null entries
 }
