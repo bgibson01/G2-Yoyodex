@@ -122,7 +122,9 @@ footer {
 
 #sort-newest {
   padding: 0.5rem 1rem;
-  background: white;
+  background: var(--g2-black);
+  color: var(--g2-blue);
+  border-color: var(--g2-black);
   border: 1px solid #ddd;
   border-radius: 6px;
   cursor: pointer;
@@ -133,7 +135,7 @@ footer {
 
 #sort-newest.active {
   background: var(--g2-black);
-  color: var(--g2-blue);
+  color: var(--g2-orange);
   border-color: var(--g2-black);
 }
 
