@@ -97,17 +97,17 @@ function renderSpecsSection(yoyo) {
 
   return `
     <button class="specs-toggle" onclick="toggleSpecs(this)">
-      ▶ Show Technical Specifications
+      ▶ Show Specs
     </button>
     <div class="specs-container">
       <div class="specs-grid">
         ${renderSpecItem('Diameter', yoyo.diameter, 'mm')}
         ${renderSpecItem('Width', yoyo.width, 'mm')}
         ${renderSpecItem('Weight', yoyo.weight, 'g')}
+        ${renderSpecItem('Response Pads', yoyo.response)}
         ${renderSpecItem('Material', yoyo.composition)}
-        ${renderSpecItem('Response Pads', yoyo.pads)}
         ${renderSpecItem('Bearing', yoyo.bearing)}
-        ${renderSpecItem('Axle', yoyo.axle)}
+        ${renderSpecItem('Axle', yoyo.axle, 'mm')}
         ${renderSpecItem('Finish', yoyo.finish)}
       </div>
     </div>
@@ -136,6 +136,7 @@ function renderYoyos(yoyos) {
           ${yoyo.release_date ? `<p><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
           ${yoyo.quantity ? `<p><strong>Quantity:</strong> ${yoyo.quantity}</p>` : ''}
           ${yoyo.glitch_quantity > 0 ? `<p><strong>Glitch Versions:</strong> ${yoyo.glitch_quantity}</p>` : ''}
+          ${yoyo.price ? `<p><strong>Price:</strong> ${yoyo.price}</p>` : ''}
         </div>
         
         ${yoyo.description ? `<div class="yoyo-description">${yoyo.description}</div>` : ''}
