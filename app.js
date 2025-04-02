@@ -13,9 +13,31 @@ const CONFIG = {
 const elements = {
   search: document.getElementById('search'),
   container: document.getElementById('yoyo-container'),
-  filterButtons: document.querySelectorAll('.filters button'),
+  filterButtons: document.querySelectorAll('.filter-btn:not(#sort-newest)').forEach(button => {
+    button.addEventListener('click', () => {
+    // Remove active class from all buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    // Add active class to clicked button
+      button.classList.add('active');
+
+      const filterValue = button.dataset.filter;
+      filterYoyos(filterValue);
+    });
+  });
   loadingIndicator: document.getElementById('loading-indicator') || createLoadingIndicator()
 };
+
+function filterYoyos(type) {
+  const cards = document.querySelectorAll('.yoyo-card');
+  cards.forEach(card => {
+    const cardType = card.querySelector('.yoyo-type').textContent; // Uses your existing .yoyo-type element
+    if (type === 'all' || cardType === type) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
 
 function createLoadingIndicator() {
   const loader = document.createElement('div');
@@ -53,7 +75,7 @@ async function fetchData(url) {
 
 function formatDate(dateString) {
   if (!dateString) return 'Unknown date';
-  
+
   try {
     // First try parsing as mm/dd/yy (Google Sheets US format)
     const parts = dateString.split('/');
@@ -62,21 +84,21 @@ function formatDate(dateString) {
       const year = parts[2].length === 2 ? `20${parts[2]}` : parts[2];
       const isoDate = `${year}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
       const date = new Date(isoDate);
-      
+
       // Only proceed if date is valid
       if (!isNaN(date.getTime())) {
         const options = { year: 'numeric', month: 'short', day: 'numeric' };
         return date.toLocaleDateString(undefined, options);
       }
     }
-    
+
     // Fallback to default Date parsing if format doesn't match
     const date = new Date(dateString);
     if (!isNaN(date.getTime())) {
       const options = { year: 'numeric', month: 'short', day: 'numeric' };
       return date.toLocaleDateString(undefined, options);
     }
-    
+
     throw new Error('Unknown date format');
   } catch (e) {
     console.warn('Invalid date format:', dateString);
@@ -91,13 +113,13 @@ function mergeSpecs(yoyos, specs) {
   }
 
   const specsMap = new Map();
-  
+
   specs.forEach(spec => {
     if (!spec || typeof spec !== 'object') return;
-    
+
     const model = spec?.model?.toString().trim().toLowerCase();
     if (!model) return;
-    
+
     specsMap.set(model, {
       diameter: spec.diameter,
       width: spec.width,
@@ -118,14 +140,14 @@ function mergeSpecs(yoyos, specs) {
 
     const model = yoyo?.model?.toString().trim().toLowerCase();
     const colorway = yoyo?.colorway?.toString().trim().toLowerCase() || 'unknown';
-    
+
     if (!model) {
       console.warn('Yoyo missing model:', yoyo);
       return null;
     }
 
     const specsData = specsMap.get(model) || {};
-    
+
     return {
       ...yoyo,
       ...specsData,
@@ -180,14 +202,14 @@ function renderYoyos(yoyos) {
 
   elements.container.innerHTML = yoyos.map(yoyo => {
     // Ensure type is always an array
-    const types = Array.isArray(yoyo.type) 
-      ? yoyo.type 
+    const types = Array.isArray(yoyo.type)
+      ? yoyo.type
       : (typeof yoyo.type === 'string' ? yoyo.type.split(',') : []);
 
     return `
     <div class="yoyo-card" data-id="${yoyo.id}">
-      <img src="${yoyo.image_url || CONFIG.placeholderImage}" 
-           alt="${yoyo.model} ${yoyo.colorway}" 
+      <img src="${yoyo.image_url || CONFIG.placeholderImage}"
+           alt="${yoyo.model} ${yoyo.colorway}"
            class="yoyo-image"
            loading="lazy"
            onerror="this.src='${CONFIG.placeholderImage}'">
@@ -196,13 +218,13 @@ function renderYoyos(yoyos) {
           <h2 class="yoyo-model">${yoyo.model}</h2>
           <span class="yoyo-colorway">${yoyo.colorway}</span>
         </div>
-        
+
         ${types.length ? `
           <div class="yoyo-types">
             ${types.map(t => `<span class="yoyo-type" data-type="${t.trim().toLowerCase()}">${t.trim()}</span>`).join('')}
           </div>
         ` : ''}
-        
+
         <div class="yoyo-meta">
           ${yoyo.release_date ? `<p><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
 		  ${yoyo.price ? `<p><strong>Price:</strong> $${yoyo.price}</p>` : ''}
@@ -210,7 +232,7 @@ function renderYoyos(yoyos) {
 		  ${yoyo.glitch_quantity ? `<p><strong>Glitches:</strong> ${yoyo.glitch_quantity}</p>` : ''}
 		  ${yoyo.description ? `<div class="yoyo-description">${yoyo.description}</div>` : ''}
         </div>
-        
+
         ${renderSpecsSection(yoyo)}
       </div>
     </div>
@@ -256,13 +278,13 @@ function showError(error) {
 
 function setupEventListeners() {
   let searchTimeout;
-  
+
   elements.search.addEventListener('input', (e) => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
       const term = e.target.value.toLowerCase().trim();
-      filteredYoyos = allYoyos.filter(yoyo => 
-        yoyo.model.toLowerCase().includes(term) || 
+      filteredYoyos = allYoyos.filter(yoyo =>
+        yoyo.model.toLowerCase().includes(term) ||
         yoyo.colorway.toLowerCase().includes(term)
       );
       renderYoyos(filteredYoyos);
@@ -273,12 +295,12 @@ function setupEventListeners() {
     button.addEventListener('click', () => {
       elements.filterButtons.forEach(btn => btn.classList.remove('active'));
       button.classList.add('active');
-      
+
       const filter = button.dataset.filter;
-      filteredYoyos = filter === 'all' 
-        ? [...allYoyos] 
+      filteredYoyos = filter === 'all'
+        ? [...allYoyos]
         : allYoyos.filter(yoyo => yoyo.type.includes(filter));
-      
+
       renderYoyos(filteredYoyos);
     });
   });
@@ -291,8 +313,8 @@ function setupEventListeners() {
 window.toggleSpecs = function(element) {
   const container = element.nextElementSibling;
   container.classList.toggle('expanded');
-  element.textContent = container.classList.contains('expanded') 
-    ? '▼ Hide Technical Specifications' 
+  element.textContent = container.classList.contains('expanded')
+    ? '▼ Hide Technical Specifications'
     : '▶ Show Technical Specifications';
 };
 
@@ -307,13 +329,13 @@ async function init() {
       fetchData(CONFIG.yoyosDataUrl),
       fetchData(CONFIG.specsDataUrl)
     ]);
-    
+
     allYoyos = mergeSpecs(yoyos, specs);
     filteredYoyos = [...allYoyos];
-    
+
     renderYoyos(filteredYoyos);
     setupEventListeners();
-    
+
   } catch (error) {
     showError(error);
   } finally {
