@@ -21,16 +21,7 @@ body {
   color: var(--g2-black);
 }
 
-.disclaimer {
-  text-align: center;
-  margin-top: 3rem;
-  padding: 1rem;
-  font-size: 0.8rem;
-  color: #666;
-  border-top: 1px solid #eee;
-}
-
-/* ===== HEADER ===== */
+/* ===== HEADER & FOOTER ===== */
 header {
   text-align: center;
   margin-bottom: 2rem;
@@ -46,6 +37,15 @@ header {
   color: #666;
   margin-top: -0.8rem;
   font-size: 0.9rem;
+}
+
+.disclaimer {
+  text-align: center;
+  margin-top: 3rem;
+  padding: 1rem;
+  font-size: 0.8rem;
+  color: #666;
+  border-top: 1px solid #eee;
 }
 
 /* ===== SEARCH & FILTERS ===== */
