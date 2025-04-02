@@ -45,7 +45,7 @@ async function fetchData(url) {
 }
 
 // Data processing
-ffunction mergeSpecs(yoyos, specs) {
+function mergeSpecs(yoyos, specs) {
   // First, validate inputs
   if (!Array.isArray(yoyos) || !Array.isArray(specs)) {
     console.error('Invalid data format - expected arrays');
