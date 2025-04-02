@@ -24,6 +24,22 @@ const elements = {
       filterYoyos(filterValue);
     });
   });
+
+  // Sort by newest (using "Released" field)
+  document.getElementById('sort-newest').addEventListener('click', () => {
+    const container = document.querySelector('.yoyo-grid');
+    const cards = Array.from(document.querySelectorAll('.yoyo-card'));
+
+    cards.sort((a, b) => {
+      // Extract dates from your .yoyo-released elements
+      const dateA = new Date(a.querySelector('.yoyo-released').textContent);
+      const dateB = new Date(b.querySelector('.yoyo-released').textContent);
+      return dateB - dateA; // Newest first
+    });
+    // Re-append sorted cards
+    cards.forEach(card => container.appendChild(card));
+  });
+
   loadingIndicator: document.getElementById('loading-indicator') || createLoadingIndicator()
 };
 
