@@ -131,6 +131,8 @@ footer {
   font-weight: 600;
   transition: var(--transition);
   margin-left: auto; /* Pushes it to the right in toolbar */
+  -webkit-autofill: none !important;
+  background-image: none !important;
 }
 
 #sort-newest.active {
