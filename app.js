@@ -34,23 +34,31 @@ function setupEventListeners() {
   document.getElementById('sort-newest').addEventListener('click', function() {
     this.classList.toggle('active');
     const isActive = this.classList.contains('active');
+
     const container = document.querySelector('.yoyo-grid');
     const cards = Array.from(container.querySelectorAll('.yoyo-card'));
+
     cards.sort((a, b) => {
-      // Parse dates from VISIBLE TEXT (no changes to HTML needed)
-      const parseDate = (card) => {
+      // Get the visible date text (e.g., "Feb 28, 2025")
+      const getDate = (card) => {
         const text = card.querySelector('[data-release-date]')?.textContent || "";
-        const dateStr = text.replace('Released:', '').trim(); // "Feb 28, 2025" → "Feb 28 2025"
-        return dateStr ? new Date(dateStr) : new Date(0); // Fallback to epoch if empty
+        return new Date(text.replace('Released:', '').trim()) || new Date(0);
       };
-      return isActive ? parseDate(b) - parseDate(a) : parseDate(a) - parseDate(b);
+
+      const dateA = getDate(a);
+      const dateB = getDate(b);
+
+      return isActive ? dateB - dateA : dateA - dateB;
     });
-    // Re-append cards
+
+    // Re-append cards in new order
     cards.forEach(card => container.appendChild(card));
+
+    // Update button text
     this.textContent = isActive ? 'Sort by Oldest' : 'Sort by Newest';
   });
-}
 
+}
 
 function filterYoyos(type) {
   const cards = document.querySelectorAll('.yoyo-card');
