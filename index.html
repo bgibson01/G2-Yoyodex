@@ -17,22 +17,21 @@
       </h1>
       <p class="subtitle">The G² Yoyodex</p>
     </header>
-    
+
     <div class="search-container">
-      <input type="text" id="search" placeholder="Search models/colorways..." 
+      <input type="text" id="search" placeholder="Search models/colorways..."
              aria-label="Search yoyos" autocomplete="off">
       <button class="clear-search" aria-label="Clear search">✕</button>
     </div>
-    
+
     <div class="toolbar">
-      <div class="filters">
-        <button data-filter="all" class="active">All</button>
-        <button data-filter="weekly">Weekly</button>
-        <button data-filter="patreon">Patreon</button>
-      </div>
-      <button class="sort-btn" aria-label="Sort yoyos">Sort: Newest ▼</button>
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="Weekly Drop">Weekly Drop</button>
+      <button class="filter-btn" data-filter="Patreon Monthly">Patreon Monthly</button>
+      <button class="filter-btn" data-filter="Lottery">Lottery</button>
+      <button class="filter-btn" id="sort-newest">Sort by Newest</button>
     </div>
-    
+
     <div id="loading-indicator" class="loading" style="display:none;">
       <div class="loading-spinner"></div>
       <p>Loading yoyo database...</p>

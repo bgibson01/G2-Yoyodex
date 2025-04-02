@@ -97,6 +97,7 @@ header {
 
 .filters button.active {
   background: var(--g2-black);
+  color: var(--g2-blue);
 }
 
 .sort-btn {
@@ -236,18 +237,17 @@ header {
   .yoyo-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .yoyo-image {
     height: 200px;
   }
-  
+
   .toolbar {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .filters {
     justify-content: center;
   }
 }
-
