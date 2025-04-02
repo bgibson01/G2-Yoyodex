@@ -237,7 +237,7 @@ function renderYoyos(yoyos) {
 
         ${types.length ? `
           <div class="yoyo-types">
-            ${types.map(t => `<span class="yoyo-type" data-type="${t.trim().toLowerCase()}">${t.trim()}</span>`).join('')}
+            ${types.map(t => `<span class="yoyo-type-badge" data-type="${t.trim().toLowerCase()}">${t.trim()}</span>`).join('')}
           </div>
         ` : ''}
 
@@ -275,6 +275,9 @@ function hideLoading() {
   }
   if (elements.container) {
     elements.container.style.display = 'grid';
+    setTimeout(() => {
+      elements.container.classList.add('visible');
+    }, 50);
   }
 }
 

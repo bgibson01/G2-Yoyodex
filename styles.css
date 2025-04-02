@@ -79,13 +79,7 @@ header {
   gap: 1rem;
 }
 
-.filters {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.filters button {
+.filter-btn {
   padding: 0.5rem 1rem;
   background: var(--g2-blue);
   color: white;
@@ -95,12 +89,12 @@ header {
   font-weight: 600;
 }
 
-.filters button.active {
+.filter-btn.active {
   background: var(--g2-black);
   color: var(--g2-blue);
 }
 
-.sort-btn {
+.sort-newest {
   padding: 0.5rem 1rem;
   background: white;
   border: 1px solid #ddd;
@@ -251,3 +245,97 @@ header {
     justify-content: center;
   }
 }
+
+/* Add these to your existing CSS */
+.yoyo-meta {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.yoyo-meta p {
+  margin: 0.3rem 0;
+}
+
+.yoyo-description {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.spec-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.no-results, .error {
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 2rem;
+  color: #666;
+}
+
+.error {
+  color: #d32f2f;
+}
+
+.yoyo-type-badge {
+  font-size: 0.65rem;
+  padding: 0.25rem 0.6rem;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  border-radius: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 500;
+}
+
+.yoyo-grid {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.yoyo-grid.visible {
+  opacity: 1;
+}
+
+.yoyo-image {
+  background: linear-gradient(135deg, #f5f5f5 25%, #e0e0e0 50%, #f5f5f5 75%);
+  background-size: 400% 400%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.specs-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.specs-toggle::before {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid currentColor;
+  transition: transform 0.2s ease;
+}
+
+.specs-container.expanded + .specs-toggle::before {
+  transform: rotate(180deg);
