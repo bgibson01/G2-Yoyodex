@@ -33,35 +33,54 @@ function setupEventListeners() {
   // Sort button
   document.getElementById('sort-newest').addEventListener('click', function() {
     this.classList.toggle('active');
-    const isActive = this.classList.contains('active');
+    const sortNewestFirst = this.classList.contains('active');
 
     const container = document.querySelector('.yoyo-grid');
     const cards = Array.from(container.querySelectorAll('.yoyo-card'));
 
-    cards.sort((a, b) => {
-      // Get the visible date text (e.g., "Feb 28, 2025")
-      const getDate = (card) => {
-        const text = card.querySelector('[data-release-date]')?.textContent || "";
-        return new Date(text.replace('Released:', '').trim()) || new Date(0);
-      };
+    // Enhanced date parser with debugging
+    const getDate = (card) => {
+      const dateElement = card.querySelector('[data-release-date]');
+      if (!dateElement) {
+        console.warn('No date element found for card:', card);
+        return new Date(0);
+      }
 
+      const rawText = dateElement.textContent;
+      const dateText = rawText.replace('Released:', '').trim();
+
+      if (!dateText) {
+        console.warn('Empty date text for card:', card);
+        return new Date(0);
+      }
+
+      const parsedDate = new Date(dateText);
+
+      if (isNaN(parsedDate)) {
+        console.warn('Invalid date parsed:', dateText, 'from card:', card);
+        return new Date(0);
+      }
+
+      return parsedDate;
+    };
+
+    cards.sort((a, b) => {
       const dateA = getDate(a);
       const dateB = getDate(b);
-
-      console.log("Sorting:", {
-        a: getDate(a).toISOString(),
-        b: getDate(b).toISOString(),
-        result: isActive ? dateB - dateA : dateA - dateB
-      });
-
-      return isActive ? dateB - dateA : dateA - dateB;
+      return sortNewestFirst ? dateB - dateA : dateA - dateB;
     });
 
-    // Re-append cards in new order
-    cards.forEach(card => container.appendChild(card));
+    // Visual debugging
+    console.log('Sorted dates:',
+      cards.map(card => ({
+        text: card.querySelector('[data-release-date]')?.textContent,
+        date: getDate(card).toISOString()
+      }))
+    );
 
-    // Update button text
-    this.textContent = isActive ? 'Sort by Oldest' : 'Sort by Newest';
+    // Update DOM
+    cards.forEach(card => container.appendChild(card));
+    this.textContent = sortNewestFirst ? 'Sort by Oldest' : 'Sort by Newest';
   });
 
 }
