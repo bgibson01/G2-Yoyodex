@@ -27,6 +27,16 @@ header {
   margin-bottom: 2rem;
 }
 
+.community-badge {
+  font-size: 0.6em;
+  background: var(--g2-orange);
+  color: white;
+  padding: 0.2em 0.5em;
+  border-radius: 1em;
+  vertical-align: middle;
+  margin-left: 0.5rem;
+}
+
 footer {
   text-align: center;
   margin-top: 3rem;
