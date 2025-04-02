@@ -31,53 +31,64 @@ function setupEventListeners() {
   });
 
   // ======================
-  // FIXED SORT BUTTON IMPLEMENTATION (NEW VERSION)
+  // CORRECTED SORT BUTTON IMPLEMENTATION
   // ======================
   document.getElementById('sort-newest').addEventListener('click', function() {
-    // Toggle active state (NEW)
     this.classList.toggle('active');
+    const isActive = this.classList.contains('active');
 
     const container = document.querySelector('.yoyo-grid');
-    const cards = Array.from(document.querySelectorAll('.yoyo-card'));
+    const cards = Array.from(container.querySelectorAll('.yoyo-card'));
 
     cards.sort((a, b) => {
-      // SAFER DATE PARSING - checks both data attribute and fallback to text content
-      const getDate = (card) => {
-        // First try data attribute (recommended approach)
-        if (card.dataset.releaseDate) return new Date(card.dataset.releaseDate);
+      // Get release dates - using data attribute
+      const dateA = new Date(a.querySelector('[data-release-date]')?.dataset.releaseDate || 0);
+      const dateB = new Date(b.querySelector('[data-release-date]')?.dataset.releaseDate || 0);
 
-        // Fallback to text content parsing (compatible with existing HTML)
-        const dateText = card.querySelector('p')?.textContent || '';
-        const dateString = dateText.replace('Released:', '').trim();
-        return new Date(dateString) || 0; // Returns 0 (epoch) if invalid
-      };
-
-      const dateA = getDate(a);
-      const dateB = getDate(b);
-
-      return this.classList.contains('active') ? dateB - dateA : dateA - dateB;
+      return isActive ? dateB - dateA : dateA - dateB;
     });
 
-    // Re-append cards (UNCHANGED)
+    // Re-append cards (ONCE)
     cards.forEach(card => container.appendChild(card));
 
-    // Update button text (NEW - OPTIONAL)
-    this.textContent = this.classList.contains('active')
-      ? 'Sort by Oldest'
-      : 'Sort by Newest';
+    // Update button text (ONCE)
+    this.textContent = isActive ? 'Sort by Oldest' : 'Sort by Newest';
+
+    // Force reflow (ONCE)
+    container.style.display = 'none';
+    container.offsetHeight; // Trigger reflow
+    container.style.display = 'grid';
   });
 }
+
+  // Re-append cards
+  cards.forEach(card => container.appendChild(card));
+
+  // Update button text
+  this.textContent = isActive ? 'Sort by Oldest' : 'Sort by Newest';
+
+  // Force reflow to ensure smooth transition
+  container.style.display = 'none';
+  container.offsetHeight; // Trigger reflow
+  container.style.display = 'grid';
+});
 
 function filterYoyos(type) {
   const cards = document.querySelectorAll('.yoyo-card');
   cards.forEach(card => {
-    const cardType = card.querySelector('.yoyo-type').textContent; // Uses your existing .yoyo-type element
-    if (type === 'all' || cardType === type) {
+    const cardType = card.querySelector('.yoyo-type')?.textContent;
+    if (type === 'all' || cardType?.includes(type)) {
       card.style.display = 'block';
     } else {
       card.style.display = 'none';
     }
   });
+
+  // Reapply sort if active
+  if (document.getElementById('sort-newest').classList.contains('active')) {
+    document.getElementById('sort-newest').click();
+    document.getElementById('sort-newest').click();
+  }
 }
 
 function createLoadingIndicator() {
@@ -200,6 +211,14 @@ function mergeSpecs(yoyos, specs) {
 }
 
 // ======================
+// IMAGE LOADING UTILITY
+// ======================
+function handleImageLoad(imgElement) {
+   console.log('Image loaded:', imgElement.src);
+  imgElement.classList.add('loaded');
+}
+
+// ======================
 // 5. RENDERING FUNCTIONS
 // ======================
 
@@ -250,10 +269,11 @@ function renderYoyos(yoyos) {
     return `
     <div class="yoyo-card" data-id="${yoyo.id}">
       <img src="${yoyo.image_url || CONFIG.placeholderImage}"
-           alt="${yoyo.model} ${yoyo.colorway}"
-           class="yoyo-image"
-           loading="lazy"
-           onerror="this.src='${CONFIG.placeholderImage}'">
+        alt="${yoyo.model} ${yoyo.colorway}"
+        class="yoyo-image"
+        loading="lazy"
+        onload="handleImageLoad(this)"
+        onerror="this.onerror=null;this.src='${CONFIG.placeholderImage}';handleImageLoad(this)">
       <div class="yoyo-info">
         <div class="yoyo-header">
           <h2 class="yoyo-model">${yoyo.model}</h2>
@@ -300,9 +320,7 @@ function hideLoading() {
   }
   if (elements.container) {
     elements.container.style.display = 'grid';
-    setTimeout(() => {
-      elements.container.classList.add('visible');
-    }, 50);
+    elements.container.classList.add('visible'); // <-- NEW LINE
   }
 }
 
@@ -314,6 +332,7 @@ function showError(error) {
       <p><small>${error.message}</small></p>
     </div>
   `;
+  elements.container.classList.add('visible');
 }
 
 // ======================

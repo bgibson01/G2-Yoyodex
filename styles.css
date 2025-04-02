@@ -54,6 +54,13 @@ header {
   font-size: 1rem;
 }
 
+#search:focus,
+.filter-btn:focus,
+#sort-newest:focus {
+  outline: 2px solid var(--g2-blue);
+  outline-offset: 2px;
+}
+
 .clear-search {
   position: absolute;
   right: 1rem;
@@ -94,17 +101,21 @@ header {
   color: var(--g2-blue);
 }
 
-.sort-newest {
+#sort-newest {
   padding: 0.5rem 1rem;
   background: white;
   border: 1px solid #ddd;
   border-radius: 6px;
   cursor: pointer;
+  font-weight: 600;
+  transition: var(--transition);
+  margin-left: auto; /* Pushes it to the right in toolbar */
 }
 
 #sort-newest.active {
   background: var(--g2-black);
   color: var(--g2-blue);
+  border-color: var(--g2-black);
 }
 
 /* ===== YOYO CARDS ===== */
@@ -120,16 +131,41 @@ header {
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
+  will-change: transform;
   position: relative;
 }
 
 .yoyo-image {
+  /* Layout & Dimensions */
   width: 100%;
   height: 250px;
+  position: relative;
+
+  /* Image Handling */
   object-fit: cover;
-  background: #f9f9f9;
   padding: 0;
+
+  /* Background & Effects */
+  background: #f9f9f9; /* Fallback */
+  background: linear-gradient(135deg, #f5f5f5 25%, #e0e0e0 50%, #f5f5f5 75%);
+  background-size: 400% 400%;
+  animation: shimmer 1.5s infinite;
+
+  /* Borders */
   border-bottom: 1px solid #eee;
+
+  /* Transition */
+  transition: opacity 0.3s ease;
+}
+
+.yoyo-image.loaded {
+  animation: none;
+  background: #f9f9f9;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .yoyo-info {
@@ -312,17 +348,6 @@ header {
   opacity: 1;
 }
 
-.yoyo-image {
-  background: linear-gradient(135deg, #f5f5f5 25%, #e0e0e0 50%, #f5f5f5 75%);
-  background-size: 400% 400%;
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
 .specs-toggle {
   display: flex;
   align-items: center;
@@ -330,18 +355,6 @@ header {
   gap: 0.5rem;
   margin-top: 1rem;
 }
-
-/* .specs-toggle::before {
-  content: '';
-  display: inline-block;
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 5px solid currentColor;
-  transition: transform 0.2s ease;
-}
-*/
 
 .specs-container.expanded + .specs-toggle::before {
   transform: rotate(180deg);
