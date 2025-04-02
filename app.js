@@ -26,12 +26,27 @@ let filteredYoyos = [];
 // HELPER FUNCTIONS
 // ======================
 function formatDate(dateString) {
-  if (!dateString) return 'Unknown date';
+  if (!dateString) return 'Date not available';
+  
   try {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    // Handle both date formats (3/25/25 and 01/04/2025 21:27:22)
+    const date = new Date(dateString.includes(' ') ? dateString : dateString + ' 00:00:00');
+    
+    if (isNaN(date.getTime())) {
+      // Fallback for other formats
+      return dateString;
+    }
+    
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
   } catch (e) {
-    console.warn('Invalid date format:', dateString);
+    console.warn('Date formatting error:', e);
     return dateString;
   }
 }
@@ -47,32 +62,21 @@ async function fetchData(url) {
   }
 }
 
+// ======================
+// DATA PROCESSING UPDATES
+// ======================
 function mergeSpecs(yoyos, specs) {
-  // Create a normalized specs map
   const specsMap = new Map();
   
   specs.forEach(spec => {
-    if (!spec.model) return;
+    if (!spec?.model) return;
     
-    // Normalize model name (trim and lowercase)
     const normalizedModel = spec.model.toString().trim().toLowerCase();
-    
-    // Parse combined width/weight if needed
-    let width = spec.width;
-    let weight = spec.weight;
-    
-    if (width && typeof width === 'string') {
-      const parts = width.split(' ');
-      width = parseFloat(parts[0]);
-      if (parts[1] && !weight) {
-        weight = parts[1].replace('g', '');
-      }
-    }
     
     specsMap.set(normalizedModel, {
       diameter: spec.diameter,
-      width: width,
-      weight: weight,
+      width: spec.width,
+      weight: spec.weight,
       composition: spec.composition,
       pads: spec.pads,
       bearing: spec.bearing,
@@ -81,51 +85,63 @@ function mergeSpecs(yoyos, specs) {
     });
   });
 
-  // Merge with yoyos
   return yoyos.map(yoyo => {
-    const normalizedModel = yoyo.model.toString().trim().toLowerCase();
+    const normalizedModel = yoyo.model?.toString().trim().toLowerCase() || '';
     const specsData = specsMap.get(normalizedModel) || {};
     
-    console.log(`Merging ${yoyo.model}`, {
-      found: specsMap.has(normalizedModel),
-      specs: specsData
-    });
-    
+    // Process all columns with proper fallbacks
     return {
-      ...yoyo,
+      model: yoyo.model || 'Unknown Model',
+      colorway: yoyo.colorway || 'Standard',
+      type: yoyo.type ? yoyo.type.split(',').map(t => t.trim()) : ['standard'],
+      release_date: yoyo.release_date,
+      quantity: yoyo.quantity ? parseInt(yoyo.quantity) : null,
+      glitch_quantity: yoyo.glitch_quantity ? parseInt(yoyo.glitch_quantity) : null,
+      price: yoyo.price ? `$${parseFloat(yoyo.price.replace(/[^0-9.]/g, ''))}` : null,
+      image_url: yoyo.image_url || 'assets/placeholder.jpg',
+      description: yoyo.description || '',
+      last_updated: yoyo.last_updated || new Date().toISOString(),
       ...specsData,
-      id: `${normalizedModel}-${yoyo.colorway.toLowerCase()}-${Date.now()}`
+      id: `${normalizedModel}-${(yoyo.colorway || 'standard').toLowerCase().replace(/\s+/g, '-')}`
     };
   });
 }
 
 // ======================
-// RENDERING FUNCTIONS
+// UPDATED RENDER FUNCTION
 // ======================
-function renderSpecsSection(yoyo) {
-  const hasSpecs = yoyo.diameter || yoyo.width || yoyo.composition;
-  if (!hasSpecs) {
-    console.log(`No specs found for ${yoyo.model}`);
-    return '';
+function renderYoyos(yoyos) {
+  if (!yoyos?.length) {
+    elements.container.innerHTML = '<p class="no-results">No yoyos found matching your criteria.</p>';
+    return;
   }
 
-  return `
-    <button class="specs-toggle" onclick="toggleSpecs(this)">
-      ▶ Show Technical Specifications
-    </button>
-    <div class="specs-container">
-      <div class="specs-grid">
-        ${renderSpecItem('Diameter', yoyo.diameter, 'mm')}
-        ${renderSpecItem('Width', yoyo.width, 'mm')}
-        ${renderSpecItem('Weight', yoyo.weight, 'g')}
-        ${renderSpecItem('Material', yoyo.composition)}
-        ${renderSpecItem('Response Pads', yoyo.pads)}
-        ${renderSpecItem('Bearing', yoyo.bearing)}
-        ${renderSpecItem('Axle', yoyo.axle)}
-        ${renderSpecItem('Finish', yoyo.finish)}
+  elements.container.innerHTML = yoyos.map(yoyo => `
+    <div class="yoyo-card" data-id="${yoyo.id}" data-type="${yoyo.type.join(' ')}">
+      <img src="${yoyo.image_url}" 
+           alt="${yoyo.model} ${yoyo.colorway}" 
+           class="yoyo-image"
+           loading="lazy"
+           onerror="this.src='assets/placeholder.jpg'">
+      <div class="yoyo-info">
+        <h2 class="yoyo-model">${yoyo.model}</h2>
+        <p class="yoyo-colorway">${yoyo.colorway}</p>
+        
+        ${yoyo.price ? `<p class="yoyo-price">${yoyo.price}</p>` : ''}
+        
+        <div class="yoyo-meta">
+          ${yoyo.release_date ? `<p><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
+          ${yoyo.quantity !== null ? `<p><strong>Quantity:</strong> ${yoyo.quantity}</p>` : ''}
+          ${yoyo.glitch_quantity ? `<p><strong>Glitch Versions:</strong> ${yoyo.glitch_quantity}</p>` : ''}
+          ${yoyo.last_updated ? `<p class="last-updated"><small>Updated: ${formatDate(yoyo.last_updated)}</small></p>` : ''}
+        </div>
+        
+        ${yoyo.description ? `<div class="yoyo-description">${yoyo.description}</div>` : ''}
+        
+        ${renderSpecsSection(yoyo)}
       </div>
     </div>
-  `;
+  `).join('');
 }
 
 function renderSpecItem(label, value, unit = '') {
@@ -208,6 +224,7 @@ function toggleSpecs(element) {
 // EVENT HANDLERS
 // ======================
 function setupEventListeners() {
+  // Search functionality
   elements.search.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase().trim();
     filteredYoyos = allYoyos.filter(yoyo => 
@@ -218,6 +235,7 @@ function setupEventListeners() {
     renderYoyos(filteredYoyos);
   });
 
+  // Filter buttons
   elements.filterButtons.forEach(button => {
     button.addEventListener('click', () => {
       const filter = button.dataset.filter;
@@ -226,7 +244,7 @@ function setupEventListeners() {
       
       filteredYoyos = filter === 'all' 
         ? [...allYoyos] 
-        : allYoyos.filter(yoyo => yoyo.type === filter);
+        : allYoyos.filter(yoyo => yoyo.type.includes(filter));
       
       renderYoyos(filteredYoyos);
     });
