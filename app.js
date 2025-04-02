@@ -14,8 +14,21 @@ const elements = {
   search: document.getElementById('search'),
   container: document.getElementById('yoyo-container'),
   filterButtons: document.querySelectorAll('.filters button'),
-  loadingIndicator: document.getElementById('loading-indicator')
+  loadingIndicator: document.getElementById('loading-indicator') || createLoadingIndicator()
 };
+
+function createLoadingIndicator() {
+  const loader = document.createElement('div');
+  loader.id = 'loading-indicator';
+  loader.className = 'loading';
+  loader.innerHTML = `
+    <div class="loading-spinner"></div>
+    <p>Loading yoyo database...</p>
+  `;
+  loader.style.display = 'none';
+  document.body.appendChild(loader);
+  return loader;
+}
 
 // ======================
 // 3. APPLICATION STATE
@@ -178,13 +191,21 @@ function renderYoyos(yoyos) {
 // ======================
 
 function showLoading() {
-  elements.loadingIndicator.style.display = 'block';
-  elements.container.style.display = 'none';
+  if (elements.loadingIndicator) {
+    elements.loadingIndicator.style.display = 'block';
+  }
+  if (elements.container) {
+    elements.container.style.display = 'none';
+  }
 }
 
 function hideLoading() {
-  elements.loadingIndicator.style.display = 'none';
-  elements.container.style.display = 'grid';
+  if (elements.loadingIndicator) {
+    elements.loadingIndicator.style.display = 'none';
+  }
+  if (elements.container) {
+    elements.container.style.display = 'grid';
+  }
 }
 
 function showError(error) {

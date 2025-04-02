@@ -3,23 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>G² YoYodex</title>
+  <title>G² YoYodex - Track G2 Yoyos and Colorways</title>
+  <link rel="icon" href="assets/favicon.ico">
+  <meta name="description" content="Track new G² yoyo releases, models, and specs">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <main>
-    <h1>G² YoYodex</h1>
-    <div class="controls">
-      <input type="text" id="search" placeholder="Search models/colorways...">
+    <header>
+      <h1>
+        <img src="assets/g2-logo.png" alt="G² Logo" class="logo">
+        YoYodex
+      </h1>
+      <p class="subtitle">The G² Yoyodex</p>
+    </header>
+    
+    <div class="search-container">
+      <input type="text" id="search" placeholder="Search models/colorways..." 
+             aria-label="Search yoyos" autocomplete="off">
+      <button class="clear-search" aria-label="Clear search">✕</button>
+    </div>
+    
+    <div class="toolbar">
       <div class="filters">
-        <button data-filter="all">All</button>
-        <button data-filter="weekly">Weekly Drop</button>
-        <button data-filter="patreon">Patreon Monthly</button>
-		<button data-filter="lottery">Lottery</button>
+        <button data-filter="all" class="active">All</button>
+        <button data-filter="weekly">Weekly</button>
+        <button data-filter="patreon">Patreon</button>
       </div>
+      <button class="sort-btn" aria-label="Sort yoyos">Sort: Newest ▼</button>
+    </div>
+    
+    <div id="loading-indicator" class="loading" style="display:none;">
+      <div class="loading-spinner"></div>
+      <p>Loading yoyo database...</p>
     </div>
 
-    <div id="yoyo-container" class="yoyo-grid"></div>
+<div id="loading-indicator" class="loading" style="display: none;">
+  <div class="loading-spinner"></div>
+  <p>Loading yoyo database...</p>
+</div>
+
+<div id="yoyo-container" class="yoyo-grid"></div>
   </main>
 
   <script src="app.js"></script>
