@@ -13,34 +13,35 @@ const CONFIG = {
 const elements = {
   search: document.getElementById('search'),
   container: document.getElementById('yoyo-container'),
-  filterButtons: document.querySelectorAll('.filter-btn:not(#sort-newest)').forEach(button => {
+  filterButtons: document.querySelectorAll('.filter-btn:not(#sort-newest)'), // Just store the NodeList
+  loadingIndicator: document.getElementById('loading-indicator') || createLoadingIndicator()
+};
+
+// Then initialize event listeners separately
+function setupEventListeners() {
+  // Filter buttons
+  elements.filterButtons.forEach(button => {
     button.addEventListener('click', () => {
-    // Remove active class from all buttons
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    // Add active class to clicked button
       button.classList.add('active');
-
-      const filterValue = button.dataset.filter;
-      filterYoyos(filterValue);
+      filterYoyos(button.dataset.filter);
     });
-  }
+  });
 
-  // Sort by newest (using "Released" field)
+  // Sort button
   document.getElementById('sort-newest').addEventListener('click', () => {
     const container = document.querySelector('.yoyo-grid');
     const cards = Array.from(document.querySelectorAll('.yoyo-card'));
 
     cards.sort((a, b) => {
-      // Extract dates from your .yoyo-released elements
       const dateA = new Date(a.querySelector('.yoyo-released').textContent);
       const dateB = new Date(b.querySelector('.yoyo-released').textContent);
-      return dateB - dateA; // Newest first
+      return dateB - dateA;
     });
-    // Re-append sorted cards
+
     cards.forEach(card => container.appendChild(card));
-  });,
-  loadingIndicator: document.getElementById('loading-indicator') || createLoadingIndicator()
-};
+  });
+}
 
 function filterYoyos(type) {
   const cards = document.querySelectorAll('.yoyo-card');
