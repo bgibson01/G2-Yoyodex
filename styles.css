@@ -103,36 +103,48 @@ h1 {
   padding: 20px;
 }
 
+/* ===== YOYO CARD HEADER ===== */
+.yoyo-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
 .yoyo-model {
   font-size: 1.3rem;
-  margin: 0 0 5px 0;
   color: var(--g2-black);
   font-weight: 600;
+  margin: 0;
 }
 
 .yoyo-colorway {
+  font-size: 1.1rem;
   color: var(--g2-blue);
   font-weight: bold;
-  margin-bottom: 10px;
-  display: block;
+  margin: 0;
 }
 
+/* ===== TYPE TAGS ===== */
 .yoyo-types {
   display: flex;
-  gap: 5px;
+  gap: 6px;
   flex-wrap: wrap;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .yoyo-type {
-  font-size: 0.7rem;
-  padding: 3px 8px;
+  font-size: 0.65rem; /* Smaller than before */
+  padding: 2px 8px;
   background: #f0f0f0;
-  border-radius: 12px;
+  border-radius: 10px;
   color: #555;
   text-transform: capitalize;
+  letter-spacing: 0.5px;
 }
 
+/* Type-specific colors */
 .yoyo-type[data-type="weekly"] {
   background: #fff0e0;
   color: #e67e22;
