@@ -42,57 +42,58 @@ let currentSort = { key: 'release_date', descending: true };
  * Improved mergeSpecs with better error handling
  */
 function mergeSpecs(yoyos, specs) {
-  if (!Array.isArray(yoyos) return [];
-  
+  // First, validate inputs
+  if (!Array.isArray(yoyos) || !Array.isArray(specs)) {
+    console.error('Invalid data format - expected arrays');
+    return [];
+  }
+
   const specsMap = new Map();
-  (specs || []).forEach(spec => {
-    try {
-      const model = spec?.model?.toString().trim().toLowerCase();
-      if (model) {
-        specsMap.set(model, {
-          diameter: spec.diameter,
-          width: spec.width,
-          weight: spec.weight,
-          composition: spec.composition,
-          pads: spec.pads,
-          bearing: spec.bearing,
-          axle: spec.axle,
-          finish: spec.finish
-        });
-      }
-    } catch (e) {
-      console.warn('Error processing spec:', e);
-    }
+  
+  // Process specs with null checks
+  specs.forEach(spec => {
+    if (!spec || typeof spec !== 'object') return;
+    
+    const model = spec?.model?.toString().trim().toLowerCase();
+    if (!model) return;
+    
+    specsMap.set(model, {
+      diameter: spec.diameter,
+      width: spec.width,
+      weight: spec.weight,
+      composition: spec.composition,
+      pads: spec.pads,
+      bearing: spec.bearing,
+      axle: spec.axle,
+      finish: spec.finish
+    });
   });
 
+  // Process yoyos with null checks - THIS IS WHERE THE FIX IS
   return yoyos.map(yoyo => {
-    try {
-      const originalModel = yoyo?.model?.toString().trim() || 'Unknown Model';
-      const normalizedModel = originalModel.toLowerCase();
-      const originalColorway = yoyo?.colorway?.toString().trim() || 'Standard';
-      const normalizedColorway = originalColorway.toLowerCase();
-      
-      const type = yoyo.type 
-        ? Array.isArray(yoyo.type) 
-          ? yoyo.type
-          : yoyo.type.split(',').map(t => t.trim()).filter(t => t)
-        : [];
-
-      return {
-        ...yoyo,
-        ...(specsMap.get(normalizedModel) || {}),
-        model: originalModel,
-        colorway: originalColorway,
-        type: type,
-        id: `${normalizedModel}-${normalizedColorway}`.replace(/\s+/g, '-'),
-        // Ensure image URL falls back to placeholder
-        image_url: yoyo.image_url || CONFIG.placeholderImage
-      };
-    } catch (e) {
-      console.warn('Error processing yoyo:', yoyo, e);
+    if (!yoyo || typeof yoyo !== 'object') {  // Added proper parentheses
+      console.warn('Invalid yoyo object:', yoyo);
       return null;
     }
-  }).filter(Boolean);
+
+    const model = yoyo?.model?.toString().trim().toLowerCase();
+    const colorway = yoyo?.colorway?.toString().trim().toLowerCase() || 'unknown';
+    
+    if (!model) {
+      console.warn('Yoyo missing model:', yoyo);
+      return null;
+    }
+
+    const specsData = specsMap.get(model) || {};
+    
+    return {
+      ...yoyo,
+      ...specsData,
+      model: yoyo.model.toString().trim(), // Preserve original casing
+      colorway: yoyo.colorway.toString().trim(), // Preserve original casing
+      id: `${model}-${colorway}-${Date.now()}`.replace(/\s+/g, '-')
+    };
+  }).filter(Boolean); // Remove any null entries
 }
 
 /**
