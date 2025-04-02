@@ -1,5 +1,5 @@
 // ======================
-// CONFIGURATION
+// 1. CONFIGURATION
 // ======================
 const CONFIG = {
   yoyosDataUrl: 'https://script.google.com/macros/s/AKfycby-6xXDgtZIaMa0-SV5kmNwDIh5IbCyvCH8bjgs22eUVu4HbtX6RiOYItejI5fMzJywzQ/exec?sheet=yoyos',
@@ -7,7 +7,7 @@ const CONFIG = {
 };
 
 // ======================
-// DOM ELEMENTS
+// 2. DOM ELEMENTS
 // ======================
 const elements = {
   search: document.getElementById('search'),
@@ -17,40 +17,22 @@ const elements = {
 };
 
 // ======================
-// APPLICATION STATE
+// 3. HELPER FUNCTIONS
 // ======================
-let allYoyos = [];
-let filteredYoyos = [];
 
-// ======================
-// HELPER FUNCTIONS
-// ======================
+// Date formatting
 function formatDate(dateString) {
-  if (!dateString) return 'Date not available';
-  
+  if (!dateString) return 'Unknown date';
   try {
-    // Handle both date formats (3/25/25 and 01/04/2025 21:27:22)
-    const date = new Date(dateString.includes(' ') ? dateString : dateString + ' 00:00:00');
-    
-    if (isNaN(date.getTime())) {
-      // Fallback for other formats
-      return dateString;
-    }
-    
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   } catch (e) {
-    console.warn('Date formatting error:', e);
+    console.warn('Invalid date format:', dateString);
     return dateString;
   }
 }
 
+// Data fetching
 async function fetchData(url) {
   try {
     const response = await fetch(url);
@@ -62,14 +44,12 @@ async function fetchData(url) {
   }
 }
 
-// ======================
-// DATA PROCESSING UPDATES
-// ======================
+// Data processing
 function mergeSpecs(yoyos, specs) {
   const specsMap = new Map();
   
   specs.forEach(spec => {
-    if (!spec?.model) return;
+    if (!spec.model) return;
     
     const normalizedModel = spec.model.toString().trim().toLowerCase();
     
@@ -86,64 +66,22 @@ function mergeSpecs(yoyos, specs) {
   });
 
   return yoyos.map(yoyo => {
-    const normalizedModel = yoyo.model?.toString().trim().toLowerCase() || '';
+    const normalizedModel = yoyo.model.toString().trim().toLowerCase();
     const specsData = specsMap.get(normalizedModel) || {};
     
-    // Process all columns with proper fallbacks
     return {
-      model: yoyo.model || 'Unknown Model',
-      colorway: yoyo.colorway || 'Standard',
-      type: yoyo.type ? yoyo.type.split(',').map(t => t.trim()) : ['standard'],
-      release_date: yoyo.release_date,
-      quantity: yoyo.quantity ? parseInt(yoyo.quantity) : null,
-      glitch_quantity: yoyo.glitch_quantity ? parseInt(yoyo.glitch_quantity) : null,
-      price: yoyo.price ? `$${parseFloat(yoyo.price.replace(/[^0-9.]/g, ''))}` : null,
-      image_url: yoyo.image_url || 'assets/placeholder.jpg',
-      description: yoyo.description || '',
-      last_updated: yoyo.last_updated || new Date().toISOString(),
+      ...yoyo,
       ...specsData,
-      id: `${normalizedModel}-${(yoyo.colorway || 'standard').toLowerCase().replace(/\s+/g, '-')}`
+      id: `${normalizedModel}-${yoyo.colorway.toLowerCase()}-${Date.now()}`
     };
   });
 }
 
 // ======================
-// UPDATED RENDER FUNCTION
+// 4. RENDERING FUNCTIONS
 // ======================
-function renderYoyos(yoyos) {
-  if (!yoyos?.length) {
-    elements.container.innerHTML = '<p class="no-results">No yoyos found matching your criteria.</p>';
-    return;
-  }
 
-  elements.container.innerHTML = yoyos.map(yoyo => `
-    <div class="yoyo-card" data-id="${yoyo.id}" data-type="${yoyo.type.join(' ')}">
-      <img src="${yoyo.image_url}" 
-           alt="${yoyo.model} ${yoyo.colorway}" 
-           class="yoyo-image"
-           loading="lazy"
-           onerror="this.src='assets/placeholder.jpg'">
-      <div class="yoyo-info">
-        <h2 class="yoyo-model">${yoyo.model}</h2>
-        <p class="yoyo-colorway">${yoyo.colorway}</p>
-        
-        ${yoyo.price ? `<p class="yoyo-price">${yoyo.price}</p>` : ''}
-        
-        <div class="yoyo-meta">
-          ${yoyo.release_date ? `<p><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
-          ${yoyo.quantity !== null ? `<p><strong>Quantity:</strong> ${yoyo.quantity}</p>` : ''}
-          ${yoyo.glitch_quantity ? `<p><strong>Glitch Versions:</strong> ${yoyo.glitch_quantity}</p>` : ''}
-          ${yoyo.last_updated ? `<p class="last-updated"><small>Updated: ${formatDate(yoyo.last_updated)}</small></p>` : ''}
-        </div>
-        
-        ${yoyo.description ? `<div class="yoyo-description">${yoyo.description}</div>` : ''}
-        
-        ${renderSpecsSection(yoyo)}
-      </div>
-    </div>
-  `).join('');
-}
-
+// Specs rendering
 function renderSpecItem(label, value, unit = '') {
   return value ? `
     <div class="spec-item">
@@ -153,6 +91,30 @@ function renderSpecItem(label, value, unit = '') {
   ` : '';
 }
 
+function renderSpecsSection(yoyo) {
+  const hasSpecs = yoyo.diameter || yoyo.width || yoyo.composition;
+  if (!hasSpecs) return '';
+
+  return `
+    <button class="specs-toggle" onclick="toggleSpecs(this)">
+      ▶ Show Technical Specifications
+    </button>
+    <div class="specs-container">
+      <div class="specs-grid">
+        ${renderSpecItem('Diameter', yoyo.diameter, 'mm')}
+        ${renderSpecItem('Width', yoyo.width, 'mm')}
+        ${renderSpecItem('Weight', yoyo.weight, 'g')}
+        ${renderSpecItem('Material', yoyo.composition)}
+        ${renderSpecItem('Response Pads', yoyo.pads)}
+        ${renderSpecItem('Bearing', yoyo.bearing)}
+        ${renderSpecItem('Axle', yoyo.axle)}
+        ${renderSpecItem('Finish', yoyo.finish)}
+      </div>
+    </div>
+  `;
+}
+
+// Main yoyo rendering
 function renderYoyos(yoyos) {
   if (!yoyos || !yoyos.length) {
     elements.container.innerHTML = '<p class="no-results">No yoyos found matching your criteria.</p>';
@@ -185,7 +147,7 @@ function renderYoyos(yoyos) {
 }
 
 // ======================
-// UI FUNCTIONS
+// 5. UI FUNCTIONS
 // ======================
 function showLoading() {
   elements.loadingIndicator.className = 'loading';
@@ -221,10 +183,9 @@ function toggleSpecs(element) {
 }
 
 // ======================
-// EVENT HANDLERS
+// 6. EVENT HANDLERS
 // ======================
 function setupEventListeners() {
-  // Search functionality
   elements.search.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase().trim();
     filteredYoyos = allYoyos.filter(yoyo => 
@@ -235,7 +196,6 @@ function setupEventListeners() {
     renderYoyos(filteredYoyos);
   });
 
-  // Filter buttons
   elements.filterButtons.forEach(button => {
     button.addEventListener('click', () => {
       const filter = button.dataset.filter;
@@ -244,7 +204,7 @@ function setupEventListeners() {
       
       filteredYoyos = filter === 'all' 
         ? [...allYoyos] 
-        : allYoyos.filter(yoyo => yoyo.type.includes(filter));
+        : allYoyos.filter(yoyo => yoyo.type === filter);
       
       renderYoyos(filteredYoyos);
     });
@@ -252,7 +212,13 @@ function setupEventListeners() {
 }
 
 // ======================
-// INITIALIZATION
+// 7. APPLICATION STATE
+// ======================
+let allYoyos = [];
+let filteredYoyos = [];
+
+// ======================
+// 8. INITIALIZATION
 // ======================
 async function init() {
   showLoading();
@@ -261,15 +227,6 @@ async function init() {
       fetchData(CONFIG.yoyosDataUrl),
       fetchData(CONFIG.specsDataUrl)
     ]);
-    
-    // DEBUG: RAW DATA CHECK
-    console.log("Raw specs data sample:", specs.slice(0, 3));
-    console.log("Sample model matching:", {
-      yoyoModel: yoyos[0].model,
-      specsModel: specs[0]?.model,
-      normalizedYoyo: yoyos[0].model.trim().toLowerCase(),
-      normalizedSpecs: specs[0]?.model?.trim().toLowerCase()
-    });
     
     allYoyos = mergeSpecs(yoyos, specs);
     filteredYoyos = [...allYoyos];
