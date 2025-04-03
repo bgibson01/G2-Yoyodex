@@ -135,6 +135,7 @@ footer {
 }
 
 .yoyo-card {
+  position: relative; /* Add this line */
   background: white;
   border-radius: 10px;
   overflow: hidden;
@@ -180,6 +181,18 @@ footer {
   position: absolute;
   top: 1rem;
   right: 1rem;
+}
+
+.yoyo-type-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  opacity: 0.5;
 }
 
 .yoyo-meta {
@@ -241,7 +254,6 @@ footer {
 }
 
 /* ===== ERROR STATES ===== */
-
 .error {
   text-align: center;
   padding: 2rem;
@@ -259,18 +271,6 @@ footer {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-}
-
-.yoyo-type-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  opacity: 0.5;
 }
 
 /* ===== LOADING STATES ===== */
