@@ -201,6 +201,54 @@ footer {
   margin: 0.3rem 0;
 }
 
+/* ===== TECH SPEC SECTIONS ===== */
+.specs-toggle {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--g2-blue);
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 1rem;
+  transition: var(--transition);
+}
+
+.specs-toggle:hover {
+  background: var(--g2-blue-dark);
+}
+
+.specs-container {
+  display: none;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.specs-container.expanded {
+  display: block;
+}
+
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.spec-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: #f9f9f9;
+  border-radius: 4px;
+  box-shadow: var(--shadow-sm);
+}
+
 /* ===== ERROR STATES ===== */
 
 .error {
