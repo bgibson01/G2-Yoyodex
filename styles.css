@@ -201,6 +201,27 @@ footer {
   margin: 0.3rem 0;
 }
 
+/* ===== ERROR STATES ===== */
+
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: #d32f2f;
+  background: #ffebee;
+  border-radius: 8px;
+  margin: 1rem;
+}
+
+.error button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--g2-blue);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 /* ===== LOADING STATES ===== */
 .loading {
   text-align: center;

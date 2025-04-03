@@ -21,10 +21,58 @@ const CONFIG = {
 const elements = {
   search: document.getElementById('search'),
   container: document.getElementById('yoyo-container'),
-  filterButtons: document.querySelectorAll('.filter-btn:not([data-sort])'),
-  sortButtons: document.querySelectorAll('[data-sort]'),
+  filterButtons: document.querySelectorAll('.filter-btn'),
+  sortButtons: document.querySelectorAll('.sort-btn'),
   loadingIndicator: document.getElementById('loading-indicator')
 };
+
+async function fetchData(url) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return Array.isArray(data) ? data : []; // Ensure always returns array
+  } catch (error) {
+    console.error('Failed to fetch data:', error);
+    return []; // Return empty array instead of failing
+  }
+}
+
+// ======================
+// 2.5 UI UTILITY FUNCTIONS
+// ======================
+function showLoading() {
+  if (elements.loadingIndicator) {
+    elements.loadingIndicator.style.display = 'block';
+  }
+  if (elements.container) {
+    elements.container.style.display = 'none';
+  }
+}
+
+function hideLoading() {
+  if (elements.loadingIndicator) {
+    elements.loadingIndicator.style.display = 'none';
+  }
+  if (elements.container) {
+    elements.container.style.display = 'grid';
+  }
+}
+
+function showError(error) {
+  console.error('Error:', error);
+  if (elements.container) {
+    elements.container.innerHTML = `
+      <div class="error">
+        <p>Failed to load data. Please try again later.</p>
+        <p><small>${error.message}</small></p>
+        <button onclick="window.location.reload()">Retry</button>
+      </div>
+    `;
+    elements.container.style.display = 'block';
+  }
 
 // ======================
 // 3. SORTING SYSTEM
@@ -210,6 +258,11 @@ async function init() {
       fetchData(CONFIG.yoyosDataUrl),
       fetchData(CONFIG.specsDataUrl)
     ]);
+
+    // Add null checks
+    if (!yoyos || !specs) {
+      throw new Error('Failed to load data from server');
+    }
 
     APP_STATE.yoyos = mergeSpecs(yoyos, specs);
     filterYoyos('all');
