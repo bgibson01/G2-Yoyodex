@@ -132,15 +132,15 @@ function renderSpecsSection(yoyo) {
 
   return `
     <button class="specs-toggle" onclick="toggleSpecs(this)">
-      ▶ Show Technical Specifications
+      \u25b6 Show Technical Specifications
     </button>
     <div class="specs-container">
       <div class="specs-grid">
         ${renderSpecItem('Diameter', yoyo.diameter, 'mm')}
         ${renderSpecItem('Width', yoyo.width, 'mm')}
         ${renderSpecItem('Weight', yoyo.weight, 'g')}
-        ${renderSpecItem('Material', yoyo.composition)}
-        ${renderSpecItem('Response', yoyo.response)}
+        ${renderSpecItem('Composition', yoyo.composition)}
+        ${renderSpecItem('Pads', yoyo.pads)}
         ${renderSpecItem('Bearing', yoyo.bearing)}
         ${renderSpecItem('Axle', yoyo.axle)}
         ${renderSpecItem('Finish', yoyo.finish)}
@@ -182,7 +182,7 @@ function renderYoyos(yoyos) {
           ${yoyo.description ? `<div class="yoyo-description">${yoyo.description}</div>` : ''}
         </div>
         ${renderSpecsSection(yoyo)}
-        <button class="expand-toggle" onclick="toggleExpand(this)">Click to expand for more info</button>
+        <button class="specs-toggle" onclick="toggleSpecs(this)">Show Technical Specifications</button>
       </div>
     </div>
   `).join('');
