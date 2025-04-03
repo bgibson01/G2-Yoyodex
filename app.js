@@ -26,6 +26,9 @@ const elements = {
   loadingIndicator: document.getElementById('loading-indicator')
 };
 
+// ======================
+// DATA PROCESSING FUNCTIONS
+// ======================
 async function fetchData(url) {
   try {
     const response = await fetch(url);
@@ -38,6 +41,81 @@ async function fetchData(url) {
     console.error('Failed to fetch data:', error);
     return []; // Return empty array instead of failing
   }
+}
+
+function formatDate(dateString) {
+  if (!dateString) return 'Unknown date';
+
+  try {
+    // Try parsing as mm/dd/yy (Google Sheets US format)
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+      const year = parts[2].length === 2 ? `20${parts[2]}` : parts[2];
+      const date = new Date(`${year}-${parts[0]}-${parts[1]}`);
+      if (!isNaN(date)) {
+        return date.toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      }
+    }
+
+    // Fallback to default parsing
+    const date = new Date(dateString);
+    if (!isNaN(date)) {
+      return date.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+  } catch (e) {
+    console.warn('Date parsing error:', e);
+  }
+
+  return dateString; // Return original if parsing fails
+}
+
+function mergeSpecs(yoyos, specs) {
+  // Handle null/undefined inputs
+  if (!Array.isArray(yoyos)) yoyos = [];
+  if (!Array.isArray(specs)) specs = [];
+
+  // Create a map for quick spec lookup
+  const specsMap = new Map();
+  specs.forEach(spec => {
+    if (spec?.model) {
+      const modelKey = spec.model.toString().trim().toLowerCase();
+      specsMap.set(modelKey, {
+        diameter: spec.diameter,
+        width: spec.width,
+        weight: spec.weight,
+        composition: spec.composition,
+        pads: spec.pads,
+        bearing: spec.bearing,
+        axle: spec.axle,
+        finish: spec.finish
+      });
+    }
+  });
+
+  // Merge specs into yoyos
+  return yoyos.map(yoyo => {
+    if (!yoyo || !yoyo.model) return null;
+
+    const modelKey = yoyo.model.toString().trim().toLowerCase();
+    const colorway = yoyo.colorway?.toString().trim().toLowerCase() || 'unknown';
+    const specsData = specsMap.get(modelKey) || {};
+
+    return {
+      ...yoyo,
+      ...specsData,
+      model: yoyo.model.toString().trim(), // Preserve original casing
+      colorway: yoyo.colorway?.toString().trim() || '', // Preserve original casing
+      id: `${modelKey}-${colorway}-${Math.random().toString(36).substr(2, 9)}` // Unique ID
+    };
+  }).filter(Boolean); // Remove any null entries
 }
 
 // ======================
@@ -260,16 +338,22 @@ async function init() {
       fetchData(CONFIG.specsDataUrl)
     ]);
 
-    // Add null checks
-    if (!yoyos || !specs) {
-      throw new Error('Failed to load data from server');
+    // Validate data before merging
+    if (!Array.isArray(yoyos) || !Array.isArray(specs)) {
+      throw new Error('Invalid data format received from server');
     }
 
     APP_STATE.yoyos = mergeSpecs(yoyos, specs);
+
+    if (!APP_STATE.yoyos.length) {
+      console.warn('No valid yoyo data after merging');
+    }
+
     filterYoyos('all');
     setupEventListeners();
 
   } catch (error) {
+    console.error('Initialization error:', error);
     showError(error);
   } finally {
     hideLoading();
