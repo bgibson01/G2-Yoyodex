@@ -73,6 +73,7 @@ function showError(error) {
     `;
     elements.container.style.display = 'block';
   }
+}
 
 // ======================
 // 3. SORTING SYSTEM
