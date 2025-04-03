@@ -182,15 +182,6 @@ footer {
   right: 1rem;
 }
 
-.yoyo-type-badge {
-  font-size: 0.65rem;
-  padding: 0.25rem 0.6rem;
-  background: rgba(0,0,0,0.7);
-  color: white;
-  border-radius: 1rem;
-  text-transform: uppercase;
-}
-
 .yoyo-meta {
   margin-top: 0.75rem;
   font-size: 0.9rem;
