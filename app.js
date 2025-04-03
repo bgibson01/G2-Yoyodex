@@ -157,34 +157,38 @@ function renderYoyos(yoyos) {
     return;
   }
 
-  elements.container.innerHTML = yoyos.map(yoyo => `
-    <div class="yoyo-card" data-id="${yoyo.id}">
-      ${yoyo.type ? `<div class="yoyo-type-badge">${yoyo.type}</div>` : ''}
-      <img src="${CONFIG.placeholderImage}"
-           data-src="${yoyo.image_url || CONFIG.placeholderImage}"
-           alt="${yoyo.model} ${yoyo.colorway}"
-           class="yoyo-image"
-           loading="lazy"
-           onerror="this.src='${CONFIG.placeholderImage}'">
-      <div class="yoyo-info">
-        <div class="yoyo-header">
-          <h2 class="yoyo-model">${yoyo.model}</h2>
-          <span class="yoyo-colorway">${yoyo.colorway}</span>
+  elements.container.innerHTML = yoyos.map(yoyo => {
+    console.log('Rendering yoyo:', yoyo);
+    const yoyoTypeBadge = yoyo.type ? `<div class="yoyo-type-badge">${yoyo.type}</div>` : '';
+    return `
+      <div class="yoyo-card" data-id="${yoyo.id}">
+        ${yoyoTypeBadge}
+        <img src="${CONFIG.placeholderImage}"
+             data-src="${yoyo.image_url || CONFIG.placeholderImage}"
+             alt="${yoyo.model} ${yoyo.colorway}"
+             class="yoyo-image"
+             loading="lazy"
+             onerror="this.src='${CONFIG.placeholderImage}'">
+        <div class="yoyo-info">
+          <div class="yoyo-header">
+            <h2 class="yoyo-model">${yoyo.model}</h2>
+            <span class="yoyo-colorway">${yoyo.colorway}</span>
+          </div>
+          <div class="yoyo-meta">
+            ${yoyo.release_date ? `
+              <p data-release-date="${new Date(yoyo.release_date).toISOString()}">
+                <strong>Released:</strong> ${formatDate(yoyo.release_date)}
+              </p>` : ''}
+            ${yoyo.price ? `<p><strong>Price:</strong> $${yoyo.price}</p>` : ''}
+            ${yoyo.quantity ? `<p><strong>Quantity:</strong> ${yoyo.quantity}</p>` : ''}
+            ${yoyo.glitch_quantity ? `<p><strong>Glitches:</strong> ${yoyo.glitch_quantity}</p>` : ''}
+            ${yoyo.description ? `<div class="yoyo-description">${yoyo.description}</div>` : ''}
+          </div>
+          ${renderSpecsSection(yoyo)}
         </div>
-        <div class="yoyo-meta">
-          ${yoyo.release_date ? `
-            <p data-release-date="${new Date(yoyo.release_date).toISOString()}">
-              <strong>Released:</strong> ${formatDate(yoyo.release_date)}
-            </p>` : ''}
-          ${yoyo.price ? `<p><strong>Price:</strong> $${yoyo.price}</p>` : ''}
-          ${yoyo.quantity ? `<p><strong>Quantity:</strong> ${yoyo.quantity}</p>` : ''}
-          ${yoyo.glitch_quantity ? `<p><strong>Glitches:</strong> ${yoyo.glitch_quantity}</p>` : ''}
-          ${yoyo.description ? `<div class="yoyo-description">${yoyo.description}</div>` : ''}
-        </div>
-        ${renderSpecsSection(yoyo)}
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   elements.container.classList.add('visible');
   lazyLoadImages();

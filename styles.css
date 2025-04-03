@@ -270,6 +270,18 @@ footer {
   cursor: pointer;
 }
 
+.yoyo-type-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  opacity: 0.5;
+}
+
 /* ===== LOADING STATES ===== */
 .loading {
   text-align: center;
@@ -306,16 +318,4 @@ footer {
   .yoyo-grid {
     grid-template-columns: 1fr;
   }
-}
-
-.yoyo-type-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  opacity: 0.5;
 }
