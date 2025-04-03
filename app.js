@@ -191,7 +191,6 @@ function renderYoyos(yoyos) {
           ${yoyo.description ? `<div class="yoyo-description">${yoyo.description}</div>` : ''}
         </div>
         ${renderSpecsSection(yoyo)}
-        <button class="specs-toggle" onclick="toggleSpecs(this)">Show Technical Specifications</button>
       </div>
     </div>
   `).join('');
