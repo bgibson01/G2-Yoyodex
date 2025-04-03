@@ -13,7 +13,12 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-E9G3FZFQCX');
+
+    // Configure GA4 to work on GitHub Pages
+    gtag('config', 'G-E9G3FZFQCX', {
+      cookie_flags: 'SameSite=None;Secure',
+      cookie_domain: 'auto'
+    });
   </script>
 </head>
 <body>
