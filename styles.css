@@ -1,4 +1,4 @@
-/* ===== VARIABLES ===== */
+/* ===== BASE STYLES ===== */
 :root {
   --g2-blue: #1AA7EC;
   --g2-blue-dark: #0E86C4;
@@ -6,11 +6,9 @@
   --g2-orange: #FF9900;
   --text-light: #f8f8f8;
   --shadow-sm: 0 3px 10px rgba(0,0,0,0.1);
-  --shadow-md: 0 5px 15px rgba(0,0,0,0.2);
   --transition: all 0.3s ease;
 }
 
-/* ===== BASE STYLES ===== */
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   line-height: 1.6;
@@ -27,6 +25,12 @@ header {
   margin-bottom: 2rem;
 }
 
+.logo {
+  height: 2.5rem;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
 .community-badge {
   font-size: 0.6em;
   background: var(--g2-orange);
@@ -34,7 +38,6 @@ header {
   padding: 0.2em 0.5em;
   border-radius: 1em;
   vertical-align: middle;
-  margin-left: 0.5rem;
 }
 
 footer {
@@ -46,19 +49,7 @@ footer {
   border-top: 1px solid #eee;
 }
 
-.logo {
-  height: 2.5rem;
-  vertical-align: middle;
-  margin-right: 0.5rem;
-}
-
-.subtitle {
-  color: #666;
-  margin-top: -0.8rem;
-  font-size: 0.9rem;
-}
-
-/* ===== SEARCH & FILTERS ===== */
+/* ===== SEARCH & CONTROLS ===== */
 .search-container {
   position: relative;
   max-width: 600px;
@@ -71,13 +62,6 @@ footer {
   border: 2px solid #ddd;
   border-radius: 6px;
   font-size: 1rem;
-}
-
-#search:focus,
-.filter-btn:focus,
-#sort-newest:focus {
-  outline: 2px solid var(--g2-blue);
-  outline-offset: 2px;
 }
 
 .clear-search {
@@ -99,53 +83,55 @@ footer {
 .toolbar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   margin-bottom: 1.5rem;
-  flex-wrap: wrap;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.filter-btn {
+.filters, .sorts {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn, .sort-btn {
   padding: 0.5rem 1rem;
-  background: var(--g2-blue);
-  color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
+  transition: var(--transition);
+}
+
+.filter-btn {
+  background: var(--g2-blue);
+  color: white;
 }
 
 .filter-btn.active {
   background: var(--g2-black);
-  color: var(--g2-blue);
 }
 
-#sort-newest {
-  padding: 0.5rem 1rem;
-  background: var(--g2-black);
-  color: var(--g2-blue);
-  border-color: var(--g2-black);
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: var(--transition);
-  margin-left: auto; /* Pushes it to the right in toolbar */
-  -webkit-autofill: none !important;
-  background-image: none !important;
+.sort-btn {
+  background: #eee;
 }
 
-#sort-newest.active {
+.sort-btn.active {
   background: var(--g2-black);
   color: var(--g2-orange);
-  border-color: var(--g2-black);
 }
 
-/* ===== YOYO CARDS ===== */
+/* ===== YOYO GRID ===== */
 .yoyo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.yoyo-grid.visible {
+  opacity: 1;
 }
 
 .yoyo-card {
@@ -153,49 +139,24 @@ footer {
   border-radius: 10px;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
-  transition: var(--transition);
-  will-change: transform;
-  position: relative;
 }
 
 .yoyo-image {
-  /* Layout & Dimensions */
   width: 100%;
   height: 250px;
-  position: relative;
-
-  /* Image Handling */
   object-fit: cover;
-  padding: 0;
-
-  /* Background & Effects */
-  background: #f9f9f9; /* Fallback */
   background: linear-gradient(135deg, #f5f5f5 25%, #e0e0e0 50%, #f5f5f5 75%);
   background-size: 400% 400%;
-  animation: shimmer 1.5s infinite;
-
-  /* Borders */
-  border-bottom: 1px solid #eee;
-
-  /* Transition */
-  transition: opacity 0.3s ease;
 }
 
 .yoyo-image.loaded {
-  animation: none;
-  background: #f9f9f9;
-}
-
-@keyframes shimmer {
-  0% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  background: none;
 }
 
 .yoyo-info {
   padding: 1.25rem;
 }
 
-/* Card Header */
 .yoyo-header {
   display: flex;
   align-items: baseline;
@@ -208,40 +169,43 @@ footer {
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
-  color: var(--g2-black);
 }
 
 .yoyo-colorway {
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1rem;
   color: var(--g2-blue);
-  margin: 0;
 }
 
-/* Type Tags */
 .yoyo-types {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  display: flex;
-  gap: 0.5rem;
 }
 
-.yoyo-type {
+.yoyo-type-badge {
   font-size: 0.65rem;
   padding: 0.25rem 0.6rem;
   background: rgba(0,0,0,0.7);
   color: white;
   border-radius: 1rem;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  font-weight: 500;
+}
+
+.yoyo-meta {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.yoyo-meta p {
+  margin: 0.3rem 0;
 }
 
 /* ===== LOADING STATES ===== */
 .loading {
   text-align: center;
   padding: 2rem;
+  display: none;
 }
 
 .loading-spinner {
@@ -259,125 +223,18 @@ footer {
   to { transform: rotate(360deg); }
 }
 
-/* ===== SPECS SECTION ===== */
-.specs-container {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease-out;
-  background: #f8f8f8;
-  border-radius: 0 0 6px 6px;
-}
-
-.specs-container.expanded {
-  max-height: 1000px;
-  padding: 15px;
-}
-
-.specs-toggle {
-  background: var(--g2-black);
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  margin-top: 10px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: var(--transition);
-  width: 100%;
-}
-
-.specs-toggle:hover {
-  background: var(--g2-blue);
-}
-
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+  }
+
+  .filters, .sorts {
+    width: 100%;
+    justify-content: center;
+  }
+
   .yoyo-grid {
     grid-template-columns: 1fr;
   }
-
-  .yoyo-image {
-    height: 200px;
-  }
-
-  .toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filters {
-    justify-content: center;
-  }
 }
-
-/* Add these to your existing CSS */
-.yoyo-meta {
-  margin-top: 0.75rem;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.yoyo-meta p {
-  margin: 0.3rem 0;
-}
-
-.yoyo-description {
-  margin-top: 1rem;
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.specs-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-}
-
-.spec-item {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-}
-
-.no-results, .error {
-  text-align: center;
-  grid-column: 1 / -1;
-  padding: 2rem;
-  color: #666;
-}
-
-.error {
-  color: #d32f2f;
-}
-
-.yoyo-type-badge {
-  font-size: 0.65rem;
-  padding: 0.25rem 0.6rem;
-  background: rgba(0,0,0,0.7);
-  color: white;
-  border-radius: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  font-weight: 500;
-}
-
-.yoyo-grid {
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.yoyo-grid.visible {
-  opacity: 1;
-}
-
-.specs-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.specs-container.expanded + .specs-toggle::before {
-  transform: rotate(180deg);

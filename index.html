@@ -2,27 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>G² YoYodex - Track G2 Yoyos and Colorways</title>
-  <link rel="icon" href="assets/favicon.ico">
-  <meta name="description" content="Track new G² yoyo releases, models, and specs">
   <link rel="stylesheet" href="styles.css">
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-E9G3FZFQCX"></script>
-
   <script>
-    // BLOCK YOURSELF FROM ANALYTICS IMMEDIATELY
     if (window.location.hostname === "bgibson01.github.io") {
       window['ga-disable-G-E9G3FZFQCX'] = true;
     }
-  </script>
-
-  <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
-    // Configure GA4 to work on GitHub Pages
     gtag('config', 'G-E9G3FZFQCX', {
       cookie_flags: 'SameSite=None;Secure',
       cookie_domain: 'auto'
@@ -43,25 +34,33 @@
     </div>
 
     <div class="toolbar">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="Weekly Drop">Weekly Drop</button>
-      <button class="filter-btn" data-filter="Patreon Monthly">Patreon Monthly</button>
-      <button class="filter-btn" data-filter="Lottery">Lottery</button>
-      <button class="filter-btn" id="sort-newest" autocomplete="off">Sort by Newest</button>
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="weekly-drop">Weekly Drop</button>
+        <button class="filter-btn" data-filter="patreon">Patreon</button>
+        <button class="filter-btn" data-filter="lottery">Lottery</button>
+      </div>
+      <div class="sorts">
+        <button class="sort-btn active" data-sort="newest">Newest</button>
+        <button class="sort-btn" data-sort="oldest">Oldest</button>
+        <button class="sort-btn" data-sort="name-asc">A-Z</button>
+        <button class="sort-btn" data-sort="name-desc">Z-A</button>
+      </div>
     </div>
 
-    <div id="loading-indicator" class="loading" style="display:none;">
+    <div id="loading-indicator" class="loading">
       <div class="loading-spinner"></div>
       <p>Loading yoyo database...</p>
     </div>
 
-<div id="yoyo-container" class="yoyo-grid"></div>
+    <div id="yoyo-container" class="yoyo-grid"></div>
   </main>
+
+  <footer>
+    <p>This is an independent community project. All yoyo data is collected from public sources.<br>
+      <a href="https://www.gsquaredyoyos.com" target="_blank">Visit the official site</a> for authorized releases.</p>
+  </footer>
 
   <script src="app.js"></script>
 </body>
-<footer>
-  <p>This is an independent community project. All yoyo data is collected from public sources.<br>
-    <a href="https://www.gsquaredyoyos.com" target="_blank">Visit the official site</a> for authorized releases.</p>
-</footer>
 </html>
