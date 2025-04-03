@@ -149,6 +149,7 @@ function renderSpecsSection(yoyo) {
   `;
 }
 
+// Function to render yoyo cards
 function renderYoyos(yoyos) {
   if (!yoyos?.length) {
     elements.container.innerHTML = '<p class="no-results">No yoyos found matching your criteria.</p>';
@@ -158,6 +159,7 @@ function renderYoyos(yoyos) {
 
   elements.container.innerHTML = yoyos.map(yoyo => `
     <div class="yoyo-card" data-id="${yoyo.id}">
+      ${yoyo.type ? `<div class="yoyo-type-badge">${yoyo.type}</div>` : ''}
       <img src="${CONFIG.placeholderImage}"
            data-src="${yoyo.image_url || CONFIG.placeholderImage}"
            alt="${yoyo.model} ${yoyo.colorway}"
@@ -169,11 +171,6 @@ function renderYoyos(yoyos) {
           <h2 class="yoyo-model">${yoyo.model}</h2>
           <span class="yoyo-colorway">${yoyo.colorway}</span>
         </div>
-        ${yoyo.type ? `
-          <div class="yoyo-types">
-            <span class="yoyo-type-badge">${yoyo.type}</span>
-          </div>
-        ` : ''}
         <div class="yoyo-meta">
           ${yoyo.release_date ? `
             <p data-release-date="${new Date(yoyo.release_date).toISOString()}">
@@ -192,6 +189,11 @@ function renderYoyos(yoyos) {
   elements.container.classList.add('visible');
   lazyLoadImages();
 }
+
+// Setting up event listeners for sort buttons
+elements.sortButtons.forEach(button => {
+  button.addEventListener('click', () => sortYoyos(button.dataset.sort));
+});
 
 function lazyLoadImages() {
   const observer = new IntersectionObserver((entries) => {
