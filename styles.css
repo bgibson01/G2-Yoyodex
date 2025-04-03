@@ -189,32 +189,36 @@ footer {
   position: absolute;
   top: 1rem;
   right: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* This ensures badges stack from the right */
+  gap: 0.5rem; /* Adds consistent spacing between badges */
 }
 
 .yoyo-type-badge {
   position: relative;
   display: inline-block;
-  padding: 0.35rem 0.9rem;
-  border-radius: 1em; /* More pill-like shape */
-  font-size: 0.8rem;
+  padding: 0.4rem 1rem;
+  border-radius: 1.5rem; /* Slightly more rounded */
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: var(--g2-black);
-  color: var(--text-light);
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition);
+  background: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3); /* More subtle border */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
   cursor: default;
-  margin: 0.25rem;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px) saturate(150%);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
 
-  /* Gradient overlay */
-  background-image: linear-gradient(
-    to bottom right,
-    rgba(255, 255, 255, 0.1),
-    rgba(0, 0, 0, 0.1)
-  );
+/* Optional hover effect */
+.yoyo-type-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.8);
 }
 
 .yoyo-meta {
