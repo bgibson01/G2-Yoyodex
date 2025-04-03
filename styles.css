@@ -192,11 +192,29 @@ footer {
 }
 
 .yoyo-type-badge {
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
+  position: relative;
+  display: inline-block;
+  padding: 0.35rem 0.9rem;
+  border-radius: 1em; /* More pill-like shape */
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--g2-black);
+  color: var(--text-light);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  cursor: default;
+  margin: 0.25rem;
+  backdrop-filter: blur(2px);
+
+  /* Gradient overlay */
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.1),
+    rgba(0, 0, 0, 0.1)
+  );
 }
 
 .yoyo-meta {
