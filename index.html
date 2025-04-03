@@ -42,12 +42,20 @@
       <button class="clear-search" aria-label="Clear search">✕</button>
     </div>
 
-    <div class="toolbar">
+    <div class="filter-controls">
       <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="Weekly Drop">Weekly Drop</button>
-      <button class="filter-btn" data-filter="Patreon Monthly">Patreon Monthly</button>
-      <button class="filter-btn" data-filter="Lottery">Lottery</button>
-      <button class="filter-btn" id="sort-newest" autocomplete="off">Sort by Newest</button>
+      <button class="filter-btn" data-filter="weekly-drop">Weekly Drops</button>
+      <button class="filter-btn" data-filter="patreon">Patreon</button>
+      <button class="filter-btn" data-filter="discord">Discord</button>
+      <button class="filter-btn" data-filter="lottery">Lottery</button>
+      <button class="filter-btn" data-filter="misc">Misc</button>
+    </div>
+
+    <div class="sort-controls">
+      <button class="sort-btn active" data-sort="newest">Newest First</button>
+      <button class="sort-btn" data-sort="oldest">Oldest First</button>
+      <button class="sort-btn" data-sort="name-asc">A-Z</button>
+      <button class="sort-btn" data-sort="name-desc">Z-A</button>
     </div>
 
     <div id="loading-indicator" class="loading" style="display:none;">

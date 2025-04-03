@@ -18,89 +18,110 @@ const elements = {
 };
 
 // ======================
+// SORTING SYSTEM
+// ======================
+const SORT_METHODS = {
+  newest: (a, b) => new Date(b.release_date || 0) - new Date(a.release_date || 0),
+  oldest: (a, b) => new Date(a.release_date || 0) - new Date(b.release_date || 0),
+  'name-asc': (a, b) => a.model.localeCompare(b.model),
+  'name-desc': (a, b) => b.model.localeCompare(a.model)
+};
+
+function sortYoyos(method) {
+  if (!SORT_METHODS[method]) return;
+
+  // Update state
+  APP_STATE.currentSort = method;
+
+  // Apply to currently filtered yoyos
+  APP_STATE.filteredYoyos.sort(SORT_METHODS[method]);
+
+  // Update UI
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.sort === method);
+
+    // Update button text for newest/oldest
+    if (btn.dataset.sort === 'newest') {
+      btn.textContent = method === 'newest' ? 'Newest First' : 'Oldest First';
+    }
+  });
+
+  renderYoyos(APP_STATE.filteredYoyos);
+}
+
+// ======================
 // UPDATED EVENT LISTENERS (ONLY MODIFIED THE SORT BUTTON)
 // ======================
 function setupEventListeners() {
-  // Filter buttons
+  let searchTimeout;
+
+  // ======================
+  // 1. SEARCH HANDLER
+  // ======================
+  elements.search.addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      APP_STATE.searchTerm = e.target.value.trim().toLowerCase();
+      filterYoyos(APP_STATE.currentFilter); // Triggers applySearch()
+    }, 300);
+  });
+
+  // ======================
+  // 2. FILTER BUTTONS
+  // ======================
   elements.filterButtons.forEach(button => {
     button.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      // Update UI
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
       button.classList.add('active');
+
+      // Process filter
       filterYoyos(button.dataset.filter);
     });
   });
 
-  // Sort button
-  document.getElementById('sort-newest').addEventListener('click', function() {
-    this.classList.toggle('active');
-    const sortNewestFirst = this.classList.contains('active');
-
-    const container = document.querySelector('.yoyo-grid');
-    const cards = Array.from(container.querySelectorAll('.yoyo-card'));
-
-    // Enhanced date parser with debugging
-    const getDate = (card) => {
-      const dateElement = card.querySelector('[data-release-date]');
-      if (!dateElement) {
-        console.warn('No date element found for card:', card);
-        return new Date(0);
-      }
-
-      const rawText = dateElement.textContent;
-      const dateText = rawText.replace('Released:', '').trim();
-
-      if (!dateText) {
-        console.warn('Empty date text for card:', card);
-        return new Date(0);
-      }
-
-      const parsedDate = new Date(dateText);
-
-      if (isNaN(parsedDate)) {
-        console.warn('Invalid date parsed:', dateText, 'from card:', card);
-        return new Date(0);
-      }
-
-      return parsedDate;
-    };
-
-    cards.sort((a, b) => {
-      const dateA = getDate(a);
-      const dateB = getDate(b);
-      return sortNewestFirst ? dateB - dateA : dateA - dateB;
+  // ======================
+  // 3. SORT BUTTONS (REPLACES YOUR CURRENT SORT)
+  // ======================
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      sortYoyos(btn.dataset.sort);
     });
-
-    // Visual debugging
-    console.log('Sorted dates:',
-      cards.map(card => ({
-        text: card.querySelector('[data-release-date]')?.textContent,
-        date: getDate(card).toISOString()
-      }))
-    );
-
-    // Update DOM
-    cards.forEach(card => container.appendChild(card));
-    this.textContent = sortNewestFirst ? 'Sort by Oldest' : 'Sort by Newest';
   });
-
 }
 
 function filterYoyos(type) {
-  const cards = document.querySelectorAll('.yoyo-card');
-  cards.forEach(card => {
-    const cardType = card.querySelector('.yoyo-type')?.textContent;
-    if (type === 'all' || cardType?.includes(type)) {
-      card.style.display = 'block';
-    } else {
-      card.style.display = 'none';
-    }
-  });
+  APP_STATE.currentFilter = type;
+  APP_STATE.filteredYoyos = type === 'all'
+    ? [...APP_STATE.yoyos]
+    : APP_STATE.yoyos.filter(yoyo => {
+        const yoyoType = yoyo.type?.toLowerCase() || '';
+        return type === 'patreon'
+          ? yoyoType.includes('patreon')
+          : yoyoType === type.toLowerCase();
+    });
+  applySearch(); // Handles search + sort together
+  sortYoyos(APP_STATE.currentSort);
+}
 
-  // Reapply sort if active
-  if (document.getElementById('sort-newest').classList.contains('active')) {
-    document.getElementById('sort-newest').click();
-    document.getElementById('sort-newest').click();
+// ======================
+// SEARCH FUNCTIONALITY
+// ======================
+function applySearch() {
+  if (!APP_STATE.searchTerm) {
+    renderYoyos(APP_STATE.filteredYoyos);
+    return;
   }
+
+  const results = APP_STATE.filteredYoyos.filter(yoyo =>
+    yoyo.model.toLowerCase().includes(APP_STATE.searchTerm) ||
+    yoyo.colorway.toLowerCase().includes(APP_STATE.searchTerm) ||
+    (yoyo.description && yoyo.description.toLowerCase().includes(APP_STATE.searchTerm))
+  );
+
+  renderYoyos(results);
 }
 
 function createLoadingIndicator() {
@@ -119,8 +140,13 @@ function createLoadingIndicator() {
 // ======================
 // 3. APPLICATION STATE
 // ======================
-let allYoyos = [];
-let filteredYoyos = [];
+const APP_STATE = {
+  yoyos: [],
+  filteredYoyos: [],
+  currentSort: 'newest',
+  currentFilter: 'all',
+  searchTerm: ''
+};
 
 // ======================
 // 4. CORE UTILITY FUNCTIONS (Define these first)
@@ -298,7 +324,8 @@ function renderYoyos(yoyos) {
         ` : ''}
 
         <div class="yoyo-meta">
-          ${yoyo.release_date ? `<p data-release-date="${new Date(yoyo.release_date).toISOString()}"><strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
+          ${yoyo.release_date ? `<p data-release-date="${new Date(yoyo.release_date).toISOString()}">
+            <strong>Released:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
           ${yoyo.price ? `<p><strong>Price:</strong> $${yoyo.price}</p>` : ''}
           ${yoyo.quantity ? `<p><strong>Quantity:</strong> ${yoyo.quantity}</p>` : ''}
           ${yoyo.glitch_quantity ? `<p><strong>Glitches:</strong> ${yoyo.glitch_quantity}</p>` : ''}
