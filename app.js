@@ -126,6 +126,15 @@ function renderSpecItem(label, value, unit = '') {
   ` : '';
 }
 
+// Define the toggleSpecs function
+function toggleSpecs(button) {
+  const specsContainer = button.nextElementSibling;
+  if (specsContainer) {
+    const isExpanded = specsContainer.classList.toggle('expanded');
+    button.innerHTML = isExpanded ? '&#9660; Hide Technical Specifications' : '&#9654; Show Technical Specifications';
+  }
+}
+
 function renderSpecsSection(yoyo) {
   const hasSpecs = yoyo.diameter || yoyo.width || yoyo.composition;
   if (!hasSpecs) return '';
