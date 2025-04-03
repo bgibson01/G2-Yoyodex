@@ -235,18 +235,18 @@ footer {
 }
 
 .specs-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
+  display: block; /* Ensure single column layout */
+  gap: 0.25rem; /* Reduced gap */
 }
 
 .spec-item {
   display: flex;
   justify-content: space-between;
-  padding: 0.5rem;
+  padding: 0.25rem 0.5rem; /* Reduced padding */
   background: #f9f9f9;
   border-radius: 4px;
   box-shadow: var(--shadow-sm);
+  margin-bottom: 0.25rem; /* Added margin to separate items slightly */
 }
 
 /* ===== ERROR STATES ===== */
