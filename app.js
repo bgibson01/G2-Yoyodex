@@ -27,67 +27,42 @@ const elements = {
 };
 
 // ======================
-// DATA PROCESSING FUNCTIONS
+// 3. UTILITY FUNCTIONS
 // ======================
 async function fetchData(url) {
   try {
     const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
-    return Array.isArray(data) ? data : []; // Ensure always returns array
+    return Array.isArray(data) ? data : [];
   } catch (error) {
-    console.error('Failed to fetch data:', error);
-    return []; // Return empty array instead of failing
+    console.error('Fetch failed:', error);
+    return [];
   }
 }
 
 function formatDate(dateString) {
   if (!dateString) return 'Unknown date';
-
   try {
-    // Try parsing as mm/dd/yy (Google Sheets US format)
-    const parts = dateString.split('/');
-    if (parts.length === 3) {
-      const year = parts[2].length === 2 ? `20${parts[2]}` : parts[2];
-      const date = new Date(`${year}-${parts[0]}-${parts[1]}`);
-      if (!isNaN(date)) {
-        return date.toLocaleDateString(undefined, {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
-        });
-      }
-    }
-
-    // Fallback to default parsing
     const date = new Date(dateString);
-    if (!isNaN(date)) {
-      return date.toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    }
+    return isNaN(date) ? dateString : date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   } catch (e) {
-    console.warn('Date parsing error:', e);
+    return dateString;
   }
-
-  return dateString; // Return original if parsing fails
 }
 
 function mergeSpecs(yoyos, specs) {
-  // Handle null/undefined inputs
   if (!Array.isArray(yoyos)) yoyos = [];
   if (!Array.isArray(specs)) specs = [];
 
-  // Create a map for quick spec lookup
   const specsMap = new Map();
   specs.forEach(spec => {
     if (spec?.model) {
-      const modelKey = spec.model.toString().trim().toLowerCase();
-      specsMap.set(modelKey, {
+      specsMap.set(spec.model.toLowerCase().trim(), {
         diameter: spec.diameter,
         width: spec.width,
         weight: spec.weight,
@@ -100,43 +75,30 @@ function mergeSpecs(yoyos, specs) {
     }
   });
 
-  // Merge specs into yoyos
   return yoyos.map(yoyo => {
-    if (!yoyo || !yoyo.model) return null;
-
-    const modelKey = yoyo.model.toString().trim().toLowerCase();
-    const colorway = yoyo.colorway?.toString().trim().toLowerCase() || 'unknown';
-    const specsData = specsMap.get(modelKey) || {};
-
+    if (!yoyo?.model) return null;
+    const modelKey = yoyo.model.toLowerCase().trim();
     return {
       ...yoyo,
-      ...specsData,
-      model: yoyo.model.toString().trim(), // Preserve original casing
-      colorway: yoyo.colorway?.toString().trim() || '', // Preserve original casing
-      id: `${modelKey}-${colorway}-${Math.random().toString(36).substr(2, 9)}` // Unique ID
+      ...(specsMap.get(modelKey) || {}),
+      model: yoyo.model.trim(),
+      colorway: yoyo.colorway?.trim() || '',
+      id: `${modelKey}-${yoyo.colorway?.toLowerCase().trim() || 'default'}-${Date.now()}`
     };
-  }).filter(Boolean); // Remove any null entries
+  }).filter(Boolean);
 }
 
 // ======================
-// 2.5 UI UTILITY FUNCTIONS
+// 4. UI FUNCTIONS
 // ======================
 function showLoading() {
-  if (elements.loadingIndicator) {
-    elements.loadingIndicator.style.display = 'block';
-  }
-  if (elements.container) {
-    elements.container.style.display = 'none';
-  }
+  if (elements.loadingIndicator) elements.loadingIndicator.style.display = 'block';
+  if (elements.container) elements.container.style.display = 'none';
 }
 
 function hideLoading() {
-  if (elements.loadingIndicator) {
-    elements.loadingIndicator.style.display = 'none';
-  }
-  if (elements.container) {
-    elements.container.style.display = 'grid';
-  }
+  if (elements.loadingIndicator) elements.loadingIndicator.style.display = 'none';
+  if (elements.container) elements.container.style.display = 'grid';
 }
 
 function showError(error) {
@@ -149,74 +111,44 @@ function showError(error) {
         <button onclick="window.location.reload()">Retry</button>
       </div>
     `;
-    elements.container.style.display = 'block';
   }
 }
 
 // ======================
-// 3. SORTING SYSTEM
+// 5. RENDERING FUNCTIONS
 // ======================
-const SORT_METHODS = {
-  newest: (a, b) => new Date(b.release_date || 0) - new Date(a.release_date || 0),
-  oldest: (a, b) => new Date(a.release_date || 0) - new Date(b.release_date || 0),
-  'name-asc': (a, b) => a.model.localeCompare(b.model),
-  'name-desc': (a, b) => b.model.localeCompare(a.model)
-};
-
-function sortYoyos(method) {
-  if (!SORT_METHODS[method]) return;
-
-  APP_STATE.currentSort = method;
-  APP_STATE.filteredYoyos.sort(SORT_METHODS[method]);
-
-  // Update UI
-  elements.sortButtons.forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.sort === method);
-  });
-
-  renderYoyos(APP_STATE.filteredYoyos);
+function renderSpecItem(label, value, unit = '') {
+  return value ? `
+    <div class="spec-item">
+      <span>${label}:</span>
+      <span>${value}${unit}</span>
+    </div>
+  ` : '';
 }
 
-// ======================
-// 4. FILTERING SYSTEM
-// ======================
-function filterYoyos(type) {
-  APP_STATE.currentFilter = type;
+function renderSpecsSection(yoyo) {
+  const hasSpecs = yoyo.diameter || yoyo.width || yoyo.composition;
+  if (!hasSpecs) return '';
 
-  APP_STATE.filteredYoyos = type === 'all'
-    ? [...APP_STATE.yoyos]
-    : APP_STATE.yoyos.filter(yoyo => {
-        const yoyoType = yoyo.type?.toLowerCase() || '';
-        return type === 'patreon'
-          ? yoyoType.includes('patreon')
-          : yoyoType === type.toLowerCase();
-      });
-
-  applySearch();
-  sortYoyos(APP_STATE.currentSort);
+  return `
+    <button class="specs-toggle" onclick="toggleSpecs(this)">
+      ▶ Show Technical Specifications
+    </button>
+    <div class="specs-container">
+      <div class="specs-grid">
+        ${renderSpecItem('Diameter', yoyo.diameter, 'mm')}
+        ${renderSpecItem('Width', yoyo.width, 'mm')}
+        ${renderSpecItem('Weight', yoyo.weight, 'g')}
+        ${renderSpecItem('Material', yoyo.composition)}
+        ${renderSpecItem('Response', yoyo.response)}
+        ${renderSpecItem('Bearing', yoyo.bearing)}
+        ${renderSpecItem('Axle', yoyo.axle)}
+        ${renderSpecItem('Finish', yoyo.finish)}
+      </div>
+    </div>
+  `;
 }
 
-// ======================
-// 5. SEARCH FUNCTIONALITY
-// ======================
-function applySearch() {
-  if (!APP_STATE.searchTerm) {
-    renderYoyos(APP_STATE.filteredYoyos);
-    return;
-  }
-
-  const results = APP_STATE.filteredYoyos.filter(yoyo =>
-    yoyo.model.toLowerCase().includes(APP_STATE.searchTerm) ||
-    yoyo.colorway.toLowerCase().includes(APP_STATE.searchTerm) ||
-    (yoyo.description && yoyo.description.toLowerCase().includes(APP_STATE.searchTerm))
-  );
-
-  renderYoyos(results);
-}
-
-// ======================
-// 6. RENDERING SYSTEM
-// ======================
 function renderYoyos(yoyos) {
   if (!yoyos?.length) {
     elements.container.innerHTML = '<p class="no-results">No yoyos found matching your criteria.</p>';
@@ -224,22 +156,14 @@ function renderYoyos(yoyos) {
     return;
   }
 
-  const fragment = document.createDocumentFragment();
-
-  yoyos.forEach(yoyo => {
-    const card = document.createElement('div');
-    card.className = 'yoyo-card';
-    card.dataset.id = yoyo.id;
-    card.dataset.type = yoyo.type?.toLowerCase() || '';
-    card.dataset.date = yoyo.release_date;
-    card.dataset.name = yoyo.model.toLowerCase();
-
-    card.innerHTML = `
+  elements.container.innerHTML = yoyos.map(yoyo => `
+    <div class="yoyo-card" data-id="${yoyo.id}">
       <img src="${CONFIG.placeholderImage}"
            data-src="${yoyo.image_url || CONFIG.placeholderImage}"
            alt="${yoyo.model} ${yoyo.colorway}"
            class="yoyo-image"
-           loading="lazy">
+           loading="lazy"
+           onerror="this.src='${CONFIG.placeholderImage}'">
       <div class="yoyo-info">
         <div class="yoyo-header">
           <h2 class="yoyo-model">${yoyo.model}</h2>
@@ -262,13 +186,9 @@ function renderYoyos(yoyos) {
         </div>
         ${renderSpecsSection(yoyo)}
       </div>
-    `;
+    </div>
+  `).join('');
 
-    fragment.appendChild(card);
-  });
-
-  elements.container.innerHTML = '';
-  elements.container.appendChild(fragment);
   elements.container.classList.add('visible');
   lazyLoadImages();
 }
@@ -279,15 +199,66 @@ function lazyLoadImages() {
       if (entry.isIntersecting) {
         const img = entry.target;
         img.src = img.dataset.src;
-        img.onload = () => img.classList.add('loaded');
         observer.unobserve(img);
       }
     });
-  }, { rootMargin: '200px' });
-
-  document.querySelectorAll('.yoyo-image').forEach(img => {
-    observer.observe(img);
   });
+
+  document.querySelectorAll('.yoyo-image').forEach(img => observer.observe(img));
+}
+
+// ======================
+// 6. CORE FUNCTIONALITY
+// ======================
+const SORT_METHODS = {
+  newest: (a, b) => new Date(b.release_date || 0) - new Date(a.release_date || 0),
+  oldest: (a, b) => new Date(a.release_date || 0) - new Date(b.release_date || 0),
+  'name-asc': (a, b) => a.model.localeCompare(b.model),
+  'name-desc': (a, b) => b.model.localeCompare(a.model)
+};
+
+function sortYoyos(method) {
+  if (!SORT_METHODS[method]) return;
+
+  APP_STATE.currentSort = method;
+  APP_STATE.filteredYoyos.sort(SORT_METHODS[method]);
+
+  elements.sortButtons.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.sort === method);
+  });
+
+  renderYoyos(APP_STATE.filteredYoyos);
+}
+
+function filterYoyos(type) {
+  APP_STATE.currentFilter = type;
+
+  APP_STATE.filteredYoyos = type === 'all'
+    ? [...APP_STATE.yoyos]
+    : APP_STATE.yoyos.filter(yoyo => {
+        const yoyoType = yoyo.type?.toLowerCase() || '';
+        return type === 'patreon'
+          ? yoyoType.includes('patreon')
+          : yoyoType === type.toLowerCase();
+      });
+
+  applySearch();
+  sortYoyos(APP_STATE.currentSort);
+}
+
+function applySearch() {
+  if (!APP_STATE.searchTerm) {
+    renderYoyos(APP_STATE.filteredYoyos);
+    return;
+  }
+
+  const results = APP_STATE.filteredYoyos.filter(yoyo =>
+    yoyo.model.toLowerCase().includes(APP_STATE.searchTerm) ||
+    yoyo.colorway.toLowerCase().includes(APP_STATE.searchTerm) ||
+    (yoyo.description && yoyo.description.toLowerCase().includes(APP_STATE.searchTerm))
+  );
+
+  renderYoyos(results);
 }
 
 // ======================
@@ -296,7 +267,6 @@ function lazyLoadImages() {
 function setupEventListeners() {
   let searchTimeout;
 
-  // Search
   elements.search.addEventListener('input', (e) => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
@@ -305,7 +275,6 @@ function setupEventListeners() {
     }, 300);
   });
 
-  // Filter buttons
   elements.filterButtons.forEach(button => {
     button.addEventListener('click', () => {
       elements.filterButtons.forEach(btn => btn.classList.remove('active'));
@@ -314,12 +283,10 @@ function setupEventListeners() {
     });
   });
 
-  // Sort buttons
   elements.sortButtons.forEach(button => {
     button.addEventListener('click', () => sortYoyos(button.dataset.sort));
   });
 
-  // Clear search
   document.querySelector('.clear-search')?.addEventListener('click', () => {
     elements.search.value = '';
     APP_STATE.searchTerm = '';
@@ -338,27 +305,27 @@ async function init() {
       fetchData(CONFIG.specsDataUrl)
     ]);
 
-    // Validate data before merging
-    if (!Array.isArray(yoyos) || !Array.isArray(specs)) {
-      throw new Error('Invalid data format received from server');
-    }
-
     APP_STATE.yoyos = mergeSpecs(yoyos, specs);
-
-    if (!APP_STATE.yoyos.length) {
-      console.warn('No valid yoyo data after merging');
-    }
-
     filterYoyos('all');
     setupEventListeners();
 
   } catch (error) {
-    console.error('Initialization error:', error);
     showError(error);
   } finally {
     hideLoading();
   }
 }
+
+// ======================
+// 9. GLOBAL FUNCTIONS
+// ======================
+window.toggleSpecs = function(element) {
+  const container = element.nextElementSibling;
+  container.classList.toggle('expanded');
+  element.textContent = container.classList.contains('expanded')
+    ? '▼ Hide Technical Specifications'
+    : '▶ Show Technical Specifications';
+};
 
 // Start the app
 document.addEventListener('DOMContentLoaded', init);
