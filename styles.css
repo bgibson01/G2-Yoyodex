@@ -339,7 +339,7 @@ footer {
 /* Favorite Button */
 .favorite-btn {
   position: absolute;
-  right: 0rem;
+  right: 0.3rem;
   background: none;
   border: none;
   font-size: 1.5rem;
