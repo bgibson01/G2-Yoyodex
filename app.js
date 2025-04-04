@@ -286,9 +286,8 @@ function filterYoyos(type) {
     ? [...APP_STATE.yoyos]
     : APP_STATE.yoyos.filter(yoyo => {
         const yoyoType = yoyo.type?.toLowerCase() || '';
-        return type === 'patreon'
-          ? yoyoType.includes('patreon')
-          : yoyoType === type.toLowerCase();
+        const typeList = yoyoType.split(',').map(t => t.trim()); // Split multiple types into an array
+        return typeList.includes(type.toLowerCase()); // Check if the selected type exists in the array
       });
 
   applySearch();
