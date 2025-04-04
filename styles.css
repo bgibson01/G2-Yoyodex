@@ -320,6 +320,36 @@ footer {
   to { transform: rotate(360deg); }
 }
 
+/* Load More Button */
+.load-more-btn {
+  display: block;
+  margin: 2rem auto; /* Center the button */
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: var(--g2-blue);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.load-more-btn:hover {
+  background: var(--g2-blue-dark); /* Darker blue on hover */
+}
+
+.load-more-btn:active {
+  transform: scale(0.98); /* Slightly shrink on click */
+}
+
+.load-more-btn:disabled {
+  background: #ccc; /* Gray background for disabled state */
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .toolbar {
