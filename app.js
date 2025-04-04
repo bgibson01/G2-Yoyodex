@@ -369,9 +369,16 @@ function showYoyoDetails(yoyo) {
   const modal = document.getElementById('yoyo-modal');
   const modalBody = document.getElementById('modal-body');
 
-  // Populate the modal with yoyo details
+  // Combine the main image and additional images
+  const images = [yoyo.image_url || CONFIG.placeholderImage, ...(yoyo.additional_images || [])];
+
+  // Populate the modal with yoyo details and image carousel
   modalBody.innerHTML = `
-    <img src="${yoyo.image_url || CONFIG.placeholderImage}" alt="${yoyo.model} ${yoyo.colorway}" class="modal-image">
+    <div class="image-carousel">
+      <button class="carousel-arrow left-arrow" onclick="navigateCarousel(-1)">&#9664;</button>
+      <img src="${images[0]}" alt="${yoyo.model} ${yoyo.colorway}" class="modal-image" id="carousel-image">
+      <button class="carousel-arrow right-arrow" onclick="navigateCarousel(1)">&#9654;</button>
+    </div>
     <h2>${yoyo.model}</h2>
     <p><strong>Colorway:</strong> ${yoyo.colorway}</p>
     ${yoyo.release_date ? `<p><strong>Release Date:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
@@ -394,8 +401,26 @@ function showYoyoDetails(yoyo) {
     </div>
   `;
 
+  // Store the images in the modal for navigation
+  modal.dataset.images = JSON.stringify(images);
+  modal.dataset.currentIndex = 0;
+
   // Show the modal
   modal.style.display = 'flex';
+}
+
+// Function to navigate the carousel
+function navigateCarousel(direction) {
+  const modal = document.getElementById('yoyo-modal');
+  const images = JSON.parse(modal.dataset.images);
+  let currentIndex = parseInt(modal.dataset.currentIndex, 10);
+
+  // Calculate the new index
+  currentIndex = (currentIndex + direction + images.length) % images.length;
+
+  // Update the image and current index
+  document.getElementById('carousel-image').src = images[currentIndex];
+  modal.dataset.currentIndex = currentIndex;
 }
 
 // Function to close the modal

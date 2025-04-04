@@ -322,12 +322,47 @@ footer {
   margin-top: 1rem;
 }
 
+/* Image Carousel */
+.image-carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  font-size: 2rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 50%;
+  transition: background 0.3s ease;
+}
+
+.carousel-arrow:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.left-arrow {
+  left: 1rem;
+}
+
+.right-arrow {
+  right: 1rem;
+}
+
 .modal-image {
   max-width: 100%;
   height: auto;
   border-radius: 8px;
-  margin-top: 1rem;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Add a subtle shadow for emphasis */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 /* ===== ERROR STATES ===== */
