@@ -339,12 +339,11 @@ footer {
 /* Favorite Button */
 .favorite-btn {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  right: 0rem;
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: #ccc;
+  color: #FF9900;
   cursor: pointer;
   transition: color 0.3s ease;
   z-index: 10;
