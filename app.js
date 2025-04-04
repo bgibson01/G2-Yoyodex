@@ -228,10 +228,6 @@ function renderYoyos(yoyos, append = false) {
 
   const yoyoCards = yoyosToRender.map(yoyo => `
     <div class="yoyo-card" data-id="${yoyo.id}">
-      <button class="favorite-btn ${favorites.has(yoyo.id) ? 'favorited' : ''}" 
-              onclick="toggleFavorite('${yoyo.id}')">
-        ${favorites.has(yoyo.id) ? '★' : '☆'}
-      </button>
       ${yoyo.type ? `<div class="yoyo-type-badge">${yoyo.type.replace(/,/g, ' ')}</div>` : ''}
       <img src="${CONFIG.placeholderImage}"
            data-src="${yoyo.image_url || CONFIG.placeholderImage}"
@@ -243,6 +239,10 @@ function renderYoyos(yoyos, append = false) {
         <div class="yoyo-header">
           <h2 class="yoyo-model">${yoyo.model}</h2>
           <span class="yoyo-colorway">${yoyo.colorway}</span>
+          <button class="favorite-btn ${favorites.has(yoyo.id) ? 'favorited' : ''}" 
+              onclick="toggleFavorite('${yoyo.id}')">
+        ${favorites.has(yoyo.id) ? '★' : '☆'}
+      </button>
         </div>
         <div class="yoyo-meta">
           ${yoyo.release_date ? `

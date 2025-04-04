@@ -343,7 +343,7 @@ footer {
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: #FF9900;
+  color: #000;
   cursor: pointer;
   transition: color 0.3s ease;
   z-index: 10;
