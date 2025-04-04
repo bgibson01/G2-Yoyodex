@@ -15,6 +15,10 @@ const CONFIG = {
   placeholderImage: 'assets/placeholder.jpg'
 };
 
+// Add a variable to track pagination
+const PAGE_SIZE = 15; // Number of yoyos to load per page
+let currentPage = 1;
+
 // ======================
 // 2. DOM ELEMENTS
 // ======================
@@ -114,6 +118,20 @@ function showError(error) {
   }
 }
 
+// Add favorites functionality
+const favorites = new Set(JSON.parse(localStorage.getItem('favorites')) || []);
+
+// Function to toggle a favorite
+function toggleFavorite(yoyoId) {
+  if (favorites.has(yoyoId)) {
+    favorites.delete(yoyoId);
+  } else {
+    favorites.add(yoyoId);
+  }
+  localStorage.setItem('favorites', JSON.stringify([...favorites]));
+  renderYoyos(APP_STATE.filteredYoyos); // Re-render to update the favorite state
+}
+
 // Function to dynamically generate filter buttons
 function generateFilterButtons(yoyos) {
   const filterContainer = document.querySelector('.filters'); // Matches your HTML structure
@@ -133,9 +151,10 @@ function generateFilterButtons(yoyos) {
   // Remove duplicates after normalization
   const uniqueTypes = Array.from(new Set(normalizedTypes));
 
-  // Add "All" filter button and dynamically create buttons for each type
+  // Add "All" and "Favorites" filter buttons
   filterContainer.innerHTML = `
     <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="favorites">Favorites</button>
     ${uniqueTypes.map(type => `
       <button class="filter-btn" data-filter="${type}">${type.charAt(0).toUpperCase() + type.slice(1)}</button>
     `).join('')}
@@ -196,11 +215,6 @@ function renderSpecsSection(yoyo) {
   `;
 }
 
-// Add a variable to track pagination
-const PAGE_SIZE = 15; // Number of yoyos to load per page
-let currentPage = 1;
-
-// Update renderYoyos to support pagination
 function renderYoyos(yoyos, append = false) {
   if (!yoyos?.length && currentPage === 1) {
     elements.container.innerHTML = '<p class="no-results">No yoyos found matching your criteria.</p>';
@@ -214,6 +228,10 @@ function renderYoyos(yoyos, append = false) {
 
   const yoyoCards = yoyosToRender.map(yoyo => `
     <div class="yoyo-card" data-id="${yoyo.id}">
+      <button class="favorite-btn ${favorites.has(yoyo.id) ? 'favorited' : ''}" 
+              onclick="toggleFavorite('${yoyo.id}')">
+        ${favorites.has(yoyo.id) ? '★' : '☆'}
+      </button>
       ${yoyo.type ? `<div class="yoyo-type-badge">${yoyo.type.replace(/,/g, ' ')}</div>` : ''}
       <img src="${CONFIG.placeholderImage}"
            data-src="${yoyo.image_url || CONFIG.placeholderImage}"
@@ -315,13 +333,17 @@ function sortYoyos(method) {
 function filterYoyos(type) {
   APP_STATE.currentFilter = type;
 
-  APP_STATE.filteredYoyos = type === 'all'
-    ? [...APP_STATE.yoyos]
-    : APP_STATE.yoyos.filter(yoyo => {
-        const yoyoType = yoyo.type?.toLowerCase() || '';
-        const typeList = yoyoType.split(',').map(t => t.trim()); // Split multiple types into an array
-        return typeList.includes(type.toLowerCase()); // Check if the selected type exists in the array
-      });
+  if (type === 'favorites') {
+    APP_STATE.filteredYoyos = APP_STATE.yoyos.filter(yoyo => favorites.has(yoyo.id));
+  } else if (type === 'all') {
+    APP_STATE.filteredYoyos = [...APP_STATE.yoyos];
+  } else {
+    APP_STATE.filteredYoyos = APP_STATE.yoyos.filter(yoyo => {
+      const yoyoType = yoyo.type?.toLowerCase() || '';
+      const typeList = yoyoType.split(',').map(t => t.trim()); // Split multiple types into an array
+      return typeList.includes(type.toLowerCase()); // Check if the selected type exists in the array
+    });
+  }
 
   applySearch();
   sortYoyos(APP_STATE.currentSort);

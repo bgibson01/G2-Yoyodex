@@ -336,6 +336,28 @@ footer {
   box-shadow: var(--shadow-sm);
 }
 
+/* Favorite Button */
+.favorite-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  z-index: 10;
+}
+
+.favorite-btn.favorited {
+  color: var(--g2-orange); /* Highlighted color for favorited items */
+}
+
+.favorite-btn:hover {
+  color: var(--g2-blue); /* Hover effect */
+}
+
 .load-more-btn:hover {
   background: var(--g2-blue-dark); /* Darker blue on hover */
 }
