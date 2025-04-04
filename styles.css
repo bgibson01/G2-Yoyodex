@@ -327,6 +327,7 @@ footer {
   height: auto;
   border-radius: 8px;
   margin-top: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Add a subtle shadow for emphasis */
 }
 
 /* ===== ERROR STATES ===== */

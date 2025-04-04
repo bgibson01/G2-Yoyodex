@@ -197,7 +197,7 @@ function renderSpecsSection(yoyo) {
   if (!hasSpecs) return '';
 
   return `
-    <button class="specs-toggle" onclick="toggleSpecs(this)">
+    <button class="specs-toggle" onclick="event.stopPropagation(); toggleSpecs(this)">
       \u25b6 Show Technical Specifications
     </button>
     <div class="specs-container">
@@ -214,6 +214,7 @@ function renderSpecsSection(yoyo) {
     </div>
   `;
 }
+
 
 function renderYoyos(yoyos, append = false) {
   if (!yoyos?.length && currentPage === 1) {
@@ -364,7 +365,6 @@ function applySearch() {
   renderYoyos(results);
 }
 
-// Function to open the modal and display yoyo details
 function showYoyoDetails(yoyo) {
   const modal = document.getElementById('yoyo-modal');
   const modalBody = document.getElementById('modal-body');
@@ -378,7 +378,19 @@ function showYoyoDetails(yoyo) {
     ${yoyo.quantity ? `<p><strong>Quantity:</strong> ${yoyo.quantity}</p>` : ''}
     ${yoyo.glitch_quantity ? `<p><strong>Glitches:</strong> ${yoyo.glitch_quantity}</p>` : ''}
     ${yoyo.description ? `<p><strong>Description:</strong> ${yoyo.description}</p>` : ''}
-    ${renderSpecsSection(yoyo)}
+    <div class="specs-container">
+      <h3>Technical Specifications</h3>
+      <div class="specs-grid">
+        ${renderSpecItem('Diameter', yoyo.diameter, 'mm')}
+        ${renderSpecItem('Width', yoyo.width, 'mm')}
+        ${renderSpecItem('Weight', yoyo.weight, 'g')}
+        ${renderSpecItem('Composition', yoyo.composition)}
+        ${renderSpecItem('Pads', yoyo.pads)}
+        ${renderSpecItem('Bearing', yoyo.bearing)}
+        ${renderSpecItem('Axle', yoyo.axle)}
+        ${renderSpecItem('Finish', yoyo.finish)}
+      </div>
+    </div>
     <img src="${yoyo.image_url || CONFIG.placeholderImage}" alt="${yoyo.model} ${yoyo.colorway}" class="modal-image">
   `;
 
