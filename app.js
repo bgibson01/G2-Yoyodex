@@ -407,6 +407,21 @@ function showYoyoDetails(yoyo) {
 
   // Show the modal
   modal.style.display = 'flex';
+
+  // Add event listeners for closing the modal
+  if (!modal.dataset.listenersAdded) {
+    modal.dataset.listenersAdded = true;
+
+    // Close modal on backdrop click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  }
 }
 
 // Function to navigate the carousel
@@ -427,12 +442,6 @@ function navigateCarousel(direction) {
 function closeModal() {
   const modal = document.getElementById('yoyo-modal');
   modal.style.display = 'none';
-  document.getElementById('yoyo-modal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closeModal();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
-  });
 }
 
 // ======================
