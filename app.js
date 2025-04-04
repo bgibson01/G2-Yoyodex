@@ -206,7 +206,7 @@ function renderYoyos(yoyos) {
 
   elements.container.innerHTML = yoyos.map(yoyo => `
     <div class="yoyo-card" data-id="${yoyo.id}">
-      ${yoyo.type ? `<div class="yoyo-type-badge">${yoyo.type}</div>` : ''}
+      ${yoyo.type ? `<div class="yoyo-type-badge">${yoyo.type.replace(/,/g, ' ')}</div>` : ''}
       <img src="${CONFIG.placeholderImage}"
            data-src="${yoyo.image_url || CONFIG.placeholderImage}"
            alt="${yoyo.model} ${yoyo.colorway}"
