@@ -196,15 +196,23 @@ function renderSpecsSection(yoyo) {
   `;
 }
 
-// Function to render yoyo cards
-function renderYoyos(yoyos) {
-  if (!yoyos?.length) {
+// Add a variable to track pagination
+const PAGE_SIZE = 20; // Number of yoyos to load per page
+let currentPage = 1;
+
+// Update renderYoyos to support pagination
+function renderYoyos(yoyos, append = false) {
+  if (!yoyos?.length && currentPage === 1) {
     elements.container.innerHTML = '<p class="no-results">No yoyos found matching your criteria.</p>';
     elements.container.classList.add('visible');
     return;
   }
 
-  elements.container.innerHTML = yoyos.map(yoyo => `
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const endIndex = currentPage * PAGE_SIZE;
+  const yoyosToRender = yoyos.slice(startIndex, endIndex);
+
+  const yoyoCards = yoyosToRender.map(yoyo => `
     <div class="yoyo-card" data-id="${yoyo.id}">
       ${yoyo.type ? `<div class="yoyo-type-badge">${yoyo.type.replace(/,/g, ' ')}</div>` : ''}
       <img src="${CONFIG.placeholderImage}"
@@ -233,9 +241,34 @@ function renderYoyos(yoyos) {
     </div>
   `).join('');
 
+  if (append) {
+    elements.container.innerHTML += yoyoCards;
+  } else {
+    elements.container.innerHTML = yoyoCards;
+  }
+
   elements.container.classList.add('visible');
   lazyLoadImages();
+
+  // Show or hide the "Load More" button
+  const loadMoreButton = document.getElementById('load-more');
+  if (yoyos.length > endIndex) {
+    loadMoreButton.style.display = 'block';
+  } else {
+    loadMoreButton.style.display = 'none';
+  }
 }
+
+// Add a "Load More" button to the HTML
+document.querySelector('main').insertAdjacentHTML('beforeend', `
+  <button id="load-more" class="load-more-btn">Load More</button>
+`);
+
+// Add event listener for the "Load More" button
+document.getElementById('load-more').addEventListener('click', () => {
+  currentPage++;
+  renderYoyos(APP_STATE.filteredYoyos, true);
+});
 
 // Setting up event listeners for sort buttons
 elements.sortButtons.forEach(button => {
