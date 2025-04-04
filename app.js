@@ -114,6 +114,33 @@ function showError(error) {
   }
 }
 
+// Function to dynamically generate filter buttons
+function generateFilterButtons(yoyos) {
+  const filterContainer = document.querySelector('.filters'); // Matches your HTML structure
+  if (!filterContainer) return;
+
+  // Extract unique types from yoyos
+  const types = Array.from(new Set(yoyos.map(yoyo => yoyo.type?.toLowerCase().trim()).filter(Boolean)));
+
+  // Add "All" filter button and dynamically create buttons for each type
+  filterContainer.innerHTML = `
+    <button class="filter-btn active" data-filter="all">All</button>
+    ${types.map(type => `
+      <button class="filter-btn" data-filter="${type}">${type.charAt(0).toUpperCase() + type.slice(1)}</button>
+    `).join('')}
+  `;
+
+  // Reattach event listeners to the new buttons
+  elements.filterButtons = document.querySelectorAll('.filter-btn');
+  elements.filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      elements.filterButtons.forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+      filterYoyos(button.dataset.filter);
+    });
+  });
+}
+
 // ======================
 // 5. RENDERING FUNCTIONS
 // ======================
@@ -308,6 +335,7 @@ function setupEventListeners() {
 // ======================
 // 8. INITIALIZATION
 // ======================
+// Update the initialization function to generate filter buttons
 async function init() {
   showLoading();
   try {
@@ -317,6 +345,10 @@ async function init() {
     ]);
 
     APP_STATE.yoyos = mergeSpecs(yoyos, specs);
+
+    // Generate filter buttons based on fetched data
+    generateFilterButtons(APP_STATE.yoyos);
+
     filterYoyos('all');
     setupEventListeners();
 
