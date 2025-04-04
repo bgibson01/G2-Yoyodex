@@ -227,7 +227,11 @@ function renderYoyos(yoyos, append = false) {
   const yoyosToRender = yoyos.slice(startIndex, endIndex);
 
   const yoyoCards = yoyosToRender.map(yoyo => `
-    <div class="yoyo-card" data-id="${yoyo.id}">
+    <div class="yoyo-card" data-id="${yoyo.id}" onclick="showYoyoDetails(${JSON.stringify(yoyo).replace(/"/g, '&quot;')})">
+      <button class="favorite-btn ${favorites.has(yoyo.id) ? 'favorited' : ''}" 
+              onclick="event.stopPropagation(); toggleFavorite('${yoyo.id}')">
+        ${favorites.has(yoyo.id) ? '★' : '☆'}
+      </button>
       ${yoyo.type ? `<div class="yoyo-type-badge">${yoyo.type.replace(/,/g, ' ')}</div>` : ''}
       <img src="${CONFIG.placeholderImage}"
            data-src="${yoyo.image_url || CONFIG.placeholderImage}"
@@ -239,10 +243,6 @@ function renderYoyos(yoyos, append = false) {
         <div class="yoyo-header">
           <h2 class="yoyo-model">${yoyo.model}</h2>
           <span class="yoyo-colorway">${yoyo.colorway}</span>
-          <button class="favorite-btn ${favorites.has(yoyo.id) ? 'favorited' : ''}" 
-              onclick="toggleFavorite('${yoyo.id}')">
-        ${favorites.has(yoyo.id) ? '★' : '☆'}
-      </button>
         </div>
         <div class="yoyo-meta">
           ${yoyo.release_date ? `
@@ -362,6 +362,40 @@ function applySearch() {
   );
 
   renderYoyos(results);
+}
+
+// Function to open the modal and display yoyo details
+function showYoyoDetails(yoyo) {
+  const modal = document.getElementById('yoyo-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  // Populate the modal with yoyo details
+  modalBody.innerHTML = `
+    <h2>${yoyo.model}</h2>
+    <p><strong>Colorway:</strong> ${yoyo.colorway}</p>
+    ${yoyo.release_date ? `<p><strong>Release Date:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
+    ${yoyo.price ? `<p><strong>Price:</strong> $${yoyo.price}</p>` : ''}
+    ${yoyo.quantity ? `<p><strong>Quantity:</strong> ${yoyo.quantity}</p>` : ''}
+    ${yoyo.glitch_quantity ? `<p><strong>Glitches:</strong> ${yoyo.glitch_quantity}</p>` : ''}
+    ${yoyo.description ? `<p><strong>Description:</strong> ${yoyo.description}</p>` : ''}
+    ${renderSpecsSection(yoyo)}
+    <img src="${yoyo.image_url || CONFIG.placeholderImage}" alt="${yoyo.model} ${yoyo.colorway}" class="modal-image">
+  `;
+
+  // Show the modal
+  modal.style.display = 'flex';
+}
+
+// Function to close the modal
+function closeModal() {
+  const modal = document.getElementById('yoyo-modal');
+  modal.style.display = 'none';
+  document.getElementById('yoyo-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
 }
 
 // ======================
