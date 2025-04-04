@@ -371,6 +371,7 @@ function showYoyoDetails(yoyo) {
 
   // Populate the modal with yoyo details
   modalBody.innerHTML = `
+    <img src="${yoyo.image_url || CONFIG.placeholderImage}" alt="${yoyo.model} ${yoyo.colorway}" class="modal-image">
     <h2>${yoyo.model}</h2>
     <p><strong>Colorway:</strong> ${yoyo.colorway}</p>
     ${yoyo.release_date ? `<p><strong>Release Date:</strong> ${formatDate(yoyo.release_date)}</p>` : ''}
@@ -391,7 +392,6 @@ function showYoyoDetails(yoyo) {
         ${renderSpecItem('Finish', yoyo.finish)}
       </div>
     </div>
-    <img src="${yoyo.image_url || CONFIG.placeholderImage}" alt="${yoyo.model} ${yoyo.colorway}" class="modal-image">
   `;
 
   // Show the modal
