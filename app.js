@@ -122,10 +122,21 @@ function generateFilterButtons(yoyos) {
   // Extract unique types from yoyos
   const types = Array.from(new Set(yoyos.map(yoyo => yoyo.type?.toLowerCase().trim()).filter(Boolean)));
 
+  // Ensure "Patreon" and "Lottery" are separate buttons
+  const normalizedTypes = types.flatMap(type => {
+    if (type.includes('patreon') && type.includes('lottery')) {
+      return ['patreon', 'lottery'];
+    }
+    return type === 'misc/other' ? 'misc' : type; // Rename "Misc/other" to "Misc"
+  });
+
+  // Remove duplicates after normalization
+  const uniqueTypes = Array.from(new Set(normalizedTypes));
+
   // Add "All" filter button and dynamically create buttons for each type
   filterContainer.innerHTML = `
     <button class="filter-btn active" data-filter="all">All</button>
-    ${types.map(type => `
+    ${uniqueTypes.map(type => `
       <button class="filter-btn" data-filter="${type}">${type.charAt(0).toUpperCase() + type.slice(1)}</button>
     `).join('')}
   `;
