@@ -16,7 +16,7 @@ const CONFIG = {
 };
 
 // Add a variable to track pagination
-const PAGE_SIZE = 15; // Number of yoyos to load per page
+const PAGE_SIZE = 12; // Number of yoyos to load per page
 let currentPage = 1;
 
 // ======================
