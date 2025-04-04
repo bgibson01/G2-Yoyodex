@@ -372,12 +372,15 @@ function showYoyoDetails(yoyo) {
   // Combine the main image and additional images
   const images = [yoyo.image_url || CONFIG.placeholderImage, ...(yoyo.additional_images || [])];
 
+  // Check if there are additional images
+  const hasAdditionalImages = images.length > 1;
+
   // Populate the modal with yoyo details and image carousel
   modalBody.innerHTML = `
     <div class="image-carousel">
-      <button class="carousel-arrow left-arrow" onclick="navigateCarousel(-1)">&#9664;</button>
+      ${hasAdditionalImages ? `<button class="carousel-arrow left-arrow" onclick="navigateCarousel(-1)">&#9664;</button>` : ''}
       <img src="${images[0]}" alt="${yoyo.model} ${yoyo.colorway}" class="modal-image" id="carousel-image">
-      <button class="carousel-arrow right-arrow" onclick="navigateCarousel(1)">&#9654;</button>
+      ${hasAdditionalImages ? `<button class="carousel-arrow right-arrow" onclick="navigateCarousel(1)">&#9654;</button>` : ''}
     </div>
     <h2>${yoyo.model}</h2>
     <p><strong>Colorway:</strong> ${yoyo.colorway}</p>
