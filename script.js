@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const yoyoGrid = document.getElementById('yoyo-grid');
   const modal = document.getElementById('modal');
-  const closeModal = document.getElementById('close-modal');
+  const closeModalBtn = document.getElementById('close-modal');
   const modalMainImage = document.getElementById('modal-main-image');
   const modalImages = document.getElementById('modal-images');
   const paginationContainer = document.getElementById('pagination-container'); // Pagination container
@@ -245,6 +245,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function closeModal() {
+    modal.classList.add('hidden');
+    modalMainImage.src = "";
+    modalImages.innerHTML = "";
+  }
+
+  closeModalBtn.addEventListener('click', closeModal);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
   function openModal(yoyo) {
     modal.classList.remove('hidden');
     modalMainImage.src = yoyo.image_url || CONFIG.placeholderImage;
@@ -270,19 +284,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
-
-  closeModal.addEventListener('click', () => {
-    modal.classList.add('hidden');
-    modalMainImage.src = "";
-    modalImages.innerHTML = "";
-  });
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      modal.classList.add('hidden');
-      modalMainImage.src = "";
-      modalImages.innerHTML = "";
-    }
-  });
 
   function updatePagination(totalCount = yoyoData.length) {
     const totalPages = Math.ceil(totalCount / itemsPerPage);
