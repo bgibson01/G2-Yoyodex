@@ -112,10 +112,16 @@ footer {
 /* Modal styles */
 #modal {
   position: fixed;
-  inset: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 1000;
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
 }
 
+/*******  ad2db3d6-b4e2-488c-879a-c4896a724ed9  *******/
 .hidden {
   display: none !important;
 }
