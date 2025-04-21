@@ -111,8 +111,11 @@ footer {
 
 /* Modal styles */
 #modal {
-  display: none;
   z-index: 1000;
+}
+
+.hidden {
+  display: none !important;
 }
 
 #modal-content {

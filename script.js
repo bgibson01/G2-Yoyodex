@@ -22,10 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function getItemsPerPage() {
     const width = window.innerWidth;
-    if (width >= 1280) return 16; // 4 columns x 4 rows
-    if (width >= 1024) return 12; // 3 columns x 4 rows
-    if (width >= 640)  return 8;  // 2 columns x 4 rows
-    return 4;                     // 1 column x 4 rows
+    if (width >= 1680) return 24;
+    if (width >= 1280) return 18;
+    if (width >= 1024) return 14;
+    if (width >= 640)  return 10;
+    return 6;                     
   }
 
   window.addEventListener('resize', () => {
@@ -151,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const releaseDate = document.createElement('p');
-      releaseDate.textContent = `Release Date: ${formatDate(yoyo.release_date)}`;
+      releaseDate.textContent = `Released: ${formatDate(yoyo.release_date)}`;
       releaseDate.classList.add('text-sm', 'text-gray-400');
 
       const actions = document.createElement('div');
