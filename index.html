@@ -26,6 +26,15 @@
       <button id="clear-search" class="clear-search absolute right-4 top-2 text-gray-400" aria-label="Clear search">✕</button>
     </div>
 
+    <!-- Controls Section -->
+    <div class="controls-container p-4 flex flex-wrap gap-2 justify-center items-center">
+      <select id="model-filter" class="bg-gray-700 text-white px-3 py-1 rounded">
+        <option value="">All Models</option>
+        <!-- JS will populate options -->
+      </select>
+      <button id="sort-date" class="bg-yellow-700 text-white px-3 py-1 rounded hover:bg-yellow-800">Sort by Release Date</button>
+    </div>
+
     <!-- Yoyo Cards Grid -->
     <div id="yoyo-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4"></div>
     <div id="pagination-container" class="pagination"></div>

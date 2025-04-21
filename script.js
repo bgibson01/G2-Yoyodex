@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let itemsPerPage = getItemsPerPage(); // Dynamically determine items per page
   let yoyoData = [];
   let specsData = [];
+  let searchTerm = '';
+  let selectedModel = '';
+  let sortDateDesc = true;
 
   function getItemsPerPage() {
     const width = window.innerWidth;
@@ -50,67 +53,173 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await fetch(CONFIG.specsDataUrl);
       specsData = await response.json();
       console.log('Fetched Specs Data:', specsData);
+      populateModelFilter();
       displayYoyoCards();
     } catch (error) {
       console.error('Error fetching specs data:', error);
     }
   }
 
+  function formatDate(dateString) {
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    if (isNaN(date)) return dateString;
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  function populateModelFilter() {
+    const modelFilter = document.getElementById('model-filter');
+    const models = Array.from(new Set(yoyoData.map(y => y.model))).sort();
+    modelFilter.innerHTML = '<option value="">All Models</option>';
+    models.forEach(model => {
+      const opt = document.createElement('option');
+      opt.value = model;
+      opt.textContent = model;
+      modelFilter.appendChild(opt);
+    });
+  }
+
+  document.getElementById('search').addEventListener('input', (e) => {
+    searchTerm = e.target.value.toLowerCase();
+    currentPage = 1;
+    displayYoyoCards();
+  });
+
+  document.getElementById('clear-search').addEventListener('click', () => {
+    searchTerm = '';
+    document.getElementById('search').value = '';
+    currentPage = 1;
+    displayYoyoCards();
+  });
+
+  document.getElementById('model-filter').addEventListener('change', (e) => {
+    selectedModel = e.target.value;
+    currentPage = 1;
+    displayYoyoCards();
+  });
+
+  document.getElementById('sort-date').addEventListener('click', () => {
+    sortDateDesc = !sortDateDesc;
+    displayYoyoCards();
+  });
+
   function displayYoyoCards() {
+    let filtered = yoyoData.filter(yoyo => {
+      const matchesSearch =
+        !searchTerm ||
+        (yoyo.model && yoyo.model.toLowerCase().includes(searchTerm)) ||
+        (yoyo.colorway && yoyo.colorway.toLowerCase().includes(searchTerm));
+      const matchesModel = !selectedModel || yoyo.model === selectedModel;
+      return matchesSearch && matchesModel;
+    });
+
+    filtered.sort((a, b) => {
+      const aDate = new Date(a.release_date);
+      const bDate = new Date(b.release_date);
+      return sortDateDesc ? bDate - aDate : aDate - bDate;
+    });
+
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const currentYoyoPage = yoyoData.slice(startIndex, endIndex);
+    const currentYoyoPage = filtered.slice(startIndex, endIndex);
 
-    yoyoGrid.innerHTML = '';  // Clear the grid before adding new cards
+    yoyoGrid.innerHTML = '';
 
     currentYoyoPage.forEach(yoyo => {
       const yoyoCard = document.createElement('div');
-      yoyoCard.classList.add('card'); // Use 'card' for consistent styling
+      yoyoCard.classList.add('card');
 
       const yoyoImage = document.createElement('img');
-      yoyoImage.src = yoyo.image_url || CONFIG.placeholderImage; // Fallback to placeholder if no image
+      yoyoImage.src = yoyo.image_url || CONFIG.placeholderImage;
       yoyoImage.alt = `${yoyo.model} - ${yoyo.colorway}`;
       yoyoImage.classList.add('w-full', 'h-auto', 'rounded');
 
       const modelName = document.createElement('h3');
       modelName.textContent = yoyo.model;
-      modelName.classList.add('text-lg', 'font-semibold');
+      modelName.classList.add('model-name');
 
       const colorway = document.createElement('p');
-      colorway.textContent = `Colorway: ${yoyo.colorway}`;
-      colorway.classList.add('text-sm', 'text-gray-400');
+      colorway.textContent = yoyo.colorway;
+      colorway.classList.add('colorway-name');
 
       const releaseDate = document.createElement('p');
-      releaseDate.textContent = `Release Date: ${yoyo.release_date}`;
+      releaseDate.textContent = `Release Date: ${formatDate(yoyo.release_date)}`;
       releaseDate.classList.add('text-sm', 'text-gray-400');
 
       const quantity = document.createElement('p');
       quantity.textContent = yoyo.quantity ? `Quantity: ${yoyo.quantity}` : 'Quantity: N/A';
       quantity.classList.add('text-sm', 'text-gray-400');
 
-      const showSpecsButton = document.createElement('button');
-      showSpecsButton.textContent = 'Show Specs';
-      showSpecsButton.classList.add('mt-2', 'bg-blue-600', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-blue-700');
-      showSpecsButton.addEventListener('click', () => showSpecs(yoyo.model));
+      const actions = document.createElement('div');
+      actions.classList.add('card-actions');
+
+      const favKey = `fav_${yoyo.model}_${yoyo.colorway}`;
+      const ownedKey = `owned_${yoyo.model}_${yoyo.colorway}`;
+
+      const favoriteBtn = document.createElement('button');
+      favoriteBtn.classList.add('favorite-btn');
+      favoriteBtn.setAttribute('aria-label', 'Add to Favorites');
+      favoriteBtn.innerHTML = localStorage.getItem(favKey) ? '⭐' : '☆';
+      if (localStorage.getItem(favKey)) favoriteBtn.classList.add('active');
+      favoriteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (localStorage.getItem(favKey)) {
+          localStorage.removeItem(favKey);
+          favoriteBtn.innerHTML = '☆';
+          favoriteBtn.classList.remove('active');
+        } else {
+          localStorage.setItem(favKey, '1');
+          favoriteBtn.innerHTML = '⭐';
+          favoriteBtn.classList.add('active');
+        }
+      });
+
+      const ownedBtn = document.createElement('button');
+      ownedBtn.classList.add('owned-btn');
+      ownedBtn.setAttribute('aria-label', 'Mark as Owned');
+      ownedBtn.innerHTML = localStorage.getItem(ownedKey) ? '🏠' : '🏡';
+      if (localStorage.getItem(ownedKey)) ownedBtn.classList.add('active');
+      ownedBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (localStorage.getItem(ownedKey)) {
+          localStorage.removeItem(ownedKey);
+          ownedBtn.innerHTML = '🏡';
+          ownedBtn.classList.remove('active');
+        } else {
+          localStorage.setItem(ownedKey, '1');
+          ownedBtn.innerHTML = '🏠';
+          ownedBtn.classList.add('active');
+        }
+      });
+
+      actions.appendChild(favoriteBtn);
+      actions.appendChild(ownedBtn);
+
+      const specs = specsData.find(spec => spec.model === yoyo.model);
+      if (specs) {
+        const showSpecsButton = document.createElement('button');
+        showSpecsButton.textContent = 'Show Specs';
+        showSpecsButton.classList.add('mt-2', 'bg-blue-600', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-blue-700');
+        showSpecsButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showSpecs(yoyo.model);
+        });
+        actions.appendChild(showSpecsButton);
+      }
 
       yoyoCard.appendChild(yoyoImage);
       yoyoCard.appendChild(modelName);
       yoyoCard.appendChild(colorway);
       yoyoCard.appendChild(releaseDate);
       yoyoCard.appendChild(quantity);
-
-      // Show specs button only if specs data is available for the model
-      const specs = specsData.find(spec => spec.model === yoyo.model);
-      if (specs) {
-        yoyoCard.appendChild(showSpecsButton);
-      }
+      yoyoCard.appendChild(actions);
 
       yoyoCard.addEventListener('click', () => openModal(yoyo));
 
       yoyoGrid.appendChild(yoyoCard);
     });
 
-    updatePagination();
+    updatePagination(filtered.length);
   }
 
   function showSpecs(model) {
@@ -125,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
     modalMainImage.src = yoyo.image_url || CONFIG.placeholderImage;
     modalImages.innerHTML = '';
 
-    // Ensure additional_images is an array
     let images = [];
     if (Array.isArray(yoyo.additional_images)) {
       images = yoyo.additional_images;
@@ -150,12 +258,9 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.classList.add('hidden');
   });
 
-  // Pagination logic
-  function updatePagination() {
-    const totalPages = Math.ceil(yoyoData.length / itemsPerPage);
-
-    paginationContainer.innerHTML = ''; // Clear previous pagination
-
+  function updatePagination(totalCount = yoyoData.length) {
+    const totalPages = Math.ceil(totalCount / itemsPerPage);
+    paginationContainer.innerHTML = '';
     for (let i = 1; i <= totalPages; i++) {
       const pageButton = document.createElement('button');
       pageButton.textContent = i;
@@ -164,15 +269,12 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPage = i;
         displayYoyoCards();
       });
-
       if (i === currentPage) {
         pageButton.classList.add('active');
       }
-
       paginationContainer.appendChild(pageButton);
     }
   }
 
-  // Fetch yoyo data on page load
   fetchYoyoData();
 });

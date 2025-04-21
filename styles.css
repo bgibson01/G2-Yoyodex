@@ -76,7 +76,9 @@ footer {
 
 /* Style for each card */
 .card {
-  background-color: #1e1e1e;
+  background: linear-gradient(135deg, #232526 0%, #414345 100%);
+  box-shadow: 0 4px 16px #0006;
+  border: 2px solid #ffd70022;
   border-radius: 8px;
   padding: 15px;
   margin: 10px;
@@ -169,4 +171,51 @@ footer {
   text-align: center;
   color: white;
   margin-top: auto;
+}
+
+/* Card actions styles */
+.card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.favorite-btn, .owned-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.1s;
+  outline: none;
+}
+
+.favorite-btn.active {
+  color: #ffd700;
+  transform: scale(1.2);
+}
+
+.owned-btn.active {
+  color: #4ade80;
+  transform: scale(1.2);
+}
+
+.favorite-btn:focus, .owned-btn:focus {
+  outline: 2px solid #ffd700;
+}
+
+.model-name {
+  color: #ffd700;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 0.5rem;
+  margin-bottom: 0.2rem;
+  text-shadow: 1px 1px 2px #0008;
+}
+
+.colorway-name {
+  color: #60a5fa;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  text-shadow: 1px 1px 2px #0006;
 }
