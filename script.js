@@ -146,9 +146,12 @@ document.addEventListener('DOMContentLoaded', () => {
       releaseDate.textContent = `Release Date: ${formatDate(yoyo.release_date)}`;
       releaseDate.classList.add('text-sm', 'text-gray-400');
 
-      const quantity = document.createElement('p');
-      quantity.textContent = yoyo.quantity ? `Quantity: ${yoyo.quantity}` : 'Quantity: N/A';
-      quantity.classList.add('text-sm', 'text-gray-400');
+      if (yoyo.quantity && Number(yoyo.quantity) !== 0) {
+        const quantity = document.createElement('p');
+        quantity.textContent = `Quantity: ${yoyo.quantity}`;
+        quantity.classList.add('text-sm', 'text-gray-400');
+        yoyoCard.appendChild(quantity);
+      }
 
       const actions = document.createElement('div');
       actions.classList.add('card-actions');
