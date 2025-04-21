@@ -13,9 +13,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const paginationContainer = document.getElementById('pagination-container'); // Pagination container
 
   let currentPage = 1;
-  const itemsPerPage = 12; // Number of yoyos per page
+  let itemsPerPage = getItemsPerPage(); // Dynamically determine items per page
   let yoyoData = [];
   let specsData = [];
+
+  function getItemsPerPage() {
+    const width = window.innerWidth;
+    if (width >= 1280) return 16; // 4 columns x 4 rows
+    if (width >= 1024) return 12; // 3 columns x 4 rows
+    if (width >= 640)  return 8;  // 2 columns x 4 rows
+    return 4;                     // 1 column x 4 rows
+  }
+
+  window.addEventListener('resize', () => {
+    const newItemsPerPage = getItemsPerPage();
+    if (newItemsPerPage !== itemsPerPage) {
+      itemsPerPage = newItemsPerPage;
+      currentPage = 1;
+      displayYoyoCards();
+    }
+  });
 
   async function fetchYoyoData() {
     try {
@@ -108,9 +125,16 @@ document.addEventListener('DOMContentLoaded', () => {
     modalMainImage.src = yoyo.image_url || CONFIG.placeholderImage;
     modalImages.innerHTML = '';
 
-    // Populate modal with additional images if available
-    if (yoyo.additional_images && yoyo.additional_images.length > 0) {
-      yoyo.additional_images.forEach(image => {
+    // Ensure additional_images is an array
+    let images = [];
+    if (Array.isArray(yoyo.additional_images)) {
+      images = yoyo.additional_images;
+    } else if (typeof yoyo.additional_images === 'string' && yoyo.additional_images.trim() !== '') {
+      images = yoyo.additional_images.split(',').map(s => s.trim());
+    }
+
+    if (images.length > 0) {
+      images.forEach(image => {
         const img = document.createElement('img');
         img.src = image;
         img.classList.add('w-32', 'h-auto', 'rounded', 'mr-2');
