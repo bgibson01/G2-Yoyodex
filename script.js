@@ -146,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
       releaseDate.textContent = `Release Date: ${formatDate(yoyo.release_date)}`;
       releaseDate.classList.add('text-sm', 'text-gray-400');
 
+      // Only create and append quantity if it exists and is not zero
       if (yoyo.quantity && Number(yoyo.quantity) !== 0) {
         const quantity = document.createElement('p');
         quantity.textContent = `Quantity: ${yoyo.quantity}`;
@@ -214,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
       yoyoCard.appendChild(modelName);
       yoyoCard.appendChild(colorway);
       yoyoCard.appendChild(releaseDate);
-      yoyoCard.appendChild(quantity);
       yoyoCard.appendChild(actions);
 
       yoyoCard.addEventListener('click', () => openModal(yoyo));
