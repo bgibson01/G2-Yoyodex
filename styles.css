@@ -11,6 +11,7 @@ body {
   padding: 15px;
   margin: 10px;
   transition: transform 0.2s;
+  cursor: pointer;
 }
 
 .card:hover {
@@ -30,4 +31,31 @@ body {
 
 .favorite.active {
   color: #ff0000;
+}
+
+#modal {
+  display: none;
+  z-index: 1000;
+}
+
+#modal-content {
+  text-align: center;
+}
+
+#modal-main-image {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+#modal-images img {
+  width: 100px;
+  height: auto;
+  margin-right: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+#modal-images img:hover {
+  opacity: 0.7;
 }

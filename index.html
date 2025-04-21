@@ -3,34 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yoyodex - GSquared Yoyos Database</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <title>Yoyodex</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://apis.google.com/js/api.js"></script> <!-- Google API library -->
 </head>
-<body>
-  <header class="text-center py-8">
-    <h1 class="text-4xl font-bold">Yoyodex</h1>
-    <p class="text-xl">The Complete GSquared Yoyos Database</p>
-  </header>
-  
-  <!-- Search and Filter Controls -->
-  <div class="flex justify-center space-x-4 py-4">
-    <input type="text" id="search-input" class="p-2 rounded" placeholder="Search by model or colorway">
-    <button id="sort-az" class="p-2 bg-gray-600 rounded">Sort A-Z</button>
-    <button id="sort-za" class="p-2 bg-gray-600 rounded">Sort Z-A</button>
-    <button id="sort-newest" class="p-2 bg-gray-600 rounded">Newest</button>
-    <button id="sort-oldest" class="p-2 bg-gray-600 rounded">Oldest</button>
+<body class="bg-gray-900 text-white">
+  <div id="yoyo-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4"></div>
+
+  <!-- Modal for additional images -->
+  <div id="modal" class="modal hidden fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
+    <div class="modal-content bg-gray-900 p-6 rounded-lg">
+      <span id="close-modal" class="text-white cursor-pointer">X</span>
+      <img id="modal-main-image" src="" class="w-full h-auto rounded mb-4">
+      <div id="modal-images" class="flex space-x-2 overflow-x-auto"></div>
+    </div>
   </div>
 
-  <!-- Yoyo Grid -->
-  <div id="yoyo-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 py-8">
-    <!-- Yoyo cards will be injected here dynamically -->
-  </div>
+  <!-- Footer -->
+  <footer class="p-4 bg-gray-800 text-white text-center">
+    <p>This is an independent community project. All yoyo data is collected from public sources.<br>
+    <a href="https://www.gsquaredyoyos.com" target="_blank">Visit the official site</a> for authorized releases.</p>
+  </footer>
 
   <script src="script.js"></script>
 </body>
-<footer>
-  <p>This is an independent community project. All yoyo data is collected from public sources.<br>
-  <a href="https://www.gsquaredyoyos.com" target="_blank">Visit the official site</a> for authorized releases.</p>
-</footer>
 </html>
