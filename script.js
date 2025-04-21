@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const yoyoGrid = document.getElementById('yoyo-grid');
   const modal = document.getElementById('modal');
   const closeModalBtn = document.getElementById('close-modal');
+  const modalOverlay = document.getElementById('modal-overlay');
   const modalMainImage = document.getElementById('modal-main-image');
   const modalImages = document.getElementById('modal-images');
   const paginationContainer = document.getElementById('pagination-container'); // Pagination container
@@ -252,6 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   closeModalBtn.addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', closeModal);
 
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
