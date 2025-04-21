@@ -33,7 +33,7 @@ function fetchYoyoData() {
           cardContent += `<div class="specs-container" data-yoyo-id="${yoyo.id}"></div>`;
           yoyoCard.innerHTML = cardContent;
           
-          document.querySelector('.yoyo-container').appendChild(yoyoCard);
+          document.querySelector('.yoyo-grid').appendChild(yoyoCard);
         });
 
         // Add event listeners to buttons to show additional images and specs
