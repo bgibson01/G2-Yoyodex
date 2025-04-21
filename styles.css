@@ -3,8 +3,22 @@ body {
   background-color: #121212;
   color: white;
   font-family: 'Arial', sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
 }
 
+/* Main container for yoyo cards */
+#yoyo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+  padding: 20px;
+  flex-grow: 1; /* Allow grid to take up available space */
+}
+
+/* Style for each card */
 .card {
   background-color: #1e1e1e;
   border-radius: 8px;
@@ -12,10 +26,9 @@ body {
   margin: 10px;
   transition: transform 0.2s;
   cursor: pointer;
-}
-
-.card:hover {
-  transform: scale(1.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .card img {
@@ -24,6 +37,11 @@ body {
   height: auto;
 }
 
+.card:hover {
+  transform: scale(1.05);
+}
+
+/* Style for the favorite star */
 .favorite {
   cursor: pointer;
   color: #ffd700;
@@ -33,6 +51,7 @@ body {
   color: #ff0000;
 }
 
+/* Modal styles */
 #modal {
   display: none;
   z-index: 1000;
@@ -58,4 +77,40 @@ body {
 
 #modal-images img:hover {
   opacity: 0.7;
+}
+
+/* Pagination Styles */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  background-color: #1e1e1e;
+  border: 1px solid #ffd700;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.pagination button:hover {
+  background-color: #ffd700;
+  color: #121212;
+}
+
+.pagination button:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
+/* Footer styles */
+footer {
+  padding: 20px;
+  background-color: #1e1e1e;
+  text-align: center;
+  color: white;
+  margin-top: auto;
 }
