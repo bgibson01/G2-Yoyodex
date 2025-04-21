@@ -142,17 +142,17 @@ document.addEventListener('DOMContentLoaded', () => {
       colorway.textContent = yoyo.colorway;
       colorway.classList.add('colorway-name');
 
+      // Quantity (only if it exists and is not zero)
+      let quantity;
+      if (yoyo.quantity && Number(yoyo.quantity) !== 0) {
+        quantity = document.createElement('p');
+        quantity.textContent = `Quantity: ${yoyo.quantity}`;
+        quantity.classList.add('text-sm', 'text-gray-400');
+      }
+
       const releaseDate = document.createElement('p');
       releaseDate.textContent = `Release Date: ${formatDate(yoyo.release_date)}`;
       releaseDate.classList.add('text-sm', 'text-gray-400');
-
-      // Only create and append quantity if it exists and is not zero
-      if (yoyo.quantity && Number(yoyo.quantity) !== 0) {
-        const quantity = document.createElement('p');
-        quantity.textContent = `Quantity: ${yoyo.quantity}`;
-        quantity.classList.add('text-sm', 'text-gray-400');
-        yoyoCard.appendChild(quantity);
-      }
 
       const actions = document.createElement('div');
       actions.classList.add('card-actions');
@@ -214,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
       yoyoCard.appendChild(yoyoImage);
       yoyoCard.appendChild(modelName);
       yoyoCard.appendChild(colorway);
+      if (quantity) yoyoCard.appendChild(quantity); // <-- Quantity now appears after colorway
       yoyoCard.appendChild(releaseDate);
       yoyoCard.appendChild(actions);
 
@@ -228,13 +229,25 @@ document.addEventListener('DOMContentLoaded', () => {
   function showSpecs(model) {
     const specs = specsData.find(spec => spec.model === model);
     if (specs) {
-      alert(`Specs for ${model}: ${JSON.stringify(specs, null, 2)}`);
+      // Create modal content
+      let html = `<h2 class="text-lg font-bold mb-2">${model} Specs</h2><ul>`;
+      for (const [key, value] of Object.entries(specs)) {
+        if (key !== "model" && value && value !== "N/A" && value !== "-") {
+          html += `<li><strong>${key.replace(/_/g, ' ')}:</strong> ${value}</li>`;
+        }
+      }
+      html += "</ul>";
+      // Show in modal
+      modalMainImage.src = ""; // Hide main image for specs
+      modalImages.innerHTML = html;
+      modal.classList.remove('hidden');
     }
   }
 
   function openModal(yoyo) {
     modal.classList.remove('hidden');
     modalMainImage.src = yoyo.image_url || CONFIG.placeholderImage;
+    modalMainImage.style.display = "block";
     modalImages.innerHTML = '';
 
     let images = [];
@@ -248,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
       images.forEach(image => {
         const img = document.createElement('img');
         img.src = image;
-        img.classList.add('w-32', 'h-auto', 'rounded', 'mr-2');
+        img.classList.add('w-32', 'h-auto', 'rounded', 'mr-2', 'cursor-pointer');
         img.addEventListener('click', () => {
           modalMainImage.src = image;
         });
@@ -259,6 +272,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   closeModal.addEventListener('click', () => {
     modal.classList.add('hidden');
+    modalMainImage.src = "";
+    modalImages.innerHTML = "";
+  });
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+      modalMainImage.src = "";
+      modalImages.innerHTML = "";
+    }
   });
 
   function updatePagination(totalCount = yoyoData.length) {
