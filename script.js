@@ -180,13 +180,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const ownedBtn = document.createElement('button');
       ownedBtn.classList.add('owned-btn');
       ownedBtn.setAttribute('aria-label', 'Mark as Owned');
-      ownedBtn.innerHTML = localStorage.getItem(ownedKey) ? '✅' : '⬜';
+      ownedBtn.innerHTML = localStorage.getItem(ownedKey) ? '✅' : '🔳';
       if (localStorage.getItem(ownedKey)) ownedBtn.classList.add('active');
       ownedBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         if (localStorage.getItem(ownedKey)) {
           localStorage.removeItem(ownedKey);
-          ownedBtn.innerHTML = '⬜';
+          ownedBtn.innerHTML = '🔳';
           ownedBtn.classList.remove('active');
         } else {
           localStorage.setItem(ownedKey, '1');
