@@ -3,69 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>G² YoYodex - Track G2 Yoyos and Colorways</title>
+  <title>Yoyodex - GSquared Yoyos Database</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-E9G3FZFQCX"></script>
-  <script>
-    if (window.location.hostname === "bgibson01.github.io") {
-      window['ga-disable-G-E9G3FZFQCX'] = true;
-    }
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-E9G3FZFQCX', {
-      cookie_flags: 'SameSite=None;Secure',
-      cookie_domain: 'auto'
-    });
-  </script>
 </head>
 <body>
-  <main>
-    <header>
-      <h1><img src="assets/g2-logo.png" alt="G² Logo" class="logo"> YoYodex<br>
-        <span class="community-badge">Community Project</span></h1>
-    </header>
-
-    <div class="search-container">
-      <input type="text" id="search" placeholder="Search models/colorways..."
-             aria-label="Search yoyos" autocomplete="off">
-      <button class="clear-search" aria-label="Clear search">✕</button>
-    </div>
-
-    <div class="toolbar">
-      <div class="filters">
-        <button class="filter-btn active" data-filter="all">All</button>
-      </div>
-      <div class="sorts">
-        <button class="sort-btn active" data-sort="newest">Newest</button>
-        <button class="sort-btn" data-sort="oldest">Oldest</button>
-        <button class="sort-btn" data-sort="name-asc">A-Z</button>
-        <button class="sort-btn" data-sort="name-desc">Z-A</button>
-      </div>
-    </div>
-
-    <div id="loading-indicator" class="loading">
-      <div class="loading-spinner"></div>
-      <p>Loading yoyo database...</p>
-    </div>
-
-    <div id="yoyo-container" class="yoyo-grid"></div>
-  </main>
-
-  <footer>
-    <p>This is an independent community project. All yoyo data is collected from public sources.<br>
-      <a href="https://www.gsquaredyoyos.com" target="_blank">Visit the official site</a> for authorized releases.</p>
-  </footer>
-
-  <script src="app.js"></script>
-
-  <div id="yoyo-modal" class="modal">
-    <div class="modal-content">
-      <button class="modal-close-btn" onclick="closeModal()">✕</button>
-      <div id="modal-body"></div>
-    </div>
+  <header class="text-center py-8">
+    <h1 class="text-4xl font-bold">Yoyodex</h1>
+    <p class="text-xl">The Complete GSquared Yoyos Database</p>
+  </header>
+  
+  <!-- Search and Filter Controls -->
+  <div class="flex justify-center space-x-4 py-4">
+    <input type="text" id="search-input" class="p-2 rounded" placeholder="Search by model or colorway">
+    <button id="sort-az" class="p-2 bg-gray-600 rounded">Sort A-Z</button>
+    <button id="sort-za" class="p-2 bg-gray-600 rounded">Sort Z-A</button>
+    <button id="sort-newest" class="p-2 bg-gray-600 rounded">Newest</button>
+    <button id="sort-oldest" class="p-2 bg-gray-600 rounded">Oldest</button>
   </div>
 
+  <!-- Yoyo Grid -->
+  <div id="yoyo-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 py-8">
+    <!-- Yoyo cards will be injected here dynamically -->
+  </div>
+
+  <script src="script.js"></script>
 </body>
+<footer>
+  <p>This is an independent community project. All yoyo data is collected from public sources.<br>
+  <a href="https://www.gsquaredyoyos.com" target="_blank">Visit the official site</a> for authorized releases.</p>
+</footer>
 </html>
