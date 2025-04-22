@@ -121,7 +121,6 @@ footer {
   overflow: auto;
 }
 
-/*******  ad2db3d6-b4e2-488c-879a-c4896a724ed9  *******/
 .hidden {
   display: none !important;
 }
@@ -211,13 +210,11 @@ footer {
 }
 
 .favorite-btn.active {
-  color: #ffd700;
-  transform: scale(1.2);
+  color: #fbbf24; /* yellow-400 */
 }
 
 .owned-btn.active {
-  color: #4ade80;
-  transform: scale(1.2);
+  color: #34d399; /* green-400 */
 }
 
 .favorite-btn:focus, .owned-btn:focus {
@@ -239,4 +236,90 @@ footer {
   font-weight: 600;
   margin-bottom: 0.3rem;
   text-shadow: 1px 1px 2px #0006;
+}
+
+/* Add these modal-specific styles */
+.modal {
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+.modal-content {
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+}
+
+.modal-details {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 0.5rem;
+}
+
+.modal-image-container {
+  position: relative;
+  width: 100%;
+  max-height: 70vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-thumbnails {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.modal-thumbnail {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.modal-thumbnail.active {
+  border-color: #fbbf24;
+}
+
+.loading-spinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: none;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.card-actions button {
+  opacity: 0.8;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.card-actions button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.controls-container button {
+  margin: 0 0.25rem;
+}
+
+.controls-container button.active {
+  border: 2px solid currentColor;
 }
