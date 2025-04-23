@@ -138,73 +138,84 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function fetchYoyoData() {
-    const spinner = document.getElementById('main-loading-spinner');
-    const grid    = document.getElementById('yoyo-grid');
-    if (spinner) spinner.style.display = 'flex';
-    if (grid)    { grid.style.display = 'grid'; grid.innerHTML = ''; }
-
-    const cacheKey = CACHE_CONFIG.yoyosCacheKey;
-    const cached   = getCachedData(cacheKey);
-    if (cached) {
-      console.log('Using cached yoyo data');
-      yoyoData = cached;
-      populateModelFilter();
-      populateColorwayFilter();
-      displayYoyoCards();
-    }
-
+    const mainLoadingSpinner = document.getElementById('main-loading-spinner');
+    const yoyoGrid = document.getElementById('yoyo-grid');
+    
     try {
-      console.log('Fetching latest yoyo data…');
-      const resp  = await fetch(CONFIG.yoyosDataUrl);
-      const fresh = await resp.json();
-
-      if (!cached || JSON.stringify(fresh) !== JSON.stringify(cached)) {
-        console.log('New yoyo data received, updating cache & UI');
-        yoyoData = fresh;
-        setCachedData(cacheKey, fresh);
+      // Show loading spinner, hide grid
+      if (mainLoadingSpinner) mainLoadingSpinner.style.display = 'flex';
+      if (yoyoGrid) {
+        yoyoGrid.style.display = 'grid'; // Keep grid visible but empty
+        yoyoGrid.innerHTML = ''; // Clear any existing content
+      }
+      
+      // Try to get cached data first
+      const cachedYoyos = getCachedData(CACHE_CONFIG.yoyosCacheKey);
+      if (cachedYoyos) {
+        yoyoData = cachedYoyos;
+        console.log('Using cached yoyo data');
+        await fetchSpecsData();
         populateModelFilter();
         populateColorwayFilter();
-        displayYoyoCards();
-      } else {
-        console.log('Yoyo data unchanged');
+        return;
       }
-    } catch (err) {
-      console.error('Network fetch failed, keeping cached data', err);
+      
+      console.log('Fetching yoyo data...');
+      const response = await fetch(CONFIG.yoyosDataUrl);
+      yoyoData = await response.json();
+      console.log('Fetched Yoyo Data:', yoyoData);
+      
+      // Cache the fetched data
+      setCachedData(CACHE_CONFIG.yoyosCacheKey, yoyoData);
+      
+      await fetchSpecsData();
+      populateModelFilter();
+      populateColorwayFilter();
+    } catch (error) {
+      console.error('Error fetching yoyo data:', error);
+      yoyoData = []; // Initialize as empty array if error
+      populateModelFilter();
+      populateColorwayFilter();
     } finally {
-      if (spinner) spinner.style.display = 'none';
+      // Hide loading spinner, show grid
+      if (mainLoadingSpinner) mainLoadingSpinner.style.display = 'none';
       isLoading = false;
+      displayYoyoCards();
     }
   }
 
   async function fetchSpecsData() {
-    const cacheKey    = CACHE_CONFIG.specsCacheKey;
-    const cachedSpecs = getCachedData(cacheKey);
-
-    if (cachedSpecs) {
-      console.log('Using cached specs data');
-      specsData = cachedSpecs;
-      // render filters even if we revalidate later
-      populateModelFilter();
-      populateColorwayFilter();
-    }
-
     try {
-      console.log('Fetching latest specs data…');
-      const resp  = await fetch(CONFIG.specsDataUrl);
-      const fresh = await resp.json();
-
-      if (!cachedSpecs || JSON.stringify(fresh) !== JSON.stringify(cachedSpecs)) {
-        console.log('New specs data received, updating cache & UI');
-        specsData = fresh;
-        setCachedData(cacheKey, fresh);
+      // Try to get cached specs first
+      const cachedSpecs = getCachedData(CACHE_CONFIG.specsCacheKey);
+      if (cachedSpecs) {
+        specsData = cachedSpecs;
+        console.log('Using cached specs data');
         populateModelFilter();
         populateColorwayFilter();
-      } else {
-        console.log('Specs data unchanged');
+        return;
       }
-    } catch (err) {
-      console.error('Error fetching specs data, keeping cached specs', err);
-      // specsData remains as cached (or empty array if no cache)
+      
+      console.log('Fetching specs data...');
+      const response = await fetch(CONFIG.specsDataUrl);
+      specsData = await response.json();
+      console.log('Fetched Specs Data:', specsData);
+      
+      if (!Array.isArray(specsData)) {
+        console.error('Specs data is not an array:', specsData);
+        specsData = [];
+      }
+      
+      // Cache the fetched data
+      setCachedData(CACHE_CONFIG.specsCacheKey, specsData);
+      
+      populateModelFilter();
+      populateColorwayFilter();
+    } catch (error) {
+      console.error('Error fetching specs data:', error);
+      specsData = [];
+      populateModelFilter();
+      populateColorwayFilter();
     }
   }
 
