@@ -139,83 +139,93 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function fetchYoyoData() {
     const mainLoadingSpinner = document.getElementById('main-loading-spinner');
-    const yoyoGrid = document.getElementById('yoyo-grid');
-    
+    const yoyoGrid           = document.getElementById('yoyo-grid');
+
+    // 1) Show spinner & clear grid
+    if (mainLoadingSpinner) mainLoadingSpinner.style.display = 'flex';
+    if (yoyoGrid) {
+      yoyoGrid.style.display = 'grid';
+      yoyoGrid.innerHTML = '';
+    }
+
+    const cacheKey     = CACHE_CONFIG.yoyosCacheKey;
+    const cachedYoyos  = getCachedData(cacheKey);
+    const hasCache     = Boolean(cachedYoyos);
+    let gotFreshUpdate = false;
+
+    // 2) If we have cached data, render it immediately
+    if (hasCache) {
+      console.log('Using cached yoyo data');
+      isLoading = false;
+      yoyoData   = cachedYoyos;
+      populateModelFilter();
+      populateColorwayFilter();
+      displayYoyoCards();
+    }
+
+    // 3) Fetch fresh in background
     try {
-      // Show loading spinner, hide grid
-      if (mainLoadingSpinner) mainLoadingSpinner.style.display = 'flex';
-      if (yoyoGrid) {
-        yoyoGrid.style.display = 'grid'; // Keep grid visible but empty
-        yoyoGrid.innerHTML = ''; // Clear any existing content
-      }
-      
-      // Try to get cached data first
-      const cachedYoyos = getCachedData(CACHE_CONFIG.yoyosCacheKey);
-      if (cachedYoyos) {
-        yoyoData = cachedYoyos;
-        console.log('Using cached yoyo data');
-        await fetchSpecsData();
+      console.log('Fetching latest yoyo data…');
+      const resp  = await fetch(CONFIG.yoyosDataUrl);
+      const fresh = await resp.json();
+
+      // 4) If no cache yet, or the payload actually changed, update UI
+      if (!hasCache || JSON.stringify(fresh) !== JSON.stringify(cachedYoyos)) {
+        console.log('New yoyo data received, updating cache & UI');
+        gotFreshUpdate = true;
+        yoyoData = fresh;
+        setCachedData(cacheKey, fresh);
         populateModelFilter();
         populateColorwayFilter();
-        return;
+        displayYoyoCards();
+      } else {
+        console.log('Yoyo data unchanged — skipping redraw');
       }
-      
-      console.log('Fetching yoyo data...');
-      const response = await fetch(CONFIG.yoyosDataUrl);
-      yoyoData = await response.json();
-      console.log('Fetched Yoyo Data:', yoyoData);
-      
-      // Cache the fetched data
-      setCachedData(CACHE_CONFIG.yoyosCacheKey, yoyoData);
-      
-      await fetchSpecsData();
-      populateModelFilter();
-      populateColorwayFilter();
-    } catch (error) {
-      console.error('Error fetching yoyo data:', error);
-      yoyoData = []; // Initialize as empty array if error
-      populateModelFilter();
-      populateColorwayFilter();
+    } catch (err) {
+      console.error('Error fetching yoyo data:', err);
     } finally {
-      // Hide loading spinner, show grid
+      // 5) Hide spinner and, if this was the first load, draw cards
       if (mainLoadingSpinner) mainLoadingSpinner.style.display = 'none';
       isLoading = false;
-      displayYoyoCards();
+
+      // Only call displayYoyoCards() on first load (no cache).
+      // If we got a fresh update we already called it above.
+      if (!hasCache) {
+        displayYoyoCards();
+      }
     }
   }
 
   async function fetchSpecsData() {
+    // 1) Render cached specs if any
+    const cacheKey    = CACHE_CONFIG.specsCacheKey;
+    const cachedSpecs = getCachedData(cacheKey);
+    if (cachedSpecs) {
+      console.log('Using cached specs data');
+      specsData = cachedSpecs;
+      populateModelFilter();
+      populateColorwayFilter();
+    }
+
+    // 2) Always fetch fresh specs
     try {
-      // Try to get cached specs first
-      const cachedSpecs = getCachedData(CACHE_CONFIG.specsCacheKey);
-      if (cachedSpecs) {
-        specsData = cachedSpecs;
-        console.log('Using cached specs data');
+      console.log('Fetching latest specs data…');
+      const resp  = await fetch(CONFIG.specsDataUrl);
+      const fresh = await resp.json();
+
+      // 3) If no cache, or data changed, update cache & UI
+      if (!cachedSpecs || JSON.stringify(fresh) !== JSON.stringify(cachedSpecs)) {
+        console.log('New specs data received, updating cache & UI');
+        specsData = fresh;
+        setCachedData(cacheKey, fresh);
         populateModelFilter();
         populateColorwayFilter();
-        return;
+      } else {
+        console.log('Specs data unchanged');
       }
-      
-      console.log('Fetching specs data...');
-      const response = await fetch(CONFIG.specsDataUrl);
-      specsData = await response.json();
-      console.log('Fetched Specs Data:', specsData);
-      
-      if (!Array.isArray(specsData)) {
-        console.error('Specs data is not an array:', specsData);
-        specsData = [];
-      }
-      
-      // Cache the fetched data
-      setCachedData(CACHE_CONFIG.specsCacheKey, specsData);
-      
-      populateModelFilter();
-      populateColorwayFilter();
-    } catch (error) {
-      console.error('Error fetching specs data:', error);
-      specsData = [];
-      populateModelFilter();
-      populateColorwayFilter();
+    } catch (err) {
+      console.error('Error fetching specs data:', err);
+      // keep cached specsData (or empty array if none)
     }
   }
 
@@ -268,7 +278,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // If a colorway is selected, filter yoyos by that colorway first
     if (selectedColorway) {
-      filteredYoyos = filteredYoyos.filter(y => y.colorway === selectedColorway);
+      // coerce both sides to string so numeric colorways like "117" still match
+      filteredYoyos = filteredYoyos.filter(y => String(y.colorway) === selectedColorway);
     }
 
     const models = Array.from(new Set(filteredYoyos.map(y => y.model))).sort();
@@ -363,9 +374,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const searchTerms = (searchTerm || '').toLowerCase().split(' ').filter(term => term.length > 0);
       
+
       // Check model and colorway filters
-      if ((selectedModel && yoyo.model !== selectedModel) ||
-          (selectedColorway && yoyo.colorway !== selectedColorway)) {
+      if (
+        (selectedModel && yoyo.model !== selectedModel) ||
+        (selectedColorway && String(yoyo.colorway) !== selectedColorway)
+      ) {
         return false;
       }
       
@@ -509,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sortDateButton.setAttribute('data-active', 'true');
       const sortIcon = sortDateButton.querySelector('.sort-icon');
       if (sortIcon) {
-        sortIcon.textContent = '↑';
+        sortIcon.textContent = 'Newest ↑';
       }
     }
   });
@@ -525,7 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.classList.add('bg-gray-800');
       this.setAttribute('data-active', 'false');
       if (sortIcon) {
-        sortIcon.textContent = '↑';
+        sortIcon.textContent = 'Newest ↑';
       }
     } else {
       // When showing oldest first, add active state
@@ -533,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.classList.add('bg-purple-900');
       this.setAttribute('data-active', 'true');
       if (sortIcon) {
-        sortIcon.textContent = '↓';
+        sortIcon.textContent = 'Oldest ↓';
       }
     }
     
@@ -611,12 +625,13 @@ document.addEventListener('DOMContentLoaded', () => {
     card.setAttribute('role', 'button');
     card.setAttribute('aria-label', `${yoyo.model} - ${yoyo.colorway}`);
 
-    // Add loading state for image
+    // Add loading state for image with a uniform square container
     const imageContainer = document.createElement('div');
-    imageContainer.classList.add('relative', 'pb-[100%]', 'w-full'); // 1:1 aspect ratio
+    imageContainer.classList.add('card-image-container');
 
     const image = document.createElement('img');
-    image.classList.add('absolute', 'inset-0', 'w-full', 'h-full', 'object-cover');
+    image.classList.add('card-image');
+
     image.src = CONFIG.placeholderImage; // Start with placeholder
     image.alt = `${yoyo.model} - ${yoyo.colorway}`;
     image.loading = 'lazy'; // Enable native lazy loading
@@ -671,6 +686,14 @@ document.addEventListener('DOMContentLoaded', () => {
     content.appendChild(model);
     content.appendChild(colorway);
     content.appendChild(details);
+
+    // ─── Show description on card ─────────────────────────
+    if (yoyo.description) {
+      const cardDesc = document.createElement('p');
+      cardDesc.classList.add('text-sm', 'text-gray-400', 'mb-2');
+      cardDesc.textContent = yoyo.description;
+      content.appendChild(cardDesc);
+    }
 
     // Add actions container for favorite and owned buttons
       const actions = document.createElement('div');
@@ -935,14 +958,10 @@ document.addEventListener('DOMContentLoaded', () => {
     modalDetails.innerHTML = `
       <div class="space-y-4">
         <div>
-          <h2 class="modal-title">
-            ${yoyo.model}
-          </h2>
-          <p class="modal-subtitle">
-            ${yoyo.colorway}
-          </p>
+          <h2 class="modal-title">${yoyo.model}</h2>
+          <p class="modal-subtitle">${yoyo.colorway}</p>
         </div>
-  
+
         <div class="space-y-2 text-gray-300">
           <p class="flex items-center gap-2">
             <span class="text-gray-400">Released:</span>
@@ -955,21 +974,21 @@ document.addEventListener('DOMContentLoaded', () => {
             </p>
           ` : ''}
         </div>
-  
+
         ${yoyo.description ? `
           <div class="mt-4">
             <h3 class="text-lg font-semibold mb-2 text-gray-200">Description</h3>
             <p class="text-gray-300">${yoyo.description}</p>
           </div>
         ` : ''}
-  
+
         ${specs ? `
           <div class="specs-section mt-4">
             <h3 class="text-lg font-semibold mb-3 text-gray-200">Specifications</h3>
             <div class="grid grid-cols-2 gap-2">
               ${Object.entries(specs)
                 .filter(([key, value]) => key !== 'model' && value && value !== 'N/A' && value !== '-')
-                .map(([key, value]) => 
+                .map(([key, value]) =>
                   `<div class="text-gray-400">${key.replace(/_/g, ' ')}:</div><div class="text-white">${value}</div>`
                 ).join('')}
             </div>

@@ -26,37 +26,37 @@
         <div class="flex items-center gap-2">
           <!-- Search Container -->
           <div class="search-container">
-            <input type="text" id="search" placeholder="Search yoyos..." class="search-input">
-            <button id="clear-search" class="clear-search-button" aria-label="Clear search">×</button>
+            <input type="text" id="search" placeholder="Search yoyos..." class="search-input" data-tooltip="Search yoyos...">
+            <button id="clear-search" class="clear-search-button" aria-label="Clear search" data-tooltip="Clear search">×</button>
           </div>
           
           <!-- Filters and Sort -->
           <div class="filter-group">
-            <select id="model-filter" class="filter-select">
+            <select id="model-filter" class="filter-select" data-tooltip="Filter by model">
               <option value="">All Models</option>
             </select>
-            <button id="sort-model-filter" class="sort-button" data-active="false">
+            <button id="sort-model-filter" class="sort-button" data-active="false" data-tooltip="Toggle model sort">
               <span class="sort-icon">A↓</span>
             </button>
           </div>
           <div class="filter-group">
-            <select id="colorway-filter" class="filter-select">
+            <select id="colorway-filter" class="filter-select" data-tooltip="Filter by colorway">
               <option value="">All Colorways</option>
             </select>
-            <button id="sort-colorway-filter" class="sort-button" data-active="false">
+            <button id="sort-colorway-filter" class="sort-button" data-active="false" data-tooltip="Toggle colorway sort">
               <span class="sort-icon">A↓</span>
             </button>
           </div>
-          <button id="show-favorites" class="filter-button" data-active="false">
+          <button id="show-favorites" class="filter-button" data-active="false" data-tooltip="Show only favorites">
             <span class="filter-text">Favorites</span>
           </button>
-          <button id="show-owned" class="filter-button" data-active="false">
+          <button id="show-owned" class="filter-button" data-active="false" data-tooltip="Show only owned">
             <span class="filter-text">Owned</span>
           </button>
-          <button id="sort-date" class="sort-button" data-active="false">
+          <button id="sort-date" class="sort-button" data-active="false" data-tooltip="Toggle release-date order">
             <span class="sort-icon">↑</span>
           </button>
-          <button id="clear-filters" class="clear-filters-button" data-active="false">
+          <button id="clear-filters" class="clear-filters-button" data-active="false" data-tooltip="Clear all filters">
             Clear Filters
           </button>
         </div>
