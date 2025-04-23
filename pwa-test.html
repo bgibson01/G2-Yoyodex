@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PWA Test Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .test-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+    .warning {
+      color: orange;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .app-link {
+      display: inline-block;
+      margin: 20px 0;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+    .app-link:hover {
+      background-color: #0b7dda;
+    }
+    .install-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    .diagnostic-list {
+      margin-top: 10px;
+      padding-left: 20px;
+    }
+    .diagnostic-item {
+      margin-bottom: 5px;
+    }
+    .diagnostic-item.pass {
+      color: green;
+    }
+    .diagnostic-item.fail {
+      color: red;
+    }
+    .diagnostic-item.warning {
+      color: orange;
+    }
+    .details-toggle {
+      background: none;
+      border: none;
+      color: blue;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 0;
+      margin-top: 5px;
+    }
+    .details-content {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>PWA Test Page</h1>
+  
+  <a href="index.html" class="app-link">Go to Main Application</a>
+  
+  <div class="test-section">
+    <h2>Install Prompt Test</h2>
+    <p>This section tests the install prompt functionality and provides detailed diagnostics.</p>
+    <button id="checkInstallPrompt">Check Install Prompt</button>
+    <div id="installPromptResult" class="result"></div>
+    <div id="installPromptDiagnostics" class="diagnostic-list"></div>
+    <button id="toggleInstallDetails" class="details-toggle">Show Details</button>
+    <div id="installDetails" class="details-content"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Service Worker Test</h2>
+    <p>This section tests the service worker registration and functionality.</p>
+    <button id="checkServiceWorker">Check Service Worker</button>
+    <div id="serviceWorkerResult" class="result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Cache Test</h2>
+    <p>This section tests the caching functionality.</p>
+    <button id="checkCache">Check Cache</button>
+    <div id="cacheResult" class="result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Offline Test</h2>
+    <p>This section tests the offline functionality.</p>
+    <button id="checkOffline">Check Offline Mode</button>
+    <div id="offlineResult" class="result"></div>
+  </div>
+  
+  <script>
+    // Function to display results
+    function displayResult(elementId, message, isError = false) {
+      const element = document.getElementById(elementId);
+      element.textContent = message;
+      element.className = isError ? 'error' : 'success';
+    }
+    
+    // Function to add diagnostic item
+    function addDiagnosticItem(containerId, message, status) {
+      const container = document.getElementById(containerId);
+      const item = document.createElement('div');
+      item.className = `diagnostic-item ${status}`;
+      item.textContent = message;
+      container.appendChild(item);
+    }
+    
+    // Function to clear diagnostics
+    function clearDiagnostics(containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+    }
+    
+    // Toggle details visibility
+    document.getElementById('toggleInstallDetails').addEventListener('click', function() {
+      const details = document.getElementById('installDetails');
+      if (details.style.display === 'block') {
+        details.style.display = 'none';
+        this.textContent = 'Show Details';
+      } else {
+        details.style.display = 'block';
+        this.textContent = 'Hide Details';
+      }
+    });
+    
+    // Check Install Prompt
+    document.getElementById('checkInstallPrompt').addEventListener('click', async () => {
+      try {
+        clearDiagnostics('installPromptDiagnostics');
+        const detailsContainer = document.getElementById('installDetails');
+        detailsContainer.innerHTML = '';
+        
+        // Check if running on HTTPS or localhost
+        const isSecureContext = window.isSecureContext;
+        addDiagnosticItem('installPromptDiagnostics', 
+          `Secure Context: ${isSecureContext ? 'Yes' : 'No'}`, 
+          isSecureContext ? 'pass' : 'fail');
+        
+        if (!isSecureContext) {
+          addDiagnosticItem('installPromptDiagnostics', 
+            'PWA requires HTTPS or localhost to work', 'fail');
+          displayResult('installPromptResult', 'PWA requires HTTPS or localhost to work', true);
+          return;
+        }
+        
+        // Check manifest
+        let manifestCheck = 'Checking manifest...';
+        detailsContainer.innerHTML += `<p><strong>Manifest Check:</strong> ${manifestCheck}</p>`;
+        
+        try {
+          const manifestResponse = await fetch('manifest.json');
+          if (manifestResponse.ok) {
+            const manifest = await manifestResponse.json();
+            addDiagnosticItem('installPromptDiagnostics', 
+              'Manifest file exists and is valid JSON', 'pass');
+            
+            // Check required manifest fields
+            const requiredFields = ['name', 'short_name', 'start_url', 'display', 'icons'];
+            let missingFields = [];
+            
+            for (const field of requiredFields) {
+              if (!manifest[field]) {
+                missingFields.push(field);
+              }
+            }
+            
+            if (missingFields.length > 0) {
+              addDiagnosticItem('installPromptDiagnostics', 
+                `Manifest is missing required fields: ${missingFields.join(', ')}`, 'fail');
+            } else {
+              addDiagnosticItem('installPromptDiagnostics', 
+                'Manifest has all required fields', 'pass');
+            }
+            
+            // Check icons
+            if (manifest.icons && manifest.icons.length > 0) {
+              addDiagnosticItem('installPromptDiagnostics', 
+                `Manifest has ${manifest.icons.length} icons defined`, 'pass');
+              
+              // Check if icons exist
+              let missingIcons = [];
+              for (const icon of manifest.icons) {
+                try {
+                  const iconResponse = await fetch(icon.src);
+                  if (!iconResponse.ok) {
+                    missingIcons.push(icon.src);
+                  }
+                } catch (e) {
+                  missingIcons.push(icon.src);
+                }
+              }
+              
+              if (missingIcons.length > 0) {
+                addDiagnosticItem('installPromptDiagnostics', 
+                  `Missing icon files: ${missingIcons.join(', ')}`, 'fail');
+              } else {
+                addDiagnosticItem('installPromptDiagnostics', 
+                  'All icon files exist', 'pass');
+              }
+            } else {
+              addDiagnosticItem('installPromptDiagnostics', 
+                'Manifest has no icons defined', 'fail');
+            }
+          } else {
+            addDiagnosticItem('installPromptDiagnostics', 
+              'Manifest file not found or invalid', 'fail');
+          }
+        } catch (e) {
+          addDiagnosticItem('installPromptDiagnostics', 
+            `Error checking manifest: ${e.message}`, 'fail');
+        }
+        
+        // Check service worker
+        if ('serviceWorker' in navigator) {
+          try {
+            const registration = await navigator.serviceWorker.ready;
+            if (registration) {
+              addDiagnosticItem('installPromptDiagnostics', 
+                'Service Worker is registered and active', 'pass');
+            } else {
+              addDiagnosticItem('installPromptDiagnostics', 
+                'Service Worker is not registered', 'fail');
+            }
+          } catch (e) {
+            addDiagnosticItem('installPromptDiagnostics', 
+              `Error checking service worker: ${e.message}`, 'fail');
+          }
+        } else {
+          addDiagnosticItem('installPromptDiagnostics', 
+            'Service Workers are not supported in this browser', 'fail');
+        }
+        
+        // Check if already installed
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+          addDiagnosticItem('installPromptDiagnostics', 
+            'App is already installed as a PWA', 'warning');
+          displayResult('installPromptResult', 'App is already installed as a PWA', false);
+          return;
+        }
+        
+        // Check if browser supports install prompt
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+          addDiagnosticItem('installPromptDiagnostics', 
+            'Install prompt is available', 'pass');
+          displayResult('installPromptResult', 'Install prompt is available!', false);
+        });
+        
+        // If we get here and deferredPrompt is still null, the prompt is not available
+        setTimeout(() => {
+          if (!deferredPrompt) {
+            addDiagnosticItem('installPromptDiagnostics', 
+              'Install prompt is not available. This could be due to:', 'fail');
+            addDiagnosticItem('installPromptDiagnostics', 
+              '- The app is already installed', 'fail');
+            addDiagnosticItem('installPromptDiagnostics', 
+              '- The user has recently dismissed the prompt', 'fail');
+            addDiagnosticItem('installPromptDiagnostics', 
+              '- The browser does not support PWA installation', 'fail');
+            addDiagnosticItem('installPromptDiagnostics', 
+              '- The app does not meet the PWA criteria', 'fail');
+            displayResult('installPromptResult', 'Install prompt is not available. See diagnostics for details.', true);
+          }
+        }, 1000);
+        
+      } catch (error) {
+        displayResult('installPromptResult', `Error checking install prompt: ${error.message}`, true);
+      }
+    });
+    
+    // Check Service Worker
+    document.getElementById('checkServiceWorker').addEventListener('click', async () => {
+      try {
+        if ('serviceWorker' in navigator) {
+          const registration = await navigator.serviceWorker.ready;
+          if (registration) {
+            displayResult('serviceWorkerResult', 'Service Worker is registered and active.');
+          } else {
+            displayResult('serviceWorkerResult', 'Service Worker is not registered. Please visit the main application first.', true);
+          }
+        } else {
+          displayResult('serviceWorkerResult', 'Service Workers are not supported in this browser.', true);
+        }
+      } catch (error) {
+        displayResult('serviceWorkerResult', `Error checking service worker: ${error.message}`, true);
+      }
+    });
+    
+    // Check Cache
+    document.getElementById('checkCache').addEventListener('click', async () => {
+      try {
+        if ('caches' in window) {
+          const cache = await caches.open('g2-yoyodex-v1');
+          const requests = await cache.keys();
+          if (requests.length > 0) {
+            displayResult('cacheResult', `Cache is working. ${requests.length} items are cached.`);
+          } else {
+            displayResult('cacheResult', 'Cache is empty. Please visit the main application first.', true);
+          }
+        } else {
+          displayResult('cacheResult', 'Cache API is not supported in this browser.', true);
+        }
+      } catch (error) {
+        displayResult('cacheResult', `Error checking cache: ${error.message}`, true);
+      }
+    });
+    
+    // Check Offline Mode
+    document.getElementById('checkOffline').addEventListener('click', async () => {
+      try {
+        if ('serviceWorker' in navigator) {
+          const registration = await navigator.serviceWorker.ready;
+          if (registration) {
+            displayResult('offlineResult', 'Service Worker is registered. Offline mode should work if the app is cached.');
+          } else {
+            displayResult('offlineResult', 'Service Worker is not registered. Please visit the main application first.', true);
+          }
+        } else {
+          displayResult('offlineResult', 'Service Workers are not supported in this browser.', true);
+        }
+      } catch (error) {
+        displayResult('offlineResult', `Error checking offline mode: ${error.message}`, true);
+      }
+    });
+  </script>
+</body>
+</html> 
