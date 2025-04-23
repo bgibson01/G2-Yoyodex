@@ -3,56 +3,155 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="G² Yoyodex - A comprehensive database of G² yoyos">
   <title>Yoyodex</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <meta name="theme-color" content="#1e1e1e">
 </head>
 <body class="bg-gray-900 text-white">
   <main>
     <!-- Header Section -->
-    <header class="p-4 bg-gray-800 text-center">
+    <header class="p-4 bg-gray-800 text-center" role="banner">
       <h1 class="text-2xl">
-        <img src="assets/g2-logo.png" alt="G² Logo" class="logo w-10 inline-block">
-        YoYodex
-        <br>
-        <span class="community-badge text-sm text-gray-400">Community Project</span>
+        G² YoYodex <span class="community-badge text-sm text-gray-400">Community Project</span>
       </h1>
     </header>
 
-    <!-- Search Bar Section -->
-    <div class="search-container p-4">
-      <input type="text" id="search" placeholder="Search models/colorways..." 
-             aria-label="Search yoyos" autocomplete="off" 
-             class="search-input w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600">
-      <button id="clear-search" class="clear-search absolute right-4 top-2 text-gray-400" aria-label="Clear search">✕</button>
+    <!-- Controls Container -->
+    <div class="controls-wrapper">
+      <div class="controls-container">
+        <div class="flex items-center gap-2">
+          <!-- Search Container -->
+          <div class="search-container">
+            <input type="text" id="search" placeholder="Search yoyos..." class="search-input">
+            <button id="clear-search" class="clear-search-button" aria-label="Clear search">×</button>
+          </div>
+          
+          <!-- Filters and Sort -->
+          <div class="filter-group">
+            <select id="model-filter" class="filter-select">
+              <option value="">All Models</option>
+            </select>
+            <button id="sort-model-filter" class="sort-button" data-active="false">
+              <span class="sort-icon">A↓</span>
+            </button>
+          </div>
+          <div class="filter-group">
+            <select id="colorway-filter" class="filter-select">
+              <option value="">All Colorways</option>
+            </select>
+            <button id="sort-colorway-filter" class="sort-button" data-active="false">
+              <span class="sort-icon">A↓</span>
+            </button>
+          </div>
+          <button id="show-favorites" class="filter-button" data-active="false">
+            <span class="filter-text">Favorites</span>
+          </button>
+          <button id="show-owned" class="filter-button" data-active="false">
+            <span class="filter-text">Owned</span>
+          </button>
+          <button id="sort-date" class="sort-button" data-active="false">
+            <span class="sort-icon">↑</span>
+          </button>
+          <button id="clear-filters" class="clear-filters-button" data-active="false">
+            Clear Filters
+          </button>
+        </div>
+      </div>
+      
+      <!-- Results Counter -->
+      <div class="results-counter-container">
+        <span id="results-counter" class="results-counter"></span>
+      </div>
     </div>
 
-    <!-- Controls Section -->
-    <div class="controls-container p-4 flex flex-wrap gap-2 justify-center items-center">
-      <select id="model-filter" class="bg-gray-700 text-white px-3 py-1 rounded">
-        <option value="">All Models</option>
-        <!-- JS will populate options -->
-      </select>
-      <button id="sort-date" class="bg-yellow-700 text-white px-3 py-1 rounded hover:bg-yellow-800">Sort by Release Date</button>
+    <!-- Scrollable Content Area -->
+    <div class="content-scroll-area">
+      <!-- Yoyo Cards Grid -->
+      <div id="yoyo-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" 
+           role="grid" aria-label="Yoyo collection"></div>
+      
+      <div id="main-loading-spinner" class="loading-spinner-container" aria-live="polite">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Loading Yoyos...</p>
+      </div>
+      
+      <div id="pagination-container" class="pagination" role="navigation" aria-label="Pagination"></div>
     </div>
-
-    <!-- Yoyo Cards Grid -->
-    <div id="yoyo-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4"></div>
-    <div id="pagination-container" class="pagination"></div>
   </main>
 
   <!-- Footer -->
-  <footer class="p-4 bg-gray-800 text-white text-center">
+  <footer class="p-4 bg-gray-800 text-white text-center" role="contentinfo">
     <p>This is an independent community project. All yoyo data is collected from public sources.<br>
-    <a href="https://www.gsquaredyoyos.com" target="_blank">Visit the official site</a> for authorized releases.</p>
+    <a href="https://www.gsquaredyoyos.com" target="_blank" rel="noopener">Visit the official site</a> for authorized releases.</p>
   </footer>
 
-  <!-- Modal for additional images -->
-  <div id="modal" class="modal hidden fixed inset-0 z-50 flex justify-center items-center">
-    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50"></div>
-    <div class="modal-content bg-gray-900 p-6 rounded-lg relative z-10">
-      <span id="close-modal" class="text-white cursor-pointer text-2xl absolute top-4 right-6">✕</span>
-      <img id="modal-main-image" src="" class="w-full h-auto rounded mb-4" alt="Yoyo Image">
-      <div id="modal-images" class="flex space-x-2 overflow-x-auto"></div>
+  <!-- Scroll to Top Button -->
+  <button id="scroll-to-top" class="scroll-to-top hidden" aria-label="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+    </svg>
+  </button>
+
+  <!-- Modal -->
+  <div id="modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center" 
+       role="dialog" aria-modal="true" aria-hidden="true">
+    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-75"></div>
+    <div class="modal-content relative bg-gray-800 rounded-lg shadow-xl max-w-6xl w-11/12">
+      <button id="close-modal" class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-10" 
+              aria-label="Close modal">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      
+      <div class="modal-inner p-6">
+        <div class="flex gap-6">
+          <!-- Left: Main Image -->
+          <div class="w-2/3">
+            <div class="modal-image-container bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center">
+              <img id="modal-main-image" src="" class="max-h-[60vh] w-auto object-contain" alt="Yoyo Image">
+            </div>
+            <!-- Thumbnails below main image -->
+            <div id="modal-images" class="mt-4 flex gap-2 overflow-x-auto py-2" role="tablist" aria-label="Image gallery"></div>
+          </div>
+
+          <!-- Right: Details -->
+          <div id="modal-details" class="w-1/3 overflow-y-auto bg-gray-900 rounded-lg p-4">
+            <div class="space-y-4">
+              <!-- Title and release info are working correctly -->
+              <div>
+                <h2 class="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">
+                  Loadout
+                </h2>
+                <p class="text-xl bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                  Weapon X
+                </p>
+              </div>
+
+              <div class="space-y-2 text-gray-300">
+                <p class="flex items-center gap-2">
+                  <span class="text-gray-400">Released:</span>
+                  <span class="text-white">March 18, 2025</span>
+                </p>
+                <p class="flex items-center gap-2">
+                  <span class="text-gray-400">Quantity:</span>
+                  <span class="text-white">12</span>
+                </p>
+              </div>
+            </div>
+            <div class="specs-section mt-4">
+              <h3 class="text-lg font-semibold mb-3 text-gray-200">Specifications</h3>
+              <div class="grid grid-cols-2 gap-2">
+                <!-- Dynamically loaded specs would go here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
