@@ -1,4 +1,8 @@
-const CACHE_NAME = 'yoyodex-v1';
+// Version-based cache name
+const CACHE_VERSION = '1.0.1';
+const CACHE_NAME = `yoyodex-cache-v${CACHE_VERSION}`;
+
+// Assets to cache
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -11,8 +15,12 @@ const ASSETS_TO_CACHE = [
   './assets/icon-512.png'
 ];
 
-// Install event - cache assets
+// Install event - cache assets and skip waiting
 self.addEventListener('install', (event) => {
+  // Skip waiting to activate immediately
+  event.waitUntil(self.skipWaiting());
+  
+  // Cache assets
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -21,8 +29,12 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and claim clients
 self.addEventListener('activate', (event) => {
+  // Claim clients to ensure the new service worker controls all pages
+  event.waitUntil(clients.claim());
+  
+  // Clean up old caches
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -38,11 +50,30 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache, fall back to network
 self.addEventListener('fetch', (event) => {
+  // Skip cross-origin requests
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
         // Return cached response if found
         if (response) {
+          // Update cache in the background
+          fetch(event.request)
+            .then(networkResponse => {
+              if (networkResponse && networkResponse.status === 200) {
+                caches.open(CACHE_NAME)
+                  .then(cache => {
+                    cache.put(event.request, networkResponse);
+                  });
+              }
+            })
+            .catch(() => {
+              // Ignore errors when updating cache
+            });
+            
           return response;
         }
 

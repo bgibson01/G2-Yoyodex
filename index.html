@@ -6,16 +6,24 @@
   <meta name="description" content="G² Yoyodex - A comprehensive database of G² yoyos">
   <title>Yoyodex</title>
   
+  <!-- Cache Control -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
   <!-- Google Analytics 4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-E9G3FZFQCX"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-E9G3FZFQCX');
+    gtag('config', 'G-E9G3FZFQCX', {
+      'cookie_domain': 'auto',
+      'cookie_flags': 'SameSite=None;Secure'
+    });
   </script>
   
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=1.0.1">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
   <link rel="apple-touch-icon" href="assets/icon-192.png">
@@ -173,6 +181,6 @@
   </div>
 
   <!-- Link to the main JavaScript file -->
-  <script src="script.js"></script>
+  <script src="script.js?v=1.0.1"></script>
 </body>
 </html>
