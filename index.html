@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="G² Yoyodex - A comprehensive database of G² yoyos">
   <title>Yoyodex</title>
+  
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-E9G3FZFQCX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-E9G3FZFQCX');
+  </script>
+  
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
@@ -23,7 +33,7 @@
     <!-- Controls Container -->
     <div class="controls-wrapper">
       <div class="controls-container">
-        <div class="flex items-center gap-2">
+        <div class="controls-flex">
           <!-- Search Container -->
           <div class="search-container">
             <input type="text" id="search" placeholder="Search yoyos..." class="search-input" data-tooltip="Search yoyos...">
@@ -39,6 +49,7 @@
               <span class="sort-icon">A↓</span>
             </button>
           </div>
+          
           <div class="filter-group">
             <select id="colorway-filter" class="filter-select" data-tooltip="Filter by colorway">
               <option value="">All Colorways</option>
@@ -47,24 +58,23 @@
               <span class="sort-icon">A↓</span>
             </button>
           </div>
+          
           <button id="show-favorites" class="filter-button" data-active="false" data-tooltip="Show only favorites">
             <span class="filter-text">Favorites</span>
           </button>
+          
           <button id="show-owned" class="filter-button" data-active="false" data-tooltip="Show only owned">
             <span class="filter-text">Owned</span>
           </button>
+          
           <button id="sort-date" class="sort-button" data-active="false" data-tooltip="Toggle release-date order">
-            <span class="sort-icon">↑</span>
+            <span class="sort-icon">Date ↓</span>
           </button>
+          
           <button id="clear-filters" class="clear-filters-button" data-active="false" data-tooltip="Clear all filters">
             Clear Filters
           </button>
         </div>
-      </div>
-      
-      <!-- Results Counter -->
-      <div class="results-counter-container">
-        <span id="results-counter" class="results-counter"></span>
       </div>
     </div>
 
@@ -85,8 +95,15 @@
 
   <!-- Footer -->
   <footer class="p-4 bg-gray-800 text-white text-center" role="contentinfo">
-    <p>This is an independent community project. All yoyo data is collected from public sources.<br>
-    <a href="https://www.gsquaredyoyos.com" target="_blank" rel="noopener">Visit the official site</a> for authorized releases.</p>
+    <p>
+      <span id="results-counter" class="results-counter"></span>
+    </p>
+    <p>This is an independent community project. All yoyo data is collected from public sources.</p>
+    <p class="footer-links">
+      <a href="https://www.gsquaredyoyos.com" target="_blank" rel="noopener">Visit the official site</a>
+      <span class="footer-separator">|</span>
+      <a href="privacy.html" class="text-blue-400 hover:text-blue-300 transition-colors">Privacy Policy</a>
+    </p>
   </footer>
 
   <!-- Scroll to Top Button -->

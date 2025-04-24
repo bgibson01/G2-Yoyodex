@@ -1,4 +1,6 @@
-/* CSS Variables */
+/* ==========================================================================
+   CSS Variables and Base Configuration
+   ========================================================================== */
 :root {
   /* Colors */
   --bg-color: #1a1a1a;
@@ -39,10 +41,14 @@
   --radius-lg: 0.75rem;
 }
 
-/* Import Google Fonts */
+/* ==========================================================================
+   Font Imports
+   ========================================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@500;600&display=swap');
 
-/* Base Styles */
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
 body {
   background-color: var(--bg-color);
   color: var(--text-color);
@@ -54,16 +60,20 @@ body {
   overflow: auto; /* Allow body to scroll if needed */
 }
 
-/* Layout Components */
+/* ==========================================================================
+   Layout Components
+   ========================================================================== */
+
+/* Header */
 header {
   background: var(--gradient-header);
-  padding: 0.75rem 0;
+  padding: 0.5rem;
   text-align: center;
   border-bottom: 1px solid var(--border-color);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
-  z-index: 20; /* Increase z-index to be above controls */
+  z-index: 30; /* Increased z-index to be above controls */
   margin-bottom: 0;
 }
 
@@ -95,6 +105,7 @@ header h1 {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* Footer */
 footer {
   background: var(--gradient-header);
   padding: 0.25rem;
@@ -113,6 +124,20 @@ footer p {
   font-size: 0.875rem;
   line-height: 1.4;
   margin: 0;
+  padding: 0.25rem 0;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.footer-separator {
+  color: var(--text-secondary);
+  opacity: 0.5;
 }
 
 footer a {
@@ -129,15 +154,18 @@ footer a:hover {
   text-decoration: underline;
 }
 
-/* Search Component */
+/* ==========================================================================
+   Search Components
+   ========================================================================== */
 .search-container {
   position: relative;
-  width: 100%;
   min-width: 150px;
   max-width: none;
   margin: 0;
   flex-shrink: 1;
   flex-grow: 1;
+  display: flex;
+  align-items: center;
 }
 
 .search-input {
@@ -150,11 +178,17 @@ footer a:hover {
   padding: 0 2rem 0 0.75rem;
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  box-sizing: border-box; /* Ensure padding is included in width calculation */
+  box-sizing: border-box;
+  flex: 1;
 }
 
-/* Clear search button */
-#clear-search {
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+}
+
+.clear-search-button {
   position: absolute;
   right: 0.5rem;
   top: 50%;
@@ -166,28 +200,38 @@ footer a:hover {
   justify-content: center;
   background: transparent;
   border: none;
-  color: var(--text-secondary);
+  color: var(--text-color);
   cursor: pointer;
   transition: all 0.2s ease;
-  z-index: 1; /* Ensure button stays above input */
+  z-index: 1020;
 }
 
-/* Grid Layout */
+.clear-search-button:hover {
+  color: var(--text-color);
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+/* ==========================================================================
+   Grid Layout
+   ========================================================================== */
 #yoyo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
-  padding: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+  padding: 0.75rem;
   margin: 0;
   min-height: 300px; /* Minimum height for the grid */
   margin-bottom: 0;
 }
 
-/* Card Component */
+/* ==========================================================================
+   Card Components
+   ========================================================================== */
 .card {
   background: var(--surface-color);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  overflow: visible;
   box-shadow: var(--card-shadow);
   transition: all 0.3s ease;
   cursor: pointer;
@@ -197,6 +241,7 @@ footer a:hover {
   margin: 0;
   border: none;
   position: relative;
+  padding-bottom: 0.25rem;
 }
 
 .card:hover {
@@ -211,8 +256,9 @@ footer a:hover {
   margin: 0;
   padding: 0;
   display: block;
-  border-radius: 0;
-  border: none;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .card .relative {
@@ -233,8 +279,9 @@ footer a:hover {
   -webkit-text-fill-color: transparent;
   font-family: 'Montserrat', sans-serif;
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   margin-bottom: 0.25rem;
+  margin-top: 0.5rem;
   letter-spacing: 0.5px;
 }
 
@@ -245,8 +292,8 @@ footer a:hover {
   -webkit-text-fill-color: transparent;
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
-  font-size: 1.125rem;
-  margin-bottom: 0.25rem;
+  font-size: 1rem;
+  margin: 0.25rem 0rem;
   letter-spacing: 0.25px;
 }
 
@@ -268,14 +315,14 @@ footer a:hover {
 
 /* Card Actions */
 .card-actions {
-  padding: 0.5rem;
+  padding: 0.25rem;
   border-top: 1px solid var(--border-color);
   background: rgba(0, 0, 0, 0.1);
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   justify-content: center;
   align-items: center;
-  min-height: 1.5rem;
+  min-height: 1.25rem;
   margin-top: auto;
   width: 100%;
 }
@@ -286,8 +333,8 @@ footer a:hover {
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 1.25rem;
-  padding: 0.25rem;
+  font-size: 1.1rem;
+  padding: 0.15rem;
   border-radius: 9999px;
   display: flex;
   align-items: center;
@@ -308,32 +355,25 @@ footer a:hover {
   color: var(--secondary-color);
 }
 
-/* Tooltip styles */
-.favorite-btn::after, .owned-btn::after {
-  content: attr(data-tooltip);
+/* Card Image Container */
+.card-image-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;      /* slightly shorter than square */
+  overflow: hidden;
+}
+
+.card-image-container .card-image {
   position: absolute;
-  bottom: -1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s ease;
-  pointer-events: none;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;        /* scale/crop to fill box */
 }
 
-.favorite-btn:hover::after, .owned-btn:hover::after {
-  opacity: 1;
-  visibility: visible;
-  bottom: -2rem;
-}
-
-/* Modal Component */
+/* ==========================================================================
+   Modal Components
+   ========================================================================== */
 .modal {
   position: fixed;
   inset: 0;
@@ -363,7 +403,7 @@ footer a:hover {
   border-radius: 1rem;
 }
 
-/* modal close "X" */
+/* Modal close button */
 #close-modal {
   position: absolute;             /* take it out of flow */
   top: 0.5rem;                    /* match your padding */
@@ -532,7 +572,9 @@ footer a:hover {
   font-size: 0.875rem;
 }
 
-/* Loading Spinner */
+/* ==========================================================================
+   Loading Components
+   ========================================================================== */
 .loading-spinner-container {
   position: fixed;
   top: 50%;
@@ -558,7 +600,9 @@ footer a:hover {
   animation: spin 1s linear infinite;
 }
 
-/* Scrollbar Styling */
+/* ==========================================================================
+   Scrollbar Styling
+   ========================================================================== */
 .modal-content ::-webkit-scrollbar,
 #modal-images::-webkit-scrollbar {
   width: 8px;
@@ -582,24 +626,29 @@ footer a:hover {
   background: #6b7280;
 }
 
-/* Pagination */
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
 .pagination {
   display: none;
 }
 
-/* Utility Classes */
 .hidden {
   display: none !important;
 }
 
-/* Animations */
+/* ==========================================================================
+   Animations
+   ========================================================================== */
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* Accessibility */
+/* ==========================================================================
+   Accessibility
+   ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
@@ -616,172 +665,154 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
-/* Controls Wrapper */
+/* ==========================================================================
+   Controls Components
+   ========================================================================== */
 .controls-wrapper {
   position: sticky;
-  top: 3.5rem;
-  z-index: 10; /* Lower than header but still sticky */
-  background-color: var(--bg-color);
-  padding: 0.5rem 0;
-  margin-bottom: 0.5rem;
+  top: 0;
+  z-index: 40; /* Increased z-index to be above header */
+  background: var(--bg-color);
+  padding: 1rem 0;
   border-bottom: 1px solid var(--border-color);
-  width: 100%;
-  margin-top: 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .controls-container {
-  background: var(--bg-secondary);
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
+  padding: 0 1.5rem;
   width: 100%;
+  position: relative; /* Added to create stacking context */
 }
 
-.controls-container .flex {
+.controls-flex {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   justify-content: flex-start;
   width: 100%;
+  position: relative; /* Added to maintain position */
 }
 
-.controls-container .flex-col {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  justify-content: center;
+/* Responsive breakpoint for controls layout */
+@media (max-width: 1200px) {
+  .controls-flex {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .search-container {
+    width: 100%;
+    max-width: none;
+    margin-bottom: 0.5rem;
+    flex-grow: 1;
+  }
+  
+  .filter-group {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .filter-button, 
+  .sort-button, 
+  .clear-filters-button {
+    flex: 0 0 auto;
+  }
+  
+  .results-counter {
+    margin-left: 0;
+    width: 100%;
+    text-align: center;
+    margin-top: 0.5rem;
+    margin-right: auto;
+    margin-left: auto;
+  }
 }
 
-/* Filter Groups */
+/* ==========================================================================
+   Filter Components
+   ========================================================================== */
 .filter-group {
-  position: relative;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.25rem;
-  margin: 0;
-  flex-shrink: 0;
+  gap: 8px;
 }
 
-/* Filter Select */
-.filter-select {
-  appearance: none;
-  background: var(--gradient-search);
+.filter-group select {
+  width: 200px;
+  padding: 8px 12px;
   border: 1px solid var(--border-color);
-  border-radius: 0.375rem;
-  padding: 0 2rem 0 0.75rem;
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.875rem;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: var(--surface-color);
   color: var(--text-color);
   cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.5rem center;
-  background-size: 1rem;
-  min-width: 120px;
-  max-width: 150px;
-  transition: all 0.3s ease;
-  background-color: rgba(45, 45, 45, 0.7);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
-  height: 2rem;
-  flex-shrink: 0;
 }
 
-/* ─── ensure dropdown items are black on light bg ───────────────── */
-.filter-select option {
-  color: #000;
-  background-color: #fff;
+.filter-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
 }
 
-/* Filter Buttons */
-.filter-button {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  background: var(--gradient-search);
+/* Buttons */
+.filter-button,
+.sort-button,
+.clear-filters-button {
+  padding: 0.5rem 0.75rem;
   border: 1px solid var(--border-color);
-  color: white;
-  height: 2rem;
-  padding: 0 0.75rem;
   border-radius: 0.375rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 100px;
+  background-color: var(--surface-color);
+  color: var(--text-color);
   font-size: 0.875rem;
-}
-
-/* Sort Button */
-.sort-button {
-  min-width: 1.5rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 0.5rem;
-  background: var(--gradient-search);
-  border: 1px solid var(--border-color);
-  border-radius: 0.375rem;
-  color: white;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.875rem;
-}
-
-/* Clear Filters Button */
-.clear-filters-button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--gradient-search);
-  border: 1px solid var(--border-color);
-  transition: all 0.3s ease;
-  color: white;
   height: 2rem;
-  padding: 0 0.75rem;
-  border-radius: 0.375rem;
-  min-width: 120px;
-  font-size: 0.875rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Modal footer */
-.modal-footer {
-  border-top: 1px solid var(--border-color);
-  padding: var(--spacing-md);
+.filter-button:hover,
+.sort-button:hover,
+.clear-filters-button:hover {
+  background-color: rgba(var(--primary-rgb), 0.1);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+.filter-button[data-active="true"],
+.sort-button[data-active="true"],
+.clear-filters-button[data-active="true"] {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.sort-icon {
+  font-size: 0.75rem;
+  opacity: 0.7;
 }
 
 /* Results Counter */
-.results-counter-container {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: -1.5rem;
-  z-index: 10;
-  width: 100%;
-  max-width: 1200px;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-}
-
 .results-counter {
   font-size: 0.875rem;
-  color: var(--text-secondary);
-  text-align: center;
-  padding: 0.25rem 0.75rem;
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 0.375rem;
-  backdrop-filter: blur(4px);
+  color: var(--text-color);
+  margin-top: 0.25rem;
+  background-color: var(--surface-color);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
   display: inline-block;
-  pointer-events: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--text-secondary);
+  font-weight: 500;
 }
 
-/* Content Scroll Area */
+/* ==========================================================================
+   Content Area
+   ========================================================================== */
 .content-scroll-area {
   flex: 1;
   padding: 0 1rem;
@@ -792,7 +823,9 @@ input:focus-visible {
   z-index: 1; /* Lower than controls and header */
 }
 
-/* Scroll to Top Button */
+/* ==========================================================================
+   Scroll to Top Button
+   ========================================================================== */
 .scroll-to-top {
   position: fixed;
   bottom: 1.5rem;
@@ -835,53 +868,146 @@ input:focus-visible {
   pointer-events: none;
 }
 
-/* ─── Card Image Container for uniform aspect ratio ───────────────── */
-.card-image-container {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;      /* enforce square */
-  overflow: hidden;
-}
+/* ==========================================================================
+   Tooltip Styles
+   ========================================================================== */
 
-.card-image-container .card-image {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;        /* scale/crop to fill box */
-}
-
-/* ─── Generic tooltip for any element with data-tooltip ───────────────── */
-[data-tooltip] {
-  position: relative;
-  cursor: help; /* indicates there's more info on hover */
-}
-
-[data-tooltip]::after {
+/* Control container tooltips - appear below the cursor */
+.controls-wrapper [data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
-  bottom: 100%;                  /* appear above the element */
+  bottom: -30px;
   left: 50%;
-  transform: translateX(-50%) translateY(-4px);
+  transform: translateX(-50%);
+  padding: 4px 8px;
   background: rgba(0, 0, 0, 0.8);
   color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
+  font-size: 12px;
+  border-radius: 4px;
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s ease, visibility 0.2s ease;
-  pointer-events: none;
-  z-index: 999;
+  z-index: 30; /* Higher than header's z-index of 20 */
 }
 
-[data-tooltip]:hover::after {
+.controls-wrapper [data-tooltip]:hover::after {
   opacity: 1;
   visibility: visible;
+  bottom: -35px; /* Move down slightly on hover */
 }
 
-/* ─── Active‑state styles for filters & sorts ───────────────────────────────── */
+/* Special handling for select elements in filter groups */
+.filter-group select[data-tooltip] {
+  position: relative;
+}
+
+.filter-group select[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 30; /* Higher than header's z-index of 20 */
+  pointer-events: none; /* Prevent tooltip from interfering with select */
+}
+
+/* Use focus instead of hover for select elements */
+.filter-group select[data-tooltip]:focus::after {
+  opacity: 1;
+  visibility: visible;
+  bottom: -35px;
+}
+
+/* Also show tooltip on hover for better UX */
+.filter-group select[data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+  bottom: -35px;
+}
+
+/* Yoyo card tooltips - appear above the cursor */
+.card [data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 1010;
+}
+
+.card [data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+  top: -35px; /* Move up slightly on hover */
+}
+
+/* Base tooltip styles */
+[data-tooltip] {
+  cursor: help;
+}
+
+/* Specific tooltip styles for filter selects */
+#model-filter[data-tooltip],
+#colorway-filter[data-tooltip],
+.filter-select[data-tooltip] {
+  position: relative;
+}
+
+#model-filter[data-tooltip]::after,
+#colorway-filter[data-tooltip]::after,
+.filter-select[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 30; /* Higher than header's z-index of 20 */
+  pointer-events: none; /* Prevent tooltip from interfering with select */
+}
+
+/* Show tooltip on hover and focus */
+#model-filter[data-tooltip]:hover::after,
+#colorway-filter[data-tooltip]:hover::after,
+.filter-select[data-tooltip]:hover::after,
+#model-filter[data-tooltip]:focus::after,
+#colorway-filter[data-tooltip]:focus::after,
+.filter-select[data-tooltip]:focus::after {
+  opacity: 1;
+  visibility: visible;
+  bottom: -35px;
+}
+
+/* ==========================================================================
+   Active State Styles
+   ========================================================================== */
 
 /* Dropdowns */
 .filter-select[data-active="true"] {
@@ -897,10 +1023,13 @@ input:focus-visible {
 
 #sort-model-filter[data-active="true"] {
   background: var(--gradient-model);
+  color: black;
 }
 #sort-colorway-filter[data-active="true"] {
   background: var(--gradient-colorway);
+  color: black;
 }
+
 #sort-date[data-active="true"] {
   background: var(--gradient-button-hover);
 }
@@ -919,4 +1048,17 @@ input:focus-visible {
 .clear-filters-button[data-active="true"] {
   background: var(--gradient-button);
   color: white;
+}
+
+/* ==========================================================================
+   Overflow Handling
+   ========================================================================== */
+.filter-button {
+  /* override the default overflow:hidden so [data-tooltip] can show */
+  overflow: visible;
+}
+
+.card {
+  /* override overflow:hidden so .favorite-btn/.owned-btn tooltips can show */
+  overflow: visible;
 }

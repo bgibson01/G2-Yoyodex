@@ -193,6 +193,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!hasCache) {
         displayYoyoCards();
       }
+
+      // resize the filters now that options & selection are set
+      if (typeof adjustFilterSelectWidth === 'function') {
+        adjustFilterSelectWidth('model-filter');
+        adjustFilterSelectWidth('colorway-filter');
+      }
+
+      // 3) Update the Favorites/Owned labels now that yoyoData is populated
+      if (typeof updateFavOwnedLabels === 'function') {
+        updateFavOwnedLabels();
+      }
     }
   }
 
@@ -523,7 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sortDateButton.setAttribute('data-active', 'true');
       const sortIcon = sortDateButton.querySelector('.sort-icon');
       if (sortIcon) {
-        sortIcon.textContent = 'Newest ↑';
+        sortIcon.textContent = 'Date ↓';
       }
     }
   });
@@ -539,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.classList.add('bg-gray-800');
       this.setAttribute('data-active', 'false');
       if (sortIcon) {
-        sortIcon.textContent = 'Newest ↑';
+        sortIcon.textContent = 'Date ↓'; 
       }
     } else {
       // When showing oldest first, add active state
@@ -547,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.classList.add('bg-purple-900');
       this.setAttribute('data-active', 'true');
       if (sortIcon) {
-        sortIcon.textContent = 'Oldest ↓';
+        sortIcon.textContent = 'Date ↑';
       }
     }
     
@@ -1053,6 +1064,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateClearFiltersButton();
     scrollToTopSmooth();
     displayYoyoCards();
+    updateFavOwnedLabels();
   });
 
   document.getElementById('show-owned').addEventListener('click', () => {
@@ -1073,6 +1085,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateClearFiltersButton();
     scrollToTopSmooth();
     displayYoyoCards();
+    updateFavOwnedLabels();
   });
 
 // Add helper for smooth scroll-to-top
@@ -1182,4 +1195,122 @@ function scrollToTopSmooth() {
     // wire click to your smooth-scroll helper
     scrollBtn.addEventListener('click', scrollToTopSmooth);
   }
+
+  // ─── New helper functions ───────────────────────────────────────────────
+  function countFavorites() {
+    return yoyoData.filter(y =>
+      localStorage.getItem(`fav_${y.model}_${y.colorway}`) === '1'
+    ).length;
+  }
+
+  function countOwned() {
+    return yoyoData.filter(y =>
+      localStorage.getItem(`owned_${y.model}_${y.colorway}`) === '1'
+    ).length;
+  }
+
+  function updateFavOwnedLabels() {
+    const favBtn   = document.getElementById('show-favorites');
+    const ownedBtn = document.getElementById('show-owned');
+    if (favBtn) {
+      const n = countFavorites();
+      favBtn.textContent = `Favorites${n > 0 ? ` (${n})` : ''}`;
+    }
+    if (ownedBtn) {
+      const n = countOwned();
+      ownedBtn.textContent = `Owned${n > 0 ? ` (${n})` : ''}`;
+    }
+  }
+
+  // ─── fire once on DOM load ──────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    updateFavOwnedLabels();
+  });
+
+  // Add this function at the end of the file, before the closing bracket
+  function trackEvent(eventName, eventParams = {}) {
+    if (typeof gtag === 'function') {
+      gtag('event', eventName, eventParams);
+    }
+  }
+
+  // Track page views
+  document.addEventListener('DOMContentLoaded', function() {
+    // Track initial page view
+    trackEvent('page_view', {
+      page_title: document.title,
+      page_location: window.location.href,
+      page_path: window.location.pathname
+    });
+    
+    // Track search events
+    const searchInput = document.getElementById('search');
+    if (searchInput) {
+      searchInput.addEventListener('input', debounce((e) => {
+        trackEvent('search', {
+          search_term: e.target.value
+        });
+      }, 500));
+    }
+    
+    // Track filter usage
+    const modelFilter = document.getElementById('model-filter');
+    if (modelFilter) {
+      modelFilter.addEventListener('change', (e) => {
+        trackEvent('filter_used', {
+          filter_type: 'model',
+          filter_value: e.target.value
+        });
+      });
+    }
+    
+    const colorwayFilter = document.getElementById('colorway-filter');
+    if (colorwayFilter) {
+      colorwayFilter.addEventListener('change', (e) => {
+        trackEvent('filter_used', {
+          filter_type: 'colorway',
+          filter_value: e.target.value
+        });
+      });
+    }
+    
+    // Track favorite/owned actions
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.favorite-btn')) {
+        const isActive = e.target.closest('.favorite-btn').classList.contains('active');
+        trackEvent('favorite_action', {
+          action: isActive ? 'remove' : 'add'
+        });
+      }
+      
+      if (e.target.closest('.owned-btn')) {
+        const isActive = e.target.closest('.owned-btn').classList.contains('active');
+        trackEvent('owned_action', {
+          action: isActive ? 'remove' : 'add'
+        });
+      }
+    });
+    
+    // Track modal views
+    const modal = document.getElementById('modal');
+    if (modal) {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            const isVisible = !modal.classList.contains('hidden');
+            if (isVisible) {
+              const modelName = document.querySelector('.modal-title')?.textContent || 'Unknown';
+              const colorwayName = document.querySelector('.modal-subtitle')?.textContent || 'Unknown';
+              trackEvent('modal_view', {
+                model: modelName,
+                colorway: colorwayName
+              });
+            }
+          }
+        });
+      });
+      
+      observer.observe(modal, { attributes: true });
+    }
+  });
 });
