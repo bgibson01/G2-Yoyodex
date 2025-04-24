@@ -17,9 +17,13 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
+    
+    // Configure GA with specific settings for GitHub Pages
     gtag('config', 'G-E9G3FZFQCX', {
-      'cookie_domain': 'auto',
-      'cookie_flags': 'SameSite=None;Secure'
+      'cookie_domain': window.location.hostname,
+      'cookie_flags': 'SameSite=None;Secure',
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
     });
   </script>
   
