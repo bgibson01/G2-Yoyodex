@@ -884,20 +884,26 @@ document.addEventListener('DOMContentLoaded', () => {
     
       favoriteBtn.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevent modal from opening
-        if (localStorage.getItem(favKey)) {
-          localStorage.removeItem(favKey);
-          favoriteBtn.innerHTML = '☆';
-          favoriteBtn.classList.remove('active');
-          favoriteBtn.setAttribute('data-tooltip', 'Add to Favorites');
-        } else {
-          localStorage.setItem(favKey, '1');
-          favoriteBtn.innerHTML = '⭐';
-          favoriteBtn.classList.add('active');
-          favoriteBtn.setAttribute('data-tooltip', 'Remove from Favorites');
-        }
-        // Update the counts immediately after changing the favorite status
-        updateFavoritesAndOwnedCounts();
-      });
+      const isFavorite = !favoriteBtn.classList.contains('active');
+      
+      if (isFavorite) {
+        localStorage.setItem(favKey, '1');
+        favoriteBtn.innerHTML = '⭐';
+        favoriteBtn.classList.add('active');
+        favoriteBtn.setAttribute('data-tooltip', 'Remove from Favorites');
+      } else {
+        localStorage.removeItem(favKey);
+        favoriteBtn.innerHTML = '☆';
+        favoriteBtn.classList.remove('active');
+        favoriteBtn.setAttribute('data-tooltip', 'Add to Favorites');
+      }
+      
+      // Update the counts immediately after changing the favorite status
+      updateFavoritesAndOwnedCounts();
+      
+      // Track favorite action
+      trackEvent('Engagement', 'Toggle Favorite', yoyo.model, isFavorite ? 1 : 0);
+    });
 
     // Owned button
       const ownedBtn = document.createElement('button');
@@ -912,20 +918,26 @@ document.addEventListener('DOMContentLoaded', () => {
     
       ownedBtn.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevent modal from opening
-        if (localStorage.getItem(ownedKey)) {
-          localStorage.removeItem(ownedKey);
-          ownedBtn.innerHTML = '🔳';
-          ownedBtn.classList.remove('active');
-          ownedBtn.setAttribute('data-tooltip', 'Mark as Owned');
-        } else {
-          localStorage.setItem(ownedKey, '1');
-          ownedBtn.innerHTML = '✅';
-          ownedBtn.classList.add('active');
-          ownedBtn.setAttribute('data-tooltip', 'Remove from Owned');
-        }
-        // Update the counts immediately after changing the owned status
-        updateFavoritesAndOwnedCounts();
-      });
+      const isOwned = !ownedBtn.classList.contains('active');
+      
+      if (isOwned) {
+        localStorage.setItem(ownedKey, '1');
+        ownedBtn.innerHTML = '✅';
+        ownedBtn.classList.add('active');
+        ownedBtn.setAttribute('data-tooltip', 'Remove from Owned');
+      } else {
+        localStorage.removeItem(ownedKey);
+        ownedBtn.innerHTML = '🔳';
+        ownedBtn.classList.remove('active');
+        ownedBtn.setAttribute('data-tooltip', 'Mark as Owned');
+      }
+      
+      // Update the counts immediately after changing the owned status
+      updateFavoritesAndOwnedCounts();
+      
+      // Track owned action
+      trackEvent('Engagement', 'Toggle Owned', yoyo.model, isOwned ? 1 : 0);
+    });
 
       actions.appendChild(favoriteBtn);
       actions.appendChild(ownedBtn);
@@ -1168,6 +1180,9 @@ document.addEventListener('DOMContentLoaded', () => {
         ` : ''}
       </div>
     `;
+
+    // Track modal view
+    trackEvent('Content', 'View Yoyo Details', `${yoyo.model} - ${yoyo.colorway}`);
   }
 
   function updatePagination(totalCount = yoyoData.length) {
@@ -1354,4 +1369,50 @@ function scrollToTopSmooth() {
     // wire click to your smooth-scroll helper
     scrollBtn.addEventListener('click', scrollToTopSmooth);
   }
+
+  // Analytics helper function
+  function trackEvent(category, action, label = null, value = null) {
+    if (typeof gtag === 'function') {
+      gtag('event', action, {
+        'event_category': category,
+        'event_label': label,
+        'value': value
+      });
+    }
+  }
+
+  // Track page views with additional parameters
+  function trackPageView(pageTitle = document.title) {
+    if (typeof gtag === 'function') {
+      gtag('config', 'G-E9G3FZFQCX', {
+        'page_title': pageTitle,
+        'page_location': window.location.href,
+        'page_path': window.location.pathname
+      });
+    }
+  }
+
+  // Track user preferences
+  function trackUserPreferences() {
+    const preferences = {
+      'favorites_count': localStorage.getItem('favorites') ? JSON.parse(localStorage.getItem('favorites')).length : 0,
+      'owned_count': localStorage.getItem('owned') ? JSON.parse(localStorage.getItem('owned')).length : 0,
+      'theme': localStorage.getItem('theme') || 'light'
+    };
+    
+    if (typeof gtag === 'function') {
+      gtag('set', 'user_properties', preferences);
+    }
+  }
+
+  // Track initial page load and user preferences
+  document.addEventListener('DOMContentLoaded', () => {
+    // Track initial page view
+    trackPageView();
+    
+    // Track user preferences
+    trackUserPreferences();
+    
+    // ... rest of existing code ...
+  });
 });
