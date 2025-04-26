@@ -178,13 +178,81 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setCachedData(key, data) {
+    // Get the previous cached data for comparison
+    const previousCache = localStorage.getItem(key);
+    let previousData = null;
+    let changes = [];
+    
+    if (previousCache) {
+      try {
+        const parsedCache = JSON.parse(previousCache);
+        previousData = parsedCache.data;
+        
+        // Compare data and identify changes
+        if (Array.isArray(data) && Array.isArray(previousData)) {
+          // For arrays (like yoyos and specs)
+          const prevIds = new Set(previousData.map(item => item.id || item.model));
+          const newIds = new Set(data.map(item => item.id || item.model));
+          
+          // Find added items
+          const added = data.filter(item => {
+            const id = item.id || item.model;
+            return !prevIds.has(id);
+          });
+          
+          // Find removed items
+          const removed = previousData.filter(item => {
+            const id = item.id || item.model;
+            return !newIds.has(id);
+          });
+          
+          // Find modified items
+          const modified = data.filter(newItem => {
+            const id = newItem.id || newItem.model;
+            const prevItem = previousData.find(item => (item.id || item.model) === id);
+            return prevItem && JSON.stringify(newItem) !== JSON.stringify(prevItem);
+          });
+          
+          if (added.length > 0) changes.push(`Added ${added.length} new items`);
+          if (removed.length > 0) changes.push(`Removed ${removed.length} items`);
+          if (modified.length > 0) changes.push(`Modified ${modified.length} items`);
+          
+          // Log details of changes if there are any
+          if (changes.length > 0) {
+            console.log(`Cache changes for ${key}:`, changes);
+            
+            // Log details of added items
+            if (added.length > 0) {
+              console.log('Added items:', added.map(item => item.model || item.id));
+            }
+            
+            // Log details of removed items
+            if (removed.length > 0) {
+              console.log('Removed items:', removed.map(item => item.model || item.id));
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Error parsing previous cache:', e);
+      }
+    }
+    
     const cacheData = {
       data,
       timestamp: Date.now(),
       version: getCurrentAppVersion()
     };
+    
     localStorage.setItem(key, JSON.stringify(cacheData));
-    console.log(`Updated cache for key: ${key}. Version: ${cacheData.version}, Timestamp: ${new Date(cacheData.timestamp).toLocaleString()}`);
+    
+    // Log cache update with changes if any
+    if (changes.length > 0) {
+      console.log(`Updated cache for key: ${key}. Version: ${cacheData.version}, Timestamp: ${new Date(cacheData.timestamp).toLocaleString()}`);
+      console.log(`Changes detected: ${changes.join(', ')}`);
+    } else {
+      console.log(`Updated cache for key: ${key}. Version: ${cacheData.version}, Timestamp: ${new Date(cacheData.timestamp).toLocaleString()}`);
+      console.log(`No changes detected in data structure.`);
+    }
   }
   
   // Helper function to get the current app version
