@@ -257,8 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Helper function to get the current app version
   function getCurrentAppVersion() {
-    // This should match the version in your manifest.json or package.json
-    return '1.0.1';
+    return '1.0.2';
   }
 
   async function fetchYoyoData() {
