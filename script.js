@@ -1702,7 +1702,11 @@ function scrollToTopSmooth() {
     const closeSpecsModalBtn = document.getElementById('submit-specs-close');
     const cancelSpecsBtn = document.getElementById('submit-specs-cancel');
     const submitSpecsBtn = document.getElementById('submit-specs');
-    
+
+    // Yoyo modal close and cancel buttons
+    const closeYoyoModalBtn = document.getElementById('close-submit-yoyo-modal');
+    const cancelYoyoBtn = document.getElementById('cancel-submit-yoyo');
+
     // Submit button handler
     if (submitSpecsBtn) {
       submitSpecsBtn.addEventListener('click', () => {
@@ -1713,32 +1717,40 @@ function scrollToTopSmooth() {
         }
       });
     }
-    
+
     // Form submission handler
     if (specsForm) {
       specsForm.addEventListener('submit', handleSpecsSubmit);
     }
-    
+
     // Close button handlers for specs modal
     if (closeSpecsModalBtn) {
       closeSpecsModalBtn.addEventListener('click', closeSubmitModal);
     }
-    
     if (cancelSpecsBtn) {
       cancelSpecsBtn.addEventListener('click', closeSubmitModal);
     }
-    
+
+    // Close button handlers for yoyo modal
+    if (closeYoyoModalBtn) {
+      closeYoyoModalBtn.addEventListener('click', closeSubmitModal);
+    }
+    if (cancelYoyoBtn) {
+      cancelYoyoBtn.addEventListener('click', closeSubmitModal);
+    }
+
     // Add escape key handler for modal
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeSubmitModal();
       }
     });
-    
+
     // Click outside to close modal
     document.addEventListener('click', (e) => {
       const specsModal = document.getElementById('submit-specs-modal');
-      if (e.target === specsModal) {
+      const yoyoModal = document.getElementById('submit-yoyo-modal');
+      if (e.target === specsModal || e.target === yoyoModal) {
         closeSubmitModal();
       }
     });
