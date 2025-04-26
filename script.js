@@ -609,15 +609,9 @@ document.addEventListener('DOMContentLoaded', () => {
       modelFilter.setAttribute('data-active', 'false');
     }
     
-    if (!newModel && selectedColorway) {
-      selectedModel = '';
-      selectedColorway = '';
-      populateColorwayFilter();
-      populateModelFilter();
-    } else {
-      selectedModel = newModel;
-      populateColorwayFilter();
-    }
+    selectedModel = newModel;
+    populateColorwayFilter();
+    
     currentPage = 1;
     updateClearFiltersButton();
     scrollToTopSmooth();
