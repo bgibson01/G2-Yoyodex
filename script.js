@@ -17,9 +17,16 @@ document.addEventListener('DOMContentLoaded', () => {
               // When the new service worker is installed
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 console.log('New version available');
-                // Optionally show a notification to the user
-                // or automatically reload the page
-                // window.location.reload();
+                // Show notification to user
+                const notification = document.createElement('div');
+                notification.className = 'fixed bottom-4 left-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+                notification.textContent = 'A new version is available! Reloading...';
+                document.body.appendChild(notification);
+                
+                // Reload after a short delay to show notification
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1500);
               }
             });
           });
@@ -257,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Helper function to get the current app version
   function getCurrentAppVersion() {
-    return '1.0.2';
+    return '1.0.3';
   }
 
   async function fetchYoyoData() {
