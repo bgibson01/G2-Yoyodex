@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Helper function to get the current app version
   function getCurrentAppVersion() {
-    return '1.0.3';
+    return '1.1.0';
   }
 
   async function fetchYoyoData() {
@@ -876,7 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
       favoriteBtn.setAttribute('aria-label', 'Add to Favorites');
     favoriteBtn.setAttribute('data-tooltip', 'Add to Favorites');
       favoriteBtn.innerHTML = localStorage.getItem(favKey) ? '⭐' : '☆';
-    if (localStorage.getItem(favKey)) {
+        if (localStorage.getItem(favKey)) {
       favoriteBtn.classList.add('active');
       favoriteBtn.setAttribute('data-tooltip', 'Remove from Favorites');
     }
@@ -886,9 +886,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const isFavorite = !favoriteBtn.classList.contains('active');
       
       if (isFavorite) {
-        localStorage.setItem(favKey, '1');
-        favoriteBtn.innerHTML = '⭐';
-        favoriteBtn.classList.add('active');
+          localStorage.setItem(favKey, '1');
+          favoriteBtn.innerHTML = '⭐';
+          favoriteBtn.classList.add('active');
         favoriteBtn.setAttribute('data-tooltip', 'Remove from Favorites');
       } else {
         localStorage.removeItem(favKey);
@@ -910,7 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ownedBtn.setAttribute('aria-label', 'Mark as Owned');
     ownedBtn.setAttribute('data-tooltip', 'Mark as Owned');
       ownedBtn.innerHTML = localStorage.getItem(ownedKey) ? '✅' : '🔳';
-    if (localStorage.getItem(ownedKey)) {
+        if (localStorage.getItem(ownedKey)) {
       ownedBtn.classList.add('active');
       ownedBtn.setAttribute('data-tooltip', 'Remove from Owned');
     }
@@ -920,9 +920,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const isOwned = !ownedBtn.classList.contains('active');
       
       if (isOwned) {
-        localStorage.setItem(ownedKey, '1');
-        ownedBtn.innerHTML = '✅';
-        ownedBtn.classList.add('active');
+          localStorage.setItem(ownedKey, '1');
+          ownedBtn.innerHTML = '✅';
+          ownedBtn.classList.add('active');
         ownedBtn.setAttribute('data-tooltip', 'Remove from Owned');
       } else {
         localStorage.removeItem(ownedKey);
@@ -936,7 +936,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Track owned action
       trackEvent('Engagement', 'Toggle Owned', yoyo.model, isOwned ? 1 : 0);
-    });
+      });
 
       actions.appendChild(favoriteBtn);
       actions.appendChild(ownedBtn);
@@ -1138,6 +1138,10 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Populate details with model and colorway at the top
     const specs = specsData.find(spec => spec.model === yoyo.model);
+    console.log('Opening modal for:', yoyo.model);
+    console.log('Specs data array length:', specsData.length);
+    console.log('Found specs:', specs);
+    
     modalDetails.innerHTML = `
       <div class="space-y-4">
         <div>
@@ -1352,6 +1356,7 @@ function scrollToTopSmooth() {
   setupModalListeners();
   addFilterControls();
   fetchYoyoData();
+  fetchSpecsData();
 
   // Scroll to top button functionality
   const scrollBtn = document.getElementById('scroll-to-top');

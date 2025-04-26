@@ -28,7 +28,7 @@
     });
   </script>
   
-  <link rel="stylesheet" href="styles.css?v=1.0.1">
+  <link rel="stylesheet" href="styles.css?v=1.0.3">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
   <link rel="apple-touch-icon" href="assets/icon-192.png">
@@ -52,7 +52,7 @@
             <input type="text" id="search" placeholder="Search yoyos..." class="search-input" data-tooltip="Search yoyos...">
             <button id="clear-search" class="clear-search-button" aria-label="Clear search" data-tooltip="Clear search">×</button>
           </div>
-          
+
           <!-- Filters and Sort -->
           <div class="filter-group">
             <select id="model-filter" class="filter-select" data-tooltip="Filter by model">
@@ -93,7 +93,7 @@
 
     <!-- Scrollable Content Area -->
     <div class="content-scroll-area">
-      <!-- Yoyo Cards Grid -->
+    <!-- Yoyo Cards Grid -->
       <div id="yoyo-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" 
            role="grid" aria-label="Yoyo collection"></div>
       
@@ -108,9 +108,15 @@
 
   <!-- Footer -->
   <footer class="p-4 bg-gray-800 text-white text-center" role="contentinfo">
-    <p>
+    <div class="flex flex-wrap items-center justify-center gap-4 mb-2">
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSd9_wiR1osfAkNYXjInFzlU0gPBYNi46ukfGPUfk1c0m8Po8Q/viewform?usp=dialog" target="_blank" rel="noopener" class="gradient-button" aria-label="Submit New Yoyo">
+        Submit Yoyo
+      </a>
       <span id="results-counter" class="results-counter"></span>
-    </p>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSc0WW8lxNugEaV0AMJvSichBZ8fqP_qLMIpD39V5vcvq3-a-Q/viewform?usp=header" target="_blank" rel="noopener" class="gradient-button" aria-label="Submit Yoyo Specifications">
+        Submit Specs
+      </a>
+    </div>
     <p>This is an independent community project. All yoyo data is collected from public sources.</p>
     <p class="footer-links">
       <a href="https://www.gsquaredyoyos.com" target="_blank" rel="noopener">Visit the official site</a>
@@ -186,6 +192,6 @@
   </div>
 
   <!-- Link to the main JavaScript file -->
-  <script src="script.js?v=1.0.1"></script>
+  <script src="script.js?v=1.0.3"></script>
 </body>
 </html>
