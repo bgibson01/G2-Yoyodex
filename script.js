@@ -1641,106 +1641,7 @@ function scrollToTopSmooth() {
     container.appendChild(wrapper);
   }
 
-  // Function to initialize the submission form
-  function initSubmitForm() {
-    const yoyoForm = document.getElementById('yoyo-submit-form');
-    const specsForm = document.getElementById('submit-specs-form');
-    const addImageBtn = document.getElementById('add-image-url');
-    const closeYoyoModalBtn = document.getElementById('close-submit-yoyo-modal');
-    const closeSpecsModalBtn = document.getElementById('close-submit-specs-modal');
-    const cancelYoyoBtn = document.getElementById('cancel-submit-yoyo');
-    const cancelSpecsBtn = document.getElementById('cancel-submit-specs');
-    
-    // Submit buttons
-    const submitYoyoBtn = document.getElementById('submit-yoyo');
-    const submitSpecsBtn = document.getElementById('submit-specs');
-    
-    // Add initial image URL input if container exists
-    const imageUrlContainer = document.getElementById('image-url-container');
-    if (imageUrlContainer) {
-      addImageUrlInput();
-    }
-    
-    // Submit button handlers
-    if (submitYoyoBtn) {
-      submitYoyoBtn.addEventListener('click', () => openSubmitModal('new'));
-    }
-    
-    if (submitSpecsBtn) {
-      submitSpecsBtn.addEventListener('click', () => {
-        const specsModal = document.getElementById('submit-specs-modal');
-        if (specsModal) {
-          specsModal.classList.remove('hidden');
-          document.body.style.overflow = 'hidden';
-        }
-      });
-    }
-    
-    // Add image URL button handler
-    if (addImageBtn) {
-      addImageBtn.addEventListener('click', () => addImageUrlInput());
-    }
-    
-    // Form submission handlers
-    if (yoyoForm) {
-      yoyoForm.addEventListener('submit', handleSubmit);
-    }
-    
-    if (specsForm) {
-      specsForm.addEventListener('submit', handleSpecsSubmit);
-    }
-    
-    // Close button handlers for yoyo modal
-    if (closeYoyoModalBtn) {
-      closeYoyoModalBtn.addEventListener('click', closeSubmitModal);
-    }
-    
-    if (cancelYoyoBtn) {
-      cancelYoyoBtn.addEventListener('click', closeSubmitModal);
-    }
-    
-    // Close button handlers for specs modal
-    if (closeSpecsModalBtn) {
-      closeSpecsModalBtn.addEventListener('click', closeSubmitModal);
-    }
-    
-    if (cancelSpecsBtn) {
-      cancelSpecsBtn.addEventListener('click', closeSubmitModal);
-    }
-    
-    // Add escape key handler for modals
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeSubmitModal();
-      }
-    });
-    
-    // Click outside to close modals
-    document.addEventListener('click', (e) => {
-      const yoyoModal = document.getElementById('submit-yoyo-modal');
-      const specsModal = document.getElementById('submit-specs-modal');
-      
-      if (e.target === yoyoModal || e.target === specsModal) {
-        closeSubmitModal();
-      }
-    });
-  }
-
-  // Initialize form when DOM is loaded
-  document.addEventListener('DOMContentLoaded', () => {
-    initSubmitForm();
-    
-    // Add submit button to header if needed
-    const headerControls = document.querySelector('.controls-container');
-    if (headerControls) {
-      const submitBtn = document.createElement('button');
-      submitBtn.className = 'px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors';
-      submitBtn.textContent = 'Submit Yoyo';
-      submitBtn.onclick = () => openSubmitModal();
-      headerControls.appendChild(submitBtn);
-    }
-  });
-
+  // Function to handle specs form submission
   async function handleSpecsSubmit(event) {
     event.preventDefault();
     
@@ -1795,19 +1696,66 @@ function scrollToTopSmooth() {
     }
   }
 
-  function closeSubmitTypeModal() {
-    const modal = document.getElementById('submit-type-modal');
-    if (modal) {
-      modal.classList.add('hidden');
-      document.body.style.overflow = '';
+  // Function to initialize the submission form
+  function initSubmitForm() {
+    const specsForm = document.getElementById('submit-specs-form');
+    const closeSpecsModalBtn = document.getElementById('submit-specs-close');
+    const cancelSpecsBtn = document.getElementById('submit-specs-cancel');
+    const submitSpecsBtn = document.getElementById('submit-specs');
+    
+    // Submit button handler
+    if (submitSpecsBtn) {
+      submitSpecsBtn.addEventListener('click', () => {
+        const specsModal = document.getElementById('submit-specs-modal');
+        if (specsModal) {
+          specsModal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+        }
+      });
     }
+    
+    // Form submission handler
+    if (specsForm) {
+      specsForm.addEventListener('submit', handleSpecsSubmit);
+    }
+    
+    // Close button handlers for specs modal
+    if (closeSpecsModalBtn) {
+      closeSpecsModalBtn.addEventListener('click', closeSubmitModal);
+    }
+    
+    if (cancelSpecsBtn) {
+      cancelSpecsBtn.addEventListener('click', closeSubmitModal);
+    }
+    
+    // Add escape key handler for modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSubmitModal();
+      }
+    });
+    
+    // Click outside to close modal
+    document.addEventListener('click', (e) => {
+      const specsModal = document.getElementById('submit-specs-modal');
+      if (e.target === specsModal) {
+        closeSubmitModal();
+      }
+    });
   }
 
-  function openSubmitTypeModal() {
-    const modal = document.getElementById('submit-type-modal');
-    if (modal) {
-      modal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
+  // Initialize form when DOM is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    initSubmitForm();
+    
+    // Add submit button to header if needed
+    const headerControls = document.querySelector('.controls-container');
+    if (headerControls) {
+      const submitBtn = document.createElement('button');
+      submitBtn.className = 'px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors';
+      submitBtn.textContent = 'Submit Yoyo';
+      submitBtn.onclick = () => openSubmitModal();
+      headerControls.appendChild(submitBtn);
     }
-  }
+  });
 });
