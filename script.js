@@ -566,15 +566,14 @@ document.addEventListener('DOMContentLoaded', () => {
       colorwayFilter.setAttribute('data-active', 'false');
     }
     
-    if (!newColorway && selectedModel) {
-      selectedModel = '';
-      selectedColorway = '';
-      populateModelFilter();
-      populateColorwayFilter();
-    } else {
-      selectedColorway = newColorway;
+    // Only clear model filter if we're clearing colorway AND there's no specific model selected
+    selectedColorway = newColorway; // Update colorway first
+    
+    if (!newColorway) {
+      // If clearing colorway, just update the model filter's options
       populateModelFilter();
     }
+    
     currentPage = 1;
     updateClearFiltersButton();
     scrollToTopSmooth();
