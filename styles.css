@@ -17,8 +17,8 @@
   --gradient-model: linear-gradient(135deg, #FF6B00, #FFB800);  /* Vibrant orange to gold */
   --gradient-colorway: linear-gradient(135deg, #00A8FF, #00FFB3); /* Electric blue to cyan */
   --gradient-header: linear-gradient(135deg, #1a1a1a, #2d2d2d);
-  --gradient-button: linear-gradient(135deg, #FF6B00, #FF8F00);
-  --gradient-button-hover: linear-gradient(135deg, #FF8F00, #FFA000);
+  --gradient-button: linear-gradient(135deg, #00A8FF, #00FFB3);
+  --gradient-button-hover: linear-gradient(135deg, #FF6B00, #FFB800);
   --gradient-search: linear-gradient(135deg, #2d2d2d, #404040);
   
   /* Spacing */
@@ -140,13 +140,19 @@ footer p {
   opacity: 0.5;
 }
 
-footer a {
+footer a:not(.gradient-button) {
   background: var(--gradient-colorway);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   text-decoration: none;
   font-weight: 500;
+}
+
+footer a.gradient-button {
+  -webkit-text-fill-color: initial;
+  color: #111;
+  background-clip: border-box;
 }
 
 footer a:hover {
@@ -1061,4 +1067,29 @@ input:focus-visible {
 .card {
   /* override overflow:hidden so .favorite-btn/.owned-btn tooltips can show */
   overflow: visible;
+}
+
+/* Gradient Button for Footer Submit Links */
+.gradient-button {
+  display: inline-block;
+  padding: 0.25rem 1rem;
+  font-size: 0.95rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  background: var(--gradient-button);
+  color: #111;
+  text-shadow: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  cursor: pointer;
+}
+.gradient-button:hover, .gradient-button:focus {
+  background: var(--gradient-button-hover);
+  color: #000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  outline: none;
+  text-decoration: none;
 }
