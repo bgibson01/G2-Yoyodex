@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Helper function to get the current app version
   function getCurrentAppVersion() {
-    return '1.0.2';
+    return '1.1.0';
   }
 
   async function fetchYoyoData() {
@@ -869,7 +869,7 @@ document.addEventListener('DOMContentLoaded', () => {
       favoriteBtn.setAttribute('aria-label', 'Add to Favorites');
     favoriteBtn.setAttribute('data-tooltip', 'Add to Favorites');
       favoriteBtn.innerHTML = localStorage.getItem(favKey) ? '⭐' : '☆';
-    if (localStorage.getItem(favKey)) {
+        if (localStorage.getItem(favKey)) {
       favoriteBtn.classList.add('active');
       favoriteBtn.setAttribute('data-tooltip', 'Remove from Favorites');
     }
@@ -879,9 +879,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const isFavorite = !favoriteBtn.classList.contains('active');
       
       if (isFavorite) {
-        localStorage.setItem(favKey, '1');
-        favoriteBtn.innerHTML = '⭐';
-        favoriteBtn.classList.add('active');
+          localStorage.setItem(favKey, '1');
+          favoriteBtn.innerHTML = '⭐';
+          favoriteBtn.classList.add('active');
         favoriteBtn.setAttribute('data-tooltip', 'Remove from Favorites');
       } else {
         localStorage.removeItem(favKey);
@@ -903,7 +903,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ownedBtn.setAttribute('aria-label', 'Mark as Owned');
     ownedBtn.setAttribute('data-tooltip', 'Mark as Owned');
       ownedBtn.innerHTML = localStorage.getItem(ownedKey) ? '✅' : '🔳';
-    if (localStorage.getItem(ownedKey)) {
+        if (localStorage.getItem(ownedKey)) {
       ownedBtn.classList.add('active');
       ownedBtn.setAttribute('data-tooltip', 'Remove from Owned');
     }
@@ -913,9 +913,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const isOwned = !ownedBtn.classList.contains('active');
       
       if (isOwned) {
-        localStorage.setItem(ownedKey, '1');
-        ownedBtn.innerHTML = '✅';
-        ownedBtn.classList.add('active');
+          localStorage.setItem(ownedKey, '1');
+          ownedBtn.innerHTML = '✅';
+          ownedBtn.classList.add('active');
         ownedBtn.setAttribute('data-tooltip', 'Remove from Owned');
       } else {
         localStorage.removeItem(ownedKey);
@@ -929,7 +929,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Track owned action
       trackEvent('Engagement', 'Toggle Owned', yoyo.model, isOwned ? 1 : 0);
-    });
+      });
 
       actions.appendChild(favoriteBtn);
       actions.appendChild(ownedBtn);
@@ -1131,6 +1131,10 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Populate details with model and colorway at the top
     const specs = specsData.find(spec => spec.model === yoyo.model);
+    console.log('Opening modal for:', yoyo.model);
+    console.log('Specs data array length:', specsData.length);
+    console.log('Found specs:', specs);
+    
     modalDetails.innerHTML = `
       <div class="space-y-4">
         <div>
@@ -1345,6 +1349,7 @@ function scrollToTopSmooth() {
   setupModalListeners();
   addFilterControls();
   fetchYoyoData();
+  fetchSpecsData();
 
   // Scroll to top button functionality
   const scrollBtn = document.getElementById('scroll-to-top');
@@ -1407,4 +1412,402 @@ function scrollToTopSmooth() {
     
     // ... rest of existing code ...
   });
+
+  // Submission form functionality
+  const submitModal = document.getElementById('submit-modal');
+  const submitYoyoBtn = document.getElementById('submit-yoyo');
+  const closeSubmitBtn = document.getElementById('close-submit-modal');
+  const cancelSubmitBtn = document.getElementById('cancel-submit');
+  const submitForm = document.getElementById('yoyo-submit-form');
+  const addImageUrlBtn = document.getElementById('add-image-url');
+  const imageUrlContainer = document.getElementById('image-url-container');
+
+  // URL for the submissions sheet - use the base URL without the sheet parameter
+  const SUBMISSIONS_URL = CONFIG.yoyosDataUrl.split('?')[0] + '?sheet=submissions&action=submit';
+
+  // Helper function to check if a model has complete specs
+  function checkModelSpecs(model) {
+    const specs = {
+      diameter: document.getElementById('submit-specs-diameter').value,
+      width: document.getElementById('submit-specs-width').value,
+      weight: document.getElementById('submit-specs-weight').value,
+      material: document.getElementById('submit-specs-material').value
+    };
+    return Object.values(specs).some(value => value !== '');
+  }
+
+  // Function to open the submit modal
+  function openSubmitModal(type = 'new', existingYoyo = null) {
+    const modal = document.getElementById('submit-yoyo-modal');
+    const form = document.getElementById('yoyo-submit-form');
+    const title = document.getElementById('submit-form-title');
+    
+    if (!modal || !form) {
+      console.error('Required modal elements not found');
+      return;
+    }
+    
+    // Reset form
+    form.reset();
+    
+    // Clear any previous image URL inputs except the first one
+    const imageUrlContainer = document.getElementById('image-url-container');
+    if (imageUrlContainer) {
+      const imageInputs = imageUrlContainer.querySelectorAll('input[type="url"]');
+      imageInputs.forEach((input, index) => {
+        if (index > 0) input.parentElement.remove();
+      });
+    }
+    
+    // Set modal title and type based on submission type
+    if (type === 'update' && existingYoyo) {
+      if (title) title.textContent = 'Update Yoyo Information';
+      
+      // Pre-fill form with existing data
+      const modelInput = document.getElementById('submit-model');
+      const colorwayInput = document.getElementById('submit-colorway');
+      const releaseDateInput = document.getElementById('submit-release-date');
+      const quantityInput = document.getElementById('submit-quantity');
+      const descriptionInput = document.getElementById('submit-description');
+      
+      if (modelInput) modelInput.value = existingYoyo.model;
+      if (colorwayInput) colorwayInput.value = existingYoyo.colorway;
+      if (releaseDateInput && existingYoyo.releaseDate) {
+        releaseDateInput.value = existingYoyo.releaseDate;
+      }
+      if (quantityInput && existingYoyo.quantity) {
+        quantityInput.value = existingYoyo.quantity;
+      }
+      if (descriptionInput && existingYoyo.description) {
+        descriptionInput.value = existingYoyo.description;
+      }
+      
+      // Handle release types
+      if (existingYoyo.releaseType) {
+        const types = existingYoyo.releaseType.split(',').map(t => t.trim());
+        types.forEach(type => {
+          const checkbox = document.querySelector(`input[name="release-type"][value="${type}"]`);
+          if (checkbox) checkbox.checked = true;
+        });
+      }
+      
+      // Handle image URLs
+      if (imageUrlContainer && existingYoyo.images && existingYoyo.images.length > 0) {
+        const firstInput = imageUrlContainer.querySelector('input[type="url"]');
+        if (firstInput) firstInput.value = existingYoyo.images[0];
+        for (let i = 1; i < existingYoyo.images.length; i++) {
+          addImageUrlInput(existingYoyo.images[i]);
+        }
+      }
+    } else {
+      if (title) title.textContent = 'Submit New Yoyo';
+    }
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Function to handle form submission
+  async function handleSubmit(event) {
+    event.preventDefault();
+    
+    // Get form data
+    const model = document.getElementById('submit-model').value;
+    const colorway = document.getElementById('submit-colorway').value;
+    const releaseDate = document.getElementById('submit-release-date').value;
+    const quantity = document.getElementById('submit-quantity').value;
+    const description = document.getElementById('submit-description').value;
+    
+    // Get selected release types
+    const releaseTypes = Array.from(document.querySelectorAll('input[name="release-type"]:checked'))
+      .map(input => input.value);
+    
+    if (releaseTypes.length === 0) {
+      alert('Please select at least one release type.');
+      return;
+    }
+    
+    // Get image URLs
+    const imageUrls = Array.from(document.querySelectorAll('#image-url-container input[type="url"]'))
+      .map(input => input.value.trim())
+      .filter(url => url !== '');
+    
+    if (imageUrls.length === 0) {
+      alert('Please provide at least one image URL.');
+      return;
+    }
+    
+    // Get specs if section is visible
+    const specsSection = document.getElementById('specs-section');
+    let specs = null;
+    
+    if (specsSection.style.display !== 'none') {
+      specs = {
+        diameter: document.getElementById('submit-specs-diameter').value,
+        width: document.getElementById('submit-specs-width').value,
+        weight: document.getElementById('submit-specs-weight').value,
+        material: document.getElementById('submit-specs-material').value
+      };
+    }
+    
+    // Prepare submission data
+    const formData = {
+      type: document.querySelector('input[name="submit-type"]:checked').value,
+      model,
+      colorway,
+      release_date: releaseDate,
+      release_type: releaseTypes.join(', '),
+      quantity: quantity ? parseInt(quantity) : null,
+      description,
+      images: imageUrls
+    };
+    
+    // Check if specs were provided
+    const hasSpecs = checkModelSpecs(model);
+    if (hasSpecs) {
+      formData.specs = specs;
+    }
+    
+    try {
+      const response = await fetch(SUBMISSIONS_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        alert('Thank you for your submission! It will be reviewed by our team.');
+        closeSubmitModal();
+      } else {
+        alert('Error submitting form: ' + (result.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Error submitting form. Please try again later.');
+    }
+  }
+
+  // Event listeners for submission form
+  if (submitYoyoBtn) {
+    submitYoyoBtn.addEventListener('click', () => openSubmitModal());
+  }
+
+  // Function to close the submit modal
+  function closeSubmitModal() {
+    const yoyoModal = document.getElementById('submit-yoyo-modal');
+    const specsModal = document.getElementById('submit-specs-modal');
+    const yoyoForm = document.getElementById('yoyo-submit-form');
+    const specsForm = document.getElementById('submit-specs-form');
+    
+    if (yoyoModal) yoyoModal.classList.add('hidden');
+    if (specsModal) specsModal.classList.add('hidden');
+    if (yoyoForm) yoyoForm.reset();
+    if (specsForm) specsForm.reset();
+    
+    document.body.style.overflow = '';
+  }
+
+  // Function to add a new image URL input field
+  function addImageUrlInput(value = '') {
+    const container = document.getElementById('image-url-container');
+    if (!container) return;
+    
+    const wrapper = document.createElement('div');
+    wrapper.className = 'flex items-center gap-2 mb-2';
+    
+    const input = document.createElement('input');
+    input.type = 'url';
+    input.className = 'flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400';
+    input.placeholder = 'Enter image URL';
+    input.value = value;
+    input.required = true;
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors';
+    removeBtn.textContent = 'Remove';
+    removeBtn.onclick = () => {
+      if (container.children.length > 1) {
+        wrapper.remove();
+      }
+    };
+    
+    wrapper.appendChild(input);
+    wrapper.appendChild(removeBtn);
+    container.appendChild(wrapper);
+  }
+
+  // Function to initialize the submission form
+  function initSubmitForm() {
+    const yoyoForm = document.getElementById('yoyo-submit-form');
+    const specsForm = document.getElementById('submit-specs-form');
+    const addImageBtn = document.getElementById('add-image-url');
+    const closeYoyoModalBtn = document.getElementById('close-submit-yoyo-modal');
+    const closeSpecsModalBtn = document.getElementById('close-submit-specs-modal');
+    const cancelYoyoBtn = document.getElementById('cancel-submit-yoyo');
+    const cancelSpecsBtn = document.getElementById('cancel-submit-specs');
+    
+    // Submit buttons
+    const submitYoyoBtn = document.getElementById('submit-yoyo');
+    const submitSpecsBtn = document.getElementById('submit-specs');
+    
+    // Add initial image URL input if container exists
+    const imageUrlContainer = document.getElementById('image-url-container');
+    if (imageUrlContainer) {
+      addImageUrlInput();
+    }
+    
+    // Submit button handlers
+    if (submitYoyoBtn) {
+      submitYoyoBtn.addEventListener('click', () => openSubmitModal('new'));
+    }
+    
+    if (submitSpecsBtn) {
+      submitSpecsBtn.addEventListener('click', () => {
+        const specsModal = document.getElementById('submit-specs-modal');
+        if (specsModal) {
+          specsModal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+        }
+      });
+    }
+    
+    // Add image URL button handler
+    if (addImageBtn) {
+      addImageBtn.addEventListener('click', () => addImageUrlInput());
+    }
+    
+    // Form submission handlers
+    if (yoyoForm) {
+      yoyoForm.addEventListener('submit', handleSubmit);
+    }
+    
+    if (specsForm) {
+      specsForm.addEventListener('submit', handleSpecsSubmit);
+    }
+    
+    // Close button handlers for yoyo modal
+    if (closeYoyoModalBtn) {
+      closeYoyoModalBtn.addEventListener('click', closeSubmitModal);
+    }
+    
+    if (cancelYoyoBtn) {
+      cancelYoyoBtn.addEventListener('click', closeSubmitModal);
+    }
+    
+    // Close button handlers for specs modal
+    if (closeSpecsModalBtn) {
+      closeSpecsModalBtn.addEventListener('click', closeSubmitModal);
+    }
+    
+    if (cancelSpecsBtn) {
+      cancelSpecsBtn.addEventListener('click', closeSubmitModal);
+    }
+    
+    // Add escape key handler for modals
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSubmitModal();
+      }
+    });
+    
+    // Click outside to close modals
+    document.addEventListener('click', (e) => {
+      const yoyoModal = document.getElementById('submit-yoyo-modal');
+      const specsModal = document.getElementById('submit-specs-modal');
+      
+      if (e.target === yoyoModal || e.target === specsModal) {
+        closeSubmitModal();
+      }
+    });
+  }
+
+  // Initialize form when DOM is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    initSubmitForm();
+    
+    // Add submit button to header if needed
+    const headerControls = document.querySelector('.controls-container');
+    if (headerControls) {
+      const submitBtn = document.createElement('button');
+      submitBtn.className = 'px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors';
+      submitBtn.textContent = 'Submit Yoyo';
+      submitBtn.onclick = () => openSubmitModal();
+      headerControls.appendChild(submitBtn);
+    }
+  });
+
+  async function handleSpecsSubmit(event) {
+    event.preventDefault();
+    
+    // Get specs data
+    const specs = {
+      model: document.getElementById('submit-specs-model').value,
+      diameter: document.getElementById('submit-specs-diameter').value,
+      width: document.getElementById('submit-specs-width').value,
+      weight: document.getElementById('submit-specs-weight').value,
+      material: document.getElementById('submit-specs-material').value
+    };
+    
+    // Validate required fields
+    if (!specs.model) {
+      alert('Please enter a model name.');
+      return;
+    }
+    
+    // Check if at least one spec is provided
+    const hasSpecs = Object.entries(specs)
+      .filter(([key]) => key !== 'model')
+      .some(([_, value]) => value !== '');
+    
+    if (!hasSpecs) {
+      alert('Please provide at least one specification.');
+      return;
+    }
+    
+    try {
+      const response = await fetch(SUBMISSIONS_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'specs',
+          ...specs
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        alert('Thank you for submitting the specifications! They will be reviewed by our team.');
+        closeSubmitModal();
+      } else {
+        alert('Error submitting specs: ' + (result.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error submitting specs:', error);
+      alert('Error submitting specs. Please try again later.');
+    }
+  }
+
+  function closeSubmitTypeModal() {
+    const modal = document.getElementById('submit-type-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+  }
+
+  function openSubmitTypeModal() {
+    const modal = document.getElementById('submit-type-modal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+  }
 });
