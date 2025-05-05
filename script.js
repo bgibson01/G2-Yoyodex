@@ -590,6 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateClearFiltersButton();
     scrollToTopSmooth();
     displayYoyoCards();
+    trackEvent('Engagement', 'Search', searchTerm);
   }, 300));
 
   document.getElementById('clear-search').addEventListener('click', () => {
@@ -613,6 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateClearFiltersButton();
     scrollToTopSmooth();
     displayYoyoCards();
+    trackEvent('Engagement', 'Filter Model', selectedModel);
   });
 
   document.getElementById('colorway-filter').addEventListener('change', (e) => {
@@ -622,6 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateClearFiltersButton();
     scrollToTopSmooth();
     displayYoyoCards();
+    trackEvent('Engagement', 'Filter Colorway', selectedColorway);
   });
 
   // Set initial state of date sort button
@@ -657,6 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sortIcon) {
         sortIcon.textContent = 'Old to New';
       }
+      trackEvent('Engagement', 'Sort Date', sortDateDesc ? 'New to Old' : 'Old to New');
     }
     
     currentPage = 1;
@@ -1198,12 +1202,14 @@ document.addEventListener('DOMContentLoaded', () => {
     modelSortType = modelSortType === 'alpha' ? 'quantity' : 'alpha';
     updateSortButton(document.getElementById('sort-model-filter'), modelSortType);
     populateModelFilter();
+    trackEvent('Engagement', 'Sort Model', modelSortType);
   });
 
   document.getElementById('sort-colorway-filter').addEventListener('click', () => {
     colorwaySortType = colorwaySortType === 'alpha' ? 'quantity' : 'alpha';
     updateSortButton(document.getElementById('sort-colorway-filter'), colorwaySortType);
     populateColorwayFilter();
+    trackEvent('Engagement', 'Sort Colorway', colorwaySortType);
   });
   
   // Add event listeners for show wishlist and show owned buttons
@@ -1333,7 +1339,10 @@ function scrollToTopSmooth() {
   }
 
   // Add event listener for clear filters button
-  document.getElementById('clear-filters').addEventListener('click', clearAllFilters);
+  document.getElementById('clear-filters').addEventListener('click', () => {
+    clearAllFilters();
+    trackEvent('Engagement', 'Clear Filters');
+  });
 
   setupModalListeners();
   addFilterControls();
@@ -1359,7 +1368,10 @@ function scrollToTopSmooth() {
     });
 
     // wire click to your smooth-scroll helper
-    scrollBtn.addEventListener('click', scrollToTopSmooth);
+    scrollBtn.addEventListener('click', () => {
+      scrollToTopSmooth();
+      trackEvent('Engagement', 'Scroll To Top');
+    });
   }
 
   // Analytics helper function
@@ -1404,5 +1416,11 @@ function scrollToTopSmooth() {
     
     // Track user preferences
     trackUserPreferences();
+  });
+
+  document.querySelectorAll('.gradient-button').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      trackEvent('Engagement', 'Footer Link Click', btn.textContent.trim());
+    });
   });
 });
