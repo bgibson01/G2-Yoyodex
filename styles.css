@@ -94,7 +94,8 @@ header h1 {
 
 .community-badge {
   font-family: 'Poppins', sans-serif;
-  font-size: 0.875rem;
+  font-size: 0.875rem; /* or whatever you want */
+  color: #a0a0a0;      /* or your preferred gray */
   background: var(--gradient-colorway);
   -webkit-background-clip: text;
   background-clip: text;
@@ -333,7 +334,7 @@ footer a:hover {
   padding: .25em 0rem;
 }
 
-.favorite-btn, .owned-btn {
+.wishlist-btn, .owned-btn {
   background: transparent;
   border: none;
   color: var(--text-secondary);
@@ -348,12 +349,12 @@ footer a:hover {
   position: relative;
 }
 
-.favorite-btn:hover, .owned-btn:hover {
+.wishlist-btn:hover, .owned-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
   transform: scale(1.1);
 }
 
-.favorite-btn.active {
+.wishlist-btn.active {
   color: var(--primary-color);
 }
 
@@ -1065,7 +1066,7 @@ input:focus-visible {
 }
 
 .card {
-  /* override overflow:hidden so .favorite-btn/.owned-btn tooltips can show */
+  /* override overflow:hidden so .wishlist-btn/.owned-btn tooltips can show */
   overflow: visible;
 }
 

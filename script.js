@@ -122,11 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let specsData = [];
   let searchTerm = '';
   let selectedModel = '';
+  let selectedColorway = '';
   let sortDateDesc = true; // Default to newest first
-  let showFavorites = false;
+  let showWishlist = false;
   let showOwned = false;
   let isLoading = true;
-  let selectedColorway = '';
   let modelSortType = 'alpha'; // 'alpha' or 'quantity'
   let modelSortDesc = false;
   let colorwaySortType = 'alpha';
@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Helper function to get the current app version
   function getCurrentAppVersion() {
-    return '1.1.0';
+    return '1.1.1';
   }
 
   async function fetchYoyoData() {
@@ -306,6 +306,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`Cache update: ${hasCache ? 'Updating existing cache' : 'Creating new cache'}`);
         gotFreshUpdate = true;
         yoyoData = fresh;
+        // Defensive: ensure yoyoData is always an array
+        if (!Array.isArray(yoyoData)) yoyoData = [];
         setCachedData(cacheKey, fresh);
         populateModelFilter();
         populateColorwayFilter();
@@ -513,8 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const searchTerms = (searchTerm || '').toLowerCase().split(' ').filter(term => term.length > 0);
       
-
-      // Check model and colorway filters
+      // Single-select filter logic
       if (
         (selectedModel && yoyo.model !== selectedModel) ||
         (selectedColorway && String(yoyo.colorway) !== selectedColorway)
@@ -522,10 +523,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
       }
       
-      // Check favorites filter
-      if (showFavorites) {
-        const favKey = `fav_${yoyo.model}_${yoyo.colorway}`;
-        if (localStorage.getItem(favKey) !== '1') {
+      // Check wishlist filter
+      if (showWishlist) {
+        const wishlistKey = `wishlist_${yoyo.model}_${yoyo.colorway}`;
+        if (localStorage.getItem(wishlistKey) !== '1') {
           return false;
         }
       }
@@ -572,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateClearFiltersButton() {
     const clearFiltersBtn = document.getElementById('clear-filters');
-    const hasActiveFilters = searchTerm || selectedModel || selectedColorway || showFavorites || showOwned || !sortDateDesc;
+    const hasActiveFilters = searchTerm || selectedModel || selectedColorway || showWishlist || showOwned || !sortDateDesc;
     
     if (hasActiveFilters) {
       clearFiltersBtn.classList.add('active');
@@ -606,18 +607,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('model-filter').addEventListener('change', (e) => {
-    const newModel = e.target.value;
-    const modelFilter = document.getElementById('model-filter');
-    
-    if (newModel) {
-      modelFilter.setAttribute('data-active', 'true');
-    } else {
-      modelFilter.setAttribute('data-active', 'false');
-    }
-    
-    selectedModel = newModel;
+    selectedModel = e.target.value;
     populateColorwayFilter();
-    
     currentPage = 1;
     updateClearFiltersButton();
     scrollToTopSmooth();
@@ -625,23 +616,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('colorway-filter').addEventListener('change', (e) => {
-    const newColorway = e.target.value;
-    const colorwayFilter = document.getElementById('colorway-filter');
-    
-    if (newColorway) {
-      colorwayFilter.setAttribute('data-active', 'true');
-    } else {
-      colorwayFilter.setAttribute('data-active', 'false');
-    }
-    
-    // Only clear model filter if we're clearing colorway AND there's no specific model selected
-    selectedColorway = newColorway; // Update colorway first
-    
-    if (!newColorway) {
-      // If clearing colorway, just update the model filter's options
-      populateModelFilter();
-    }
-    
+    selectedColorway = e.target.value;
+    populateModelFilter();
     currentPage = 1;
     updateClearFiltersButton();
     scrollToTopSmooth();
@@ -707,17 +683,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateFavoritesAndOwnedCounts() {
-    // Count favorites
-    let favoritesCount = 0;
+    // Count wishlist
+    let wishlistCount = 0;
     let ownedCount = 0;
     
-    // Loop through all yoyos to count favorites and owned
+    // Loop through all yoyos to count wishlist and owned
     yoyoData.forEach(yoyo => {
-      const favKey = `fav_${yoyo.model}_${yoyo.colorway}`;
+      const wishlistKey = `wishlist_${yoyo.model}_${yoyo.colorway}`;
       const ownedKey = `owned_${yoyo.model}_${yoyo.colorway}`;
       
-      if (localStorage.getItem(favKey) === '1') {
-        favoritesCount++;
+      if (localStorage.getItem(wishlistKey) === '1') {
+        wishlistCount++;
       }
       
       if (localStorage.getItem(ownedKey) === '1') {
@@ -726,11 +702,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Update button text
-    const favoritesBtn = document.getElementById('show-favorites');
+    const wishlistBtn = document.getElementById('show-wishlist');
     const ownedBtn = document.getElementById('show-owned');
     
-    if (favoritesBtn) {
-      favoritesBtn.innerHTML = `<span class="filter-text">Favorites (${favoritesCount})</span>`;
+    if (wishlistBtn) {
+      wishlistBtn.innerHTML = `<span class="filter-text">Wishlist (${wishlistCount})</span>`;
     }
     
     if (ownedBtn) {
@@ -766,7 +742,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update results counter
     updateResultsCounter(filtered.length);
     
-    // Update favorites and owned counts
+    // Update wishlist and owned counts
     updateFavoritesAndOwnedCounts();
 
     // Display no results message if needed
@@ -862,46 +838,46 @@ document.addEventListener('DOMContentLoaded', () => {
       content.appendChild(cardDesc);
     }
 
-    // Add actions container for favorite and owned buttons
+    // Add actions container for wishlist and owned buttons
       const actions = document.createElement('div');
     actions.classList.add('card-actions', 'mt-auto', 'flex', 'gap-2', 'justify-center');
 
     // Generate unique keys for localStorage
-      const favKey = `fav_${yoyo.model}_${yoyo.colorway}`;
+      const wishlistKey = `wishlist_${yoyo.model}_${yoyo.colorway}`;
       const ownedKey = `owned_${yoyo.model}_${yoyo.colorway}`;
 
-    // Favorite button
-      const favoriteBtn = document.createElement('button');
-    favoriteBtn.classList.add('favorite-btn', 'p-2', 'rounded-full', 'hover:bg-gray-700', 'transition-colors');
-      favoriteBtn.setAttribute('aria-label', 'Add to Favorites');
-    favoriteBtn.setAttribute('data-tooltip', 'Add to Favorites');
-      favoriteBtn.innerHTML = localStorage.getItem(favKey) ? '⭐' : '☆';
-        if (localStorage.getItem(favKey)) {
-      favoriteBtn.classList.add('active');
-      favoriteBtn.setAttribute('data-tooltip', 'Remove from Favorites');
+    // Wishlist button
+      const wishlistBtn = document.createElement('button');
+    wishlistBtn.classList.add('wishlist-btn', 'p-2', 'rounded-full', 'hover:bg-gray-700', 'transition-colors');
+      wishlistBtn.setAttribute('aria-label', 'Add to Wishlist');
+    wishlistBtn.setAttribute('data-tooltip', 'Add to Wishlist');
+      wishlistBtn.innerHTML = localStorage.getItem(wishlistKey) ? '💖' : '🤍';
+        if (localStorage.getItem(wishlistKey)) {
+      wishlistBtn.classList.add('active');
+      wishlistBtn.setAttribute('data-tooltip', 'Remove from Wishlist');
     }
     
-      favoriteBtn.addEventListener('click', (e) => {
+      wishlistBtn.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevent modal from opening
-      const isFavorite = !favoriteBtn.classList.contains('active');
+      const isWishlist = !wishlistBtn.classList.contains('active');
       
-      if (isFavorite) {
-          localStorage.setItem(favKey, '1');
-          favoriteBtn.innerHTML = '⭐';
-          favoriteBtn.classList.add('active');
-        favoriteBtn.setAttribute('data-tooltip', 'Remove from Favorites');
+      if (isWishlist) {
+          localStorage.setItem(wishlistKey, '1');
+          wishlistBtn.innerHTML = '💖';
+          wishlistBtn.classList.add('active');
+        wishlistBtn.setAttribute('data-tooltip', 'Remove from Wishlist');
       } else {
-        localStorage.removeItem(favKey);
-        favoriteBtn.innerHTML = '☆';
-        favoriteBtn.classList.remove('active');
-        favoriteBtn.setAttribute('data-tooltip', 'Add to Favorites');
+        localStorage.removeItem(wishlistKey);
+        wishlistBtn.innerHTML = '🤍';
+        wishlistBtn.classList.remove('active');
+        wishlistBtn.setAttribute('data-tooltip', 'Add to Wishlist');
       }
       
-      // Update the counts immediately after changing the favorite status
+      // Update the counts immediately after changing the wishlist status
       updateFavoritesAndOwnedCounts();
       
-      // Track favorite action
-      trackEvent('Engagement', 'Toggle Favorite', yoyo.model, isFavorite ? 1 : 0);
+      // Track wishlist action
+      trackEvent('Engagement', 'Toggle Wishlist', yoyo.model, isWishlist ? 1 : 0);
     });
 
     // Owned button
@@ -909,7 +885,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ownedBtn.classList.add('owned-btn', 'p-2', 'rounded-full', 'hover:bg-gray-700', 'transition-colors');
       ownedBtn.setAttribute('aria-label', 'Mark as Owned');
     ownedBtn.setAttribute('data-tooltip', 'Mark as Owned');
-      ownedBtn.innerHTML = localStorage.getItem(ownedKey) ? '✅' : '🔳';
+      ownedBtn.innerHTML = localStorage.getItem(ownedKey) ? '✅' : '🛒';
         if (localStorage.getItem(ownedKey)) {
       ownedBtn.classList.add('active');
       ownedBtn.setAttribute('data-tooltip', 'Remove from Owned');
@@ -926,7 +902,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ownedBtn.setAttribute('data-tooltip', 'Remove from Owned');
       } else {
         localStorage.removeItem(ownedKey);
-        ownedBtn.innerHTML = '🔳';
+        ownedBtn.innerHTML = '🛒';
         ownedBtn.classList.remove('active');
         ownedBtn.setAttribute('data-tooltip', 'Mark as Owned');
       }
@@ -938,7 +914,7 @@ document.addEventListener('DOMContentLoaded', () => {
       trackEvent('Engagement', 'Toggle Owned', yoyo.model, isOwned ? 1 : 0);
       });
 
-      actions.appendChild(favoriteBtn);
+      actions.appendChild(wishlistBtn);
       actions.appendChild(ownedBtn);
     card.appendChild(content);
     card.appendChild(actions);
@@ -1174,7 +1150,13 @@ document.addEventListener('DOMContentLoaded', () => {
             <h3 class="text-lg font-semibold mb-3 text-gray-200">Specifications</h3>
             <div class="grid grid-cols-2 gap-2">
               ${Object.entries(specs)
-                .filter(([key, value]) => key !== 'model' && value && value !== 'N/A' && value !== '-')
+                .filter(([key, value]) =>
+                  key !== 'model' &&
+                  key !== 'sort_key' &&
+                  key !== 'created_at' &&
+                  key !== 'last_modified' &&
+                  value && value !== 'N/A' && value !== '-'
+                )
                 .map(([key, value]) =>
                   `<div class="text-gray-400">${key.replace(/_/g, ' ')}:</div><div class="text-white">${value}</div>`
                 ).join('')}
@@ -1224,12 +1206,12 @@ document.addEventListener('DOMContentLoaded', () => {
     populateColorwayFilter();
   });
   
-  // Add event listeners for show favorites and show owned buttons
-  document.getElementById('show-favorites').addEventListener('click', () => {
-    showFavorites = !showFavorites;
-    const button = document.getElementById('show-favorites');
+  // Add event listeners for show wishlist and show owned buttons
+  document.getElementById('show-wishlist').addEventListener('click', () => {
+    showWishlist = !showWishlist;
+    const button = document.getElementById('show-wishlist');
     
-    if (showFavorites) {
+    if (showWishlist) {
       button.classList.remove('bg-gray-800');
       button.classList.add('bg-yellow-900');
       button.setAttribute('data-active', 'true');
@@ -1290,7 +1272,7 @@ function scrollToTopSmooth() {
     colorwayFilter.setAttribute('data-active', 'false');
     
     // Reset filter display flags
-    showFavorites = false;
+    showWishlist = false;
     showOwned = false;
     
     // Reset sort orders
@@ -1322,13 +1304,13 @@ function scrollToTopSmooth() {
     }
     
     // Reset filter buttons
-    const favoritesBtn = document.getElementById('show-favorites');
+    const wishlistBtn = document.getElementById('show-wishlist');
     const ownedBtn = document.getElementById('show-owned');
     
-    if (favoritesBtn) {
-      favoritesBtn.classList.remove('bg-yellow-900');
-      favoritesBtn.classList.add('bg-gray-800');
-      favoritesBtn.setAttribute('data-active', 'false');
+    if (wishlistBtn) {
+      wishlistBtn.classList.remove('bg-yellow-900');
+      wishlistBtn.classList.add('bg-gray-800');
+      wishlistBtn.setAttribute('data-active', 'false');
     }
     
     if (ownedBtn) {
@@ -1355,8 +1337,14 @@ function scrollToTopSmooth() {
 
   setupModalListeners();
   addFilterControls();
-  fetchYoyoData();
-  fetchSpecsData();
+
+  // Now fetch data (after Choices.js is ready)
+  async function initializeApp() {
+    await fetchYoyoData();
+    await fetchSpecsData();
+  }
+  // Call the new initializer
+  initializeApp();
 
   // Scroll to top button functionality
   const scrollBtn = document.getElementById('scroll-to-top');
@@ -1399,7 +1387,7 @@ function scrollToTopSmooth() {
   // Track user preferences
   function trackUserPreferences() {
     const preferences = {
-      'favorites_count': localStorage.getItem('favorites') ? JSON.parse(localStorage.getItem('favorites')).length : 0,
+      'wishlist_count': localStorage.getItem('wishlist') ? JSON.parse(localStorage.getItem('wishlist')).length : 0,
       'owned_count': localStorage.getItem('owned') ? JSON.parse(localStorage.getItem('owned')).length : 0,
       'theme': localStorage.getItem('theme') || 'light'
     };
@@ -1416,7 +1404,5 @@ function scrollToTopSmooth() {
     
     // Track user preferences
     trackUserPreferences();
-    
-    // ... rest of existing code ...
   });
 });
