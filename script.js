@@ -863,25 +863,25 @@ document.addEventListener('DOMContentLoaded', () => {
     
       wishlistBtn.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevent modal from opening
-      const isWishlist = !wishlistBtn.classList.contains('active');
+      const isAdding = !wishlistBtn.classList.contains('active');
       
-      if (isWishlist) {
+      if (isAdding) {
           localStorage.setItem(wishlistKey, '1');
           wishlistBtn.innerHTML = '💖';
           wishlistBtn.classList.add('active');
         wishlistBtn.setAttribute('data-tooltip', 'Remove from Wishlist');
+        trackEvent('Engagement', 'Add to Wishlist', yoyo.model);
       } else {
         localStorage.removeItem(wishlistKey);
         wishlistBtn.innerHTML = '🤍';
         wishlistBtn.classList.remove('active');
         wishlistBtn.setAttribute('data-tooltip', 'Add to Wishlist');
+        trackEvent('Engagement', 'Remove from Wishlist', yoyo.model);
       }
       
       // Update the counts immediately after changing the wishlist status
       updateFavoritesAndOwnedCounts();
-      
-      // Track wishlist action
-      trackEvent('Engagement', 'Toggle Wishlist', yoyo.model, isWishlist ? 1 : 0);
+    
     });
 
     // Owned button
@@ -897,25 +897,26 @@ document.addEventListener('DOMContentLoaded', () => {
     
       ownedBtn.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevent modal from opening
-      const isOwned = !ownedBtn.classList.contains('active');
+      const isAdding = !ownedBtn.classList.contains('active');
       
-      if (isOwned) {
+      if (isAdding) {
           localStorage.setItem(ownedKey, '1');
           ownedBtn.innerHTML = '✅';
           ownedBtn.classList.add('active');
         ownedBtn.setAttribute('data-tooltip', 'Remove from Owned');
+        trackEvent('Engagement', 'Add to Owned', yoyo.model);
       } else {
         localStorage.removeItem(ownedKey);
         ownedBtn.innerHTML = '🛒';
         ownedBtn.classList.remove('active');
         ownedBtn.setAttribute('data-tooltip', 'Mark as Owned');
+        trackEvent('Engagement', 'Remove from Owned', yoyo.model);
       }
       
       // Update the counts immediately after changing the owned status
       updateFavoritesAndOwnedCounts();
       
-      // Track owned action
-      trackEvent('Engagement', 'Toggle Owned', yoyo.model, isOwned ? 1 : 0);
+      // Track owned action (split above)
       });
 
       actions.appendChild(wishlistBtn);
@@ -943,7 +944,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Create modal content
       let html = `<h2 class="text-lg font-bold mb-2">${model} Specs</h2><ul>`;
       for (const [key, value] of Object.entries(specs)) {
-        if (key !== "model" && value && value !== "N/A" && value !== "-") {
+        if (key !== "Model" && value && value !== "N/A" && value !== "-") {
           html += `<li><strong>${key.replace(/_/g, ' ')}:</strong> ${value}</li>`;
         }
       }
@@ -1122,6 +1123,49 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Specs data array length:', specsData.length);
     console.log('Found specs:', specs);
     
+    // Only show selected fields, with user-friendly labels and units
+    // Compose 'Composition' from Body and Rims
+    let composition = '';
+    if (specs) {
+      const body = specs['body'];
+      const rims = specs['rims'];
+      if (body && body !== 'N/A' && body !== '-') {
+        if (rims && rims !== 'N/A' && rims !== '-') {
+          composition = `${body} with ${rims} rims`;
+        } else {
+          composition = body;
+        }
+      }
+    }
+    const specFields = [
+      // Composition is handled separately
+      { key: 'info', label: 'Additional Info' },
+      { key: 'dia', label: 'Diameter', unit: 'mm' },
+      { key: 'wid', label: 'Width', unit: 'mm' },
+      { key: 'wt', label: 'Weight', unit: 'g' },
+      { key: 'pads', label: 'Response' },
+      { key: 'bearing', label: 'Bearing' },
+      { key: 'axle', label: 'Axle', unit: 'mm' },     
+      { key: 'released', label: 'Model Released' },
+      { key: 'status', label: 'Status' },
+      { key: 'source', label: 'Source' }
+    ];
+    
+    let specHtml = '';
+    if (composition) {
+      specHtml += `<div class=\"text-gray-400\">Composition:</div><div class=\"text-white\">${composition}</div>`;
+    }
+    specHtml += specs ? specFields
+      .filter(field => specs[field.key] && specs[field.key] !== 'N/A' && specs[field.key] !== '-')
+      .map(field => {
+        let value = specs[field.key];
+        if (field.unit && value && !String(value).includes(field.unit)) {
+          value = `${value} ${field.unit}`;
+        }
+        return `<div class=\"text-gray-400\">${field.label}:</div><div class=\"text-white\">${value}</div>`;
+      })
+      .join('') : '';
+    
     modalDetails.innerHTML = `
       <div class="space-y-4">
         <div>
@@ -1149,21 +1193,11 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         ` : ''}
 
-        ${specs ? `
+        ${specHtml ? `
           <div class="specs-section mt-4">
             <h3 class="text-lg font-semibold mb-3 text-gray-200">Specifications</h3>
             <div class="grid grid-cols-2 gap-2">
-              ${Object.entries(specs)
-                .filter(([key, value]) =>
-                  key !== 'model' &&
-                  key !== 'sort_key' &&
-                  key !== 'created_at' &&
-                  key !== 'last_modified' &&
-                  value && value !== 'N/A' && value !== '-'
-                )
-                .map(([key, value]) =>
-                  `<div class="text-gray-400">${key.replace(/_/g, ' ')}:</div><div class="text-white">${value}</div>`
-                ).join('')}
+              ${specHtml}
             </div>
           </div>
         ` : ''}
@@ -1221,10 +1255,12 @@ document.addEventListener('DOMContentLoaded', () => {
       button.classList.remove('bg-gray-800');
       button.classList.add('bg-yellow-900');
       button.setAttribute('data-active', 'true');
+      trackEvent('Engagement', 'Filter', 'Show Wishlist');
     } else {
       button.classList.remove('bg-yellow-900');
       button.classList.add('bg-gray-800');
       button.setAttribute('data-active', 'false');
+      trackEvent('Engagement', 'Filter', 'Hide Wishlist');
     }
     
     currentPage = 1;
@@ -1241,10 +1277,12 @@ document.addEventListener('DOMContentLoaded', () => {
       button.classList.remove('bg-gray-800');
       button.classList.add('bg-blue-900');
       button.setAttribute('data-active', 'true');
+      trackEvent('Engagement', 'Filter', 'Show Owned');
     } else {
       button.classList.remove('bg-blue-900');
       button.classList.add('bg-gray-800');
       button.setAttribute('data-active', 'false');
+      trackEvent('Engagement', 'Filter', 'Hide Owned');
     }
     
     currentPage = 1;
