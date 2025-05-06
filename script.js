@@ -1,36 +1,23 @@
+const DEBUG = true;
+
 document.addEventListener('DOMContentLoaded', () => {
   // Register service worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js')
-        .then((registration) => {
-          console.log('ServiceWorker registration successful');
-          
-          // Check for updates when the page loads
-          registration.update();
-          
-          // Listen for new service worker versions
-          registration.addEventListener('updatefound', () => {
-            const newWorker = registration.installing;
-            
-            newWorker.addEventListener('statechange', () => {
-              // When the new service worker is installed
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('New version available');
-                // Show notification to user
-                const notification = document.createElement('div');
-                notification.className = 'fixed bottom-4 left-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-                notification.textContent = 'A new version is available! Reloading...';
-                document.body.appendChild(notification);
-                
-                // Reload after a short delay to show notification
-                setTimeout(() => {
-                  window.location.reload();
-                }, 1500);
-              }
-            });
-          });
-        })
+        //.then((registration) => {
+        //  console.log('ServiceWorker registration successful');
+        //.then((registration) => {
+        // ... existing code ...
+        //      if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+        //        console.log('New version available');
+        // ... existing code ...
+        //.catch((err) => {
+        //  console.log('ServiceWorker registration failed: ', err);
+        // ... existing code ...
+        //console.log('User accepted the install prompt');
+        //console.log('User dismissed the install prompt');
+        //console.log('PWA was installed');
         .catch((err) => {
           console.log('ServiceWorker registration failed: ', err);
         });
@@ -81,9 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Wait for the user to respond to the prompt
     deferredPrompt.userChoice.then((choiceResult) => {
       if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the install prompt');
+        //console.log('User accepted the install prompt');
       } else {
-        console.log('User dismissed the install prompt');
+        //console.log('User dismissed the install prompt');
       }
       // Clear the saved prompt since it can't be used again
       deferredPrompt = null;
@@ -92,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Listen for successful installation
   window.addEventListener('appinstalled', () => {
-    console.log('PWA was installed');
+    //console.log('PWA was installed');
     installButton.style.display = 'none';
   });
 
@@ -285,25 +272,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2) If we have cached data, render it immediately
     if (hasCache) {
-      console.log('Using cached yoyo data');
+      if (DEBUG) console.log('Using cached yoyo data');
       isLoading = false;
       yoyoData   = cachedYoyos;
       populateModelFilter();
       populateColorwayFilter();
       displayYoyoCards();
       updateFavoritesAndOwnedCounts();
+      if (DEBUG) console.log('Loaded yoyos:', yoyoData, 'Count:', yoyoData.length);
     }
 
     // 3) Fetch fresh in background
     try {
-      console.log('Fetching latest yoyo data…');
+      if (DEBUG) console.log('Fetching latest yoyo data…');
       const resp  = await fetch(CONFIG.yoyosDataUrl);
       const fresh = await resp.json();
 
       // 4) If no cache yet, or the payload actually changed, update UI
       if (!hasCache || JSON.stringify(fresh) !== JSON.stringify(cachedYoyos)) {
-        console.log('New yoyo data received, updating cache & UI');
-        console.log(`Cache update: ${hasCache ? 'Updating existing cache' : 'Creating new cache'}`);
+        if (DEBUG) {
+          console.log('New yoyo data received, updating cache & UI');
+          console.log(`Cache update: ${hasCache ? 'Updating existing cache' : 'Creating new cache'}`);
+        }
         gotFreshUpdate = true;
         yoyoData = fresh;
         // Defensive: ensure yoyoData is always an array
@@ -313,8 +303,9 @@ document.addEventListener('DOMContentLoaded', () => {
         populateColorwayFilter();
         displayYoyoCards();
         updateFavoritesAndOwnedCounts();
+        if (DEBUG) console.log('Loaded yoyos:', yoyoData, 'Count:', yoyoData.length);
       } else {
-        console.log('Yoyo data unchanged — skipping redraw');
+        if (DEBUG) console.log('Yoyo data unchanged — skipping redraw');
       }
     } catch (err) {
       console.error('Error fetching yoyo data:', err);
@@ -337,27 +328,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const cacheKey    = CACHE_CONFIG.specsCacheKey;
     const cachedSpecs = getCachedData(cacheKey);
     if (cachedSpecs) {
-      console.log('Using cached specs data');
+      if (DEBUG) console.log('Using cached specs data');
       specsData = cachedSpecs;
       populateModelFilter();
       populateColorwayFilter();
+      if (DEBUG) console.log('Loaded specs:', specsData, 'Count:', specsData.length);
     }
 
     // 2) Always fetch fresh specs
     try {
-      console.log('Fetching latest specs data…');
+      if (DEBUG) console.log('Fetching latest specs data…');
       const resp  = await fetch(CONFIG.specsDataUrl);
       const fresh = await resp.json();
 
       // 3) If no cache, or data changed, update cache & UI
       if (!cachedSpecs || JSON.stringify(fresh) !== JSON.stringify(cachedSpecs)) {
-        console.log('New specs data received, updating cache & UI');
+        if (DEBUG) console.log('New specs data received, updating cache & UI');
         specsData = fresh;
         setCachedData(cacheKey, fresh);
         populateModelFilter();
         populateColorwayFilter();
+        if (DEBUG) console.log('Loaded specs:', specsData, 'Count:', specsData.length);
       } else {
-        console.log('Specs data unchanged');
+        if (DEBUG) console.log('Specs data unchanged');
       }
     } catch (err) {
       console.error('Error fetching specs data:', err);
@@ -423,6 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
       filteredYoyos = filteredYoyos.filter(y => String(y.colorway) === selectedColorway);
     }
 
+    // Get unique models
     const models = Array.from(new Set(filteredYoyos.map(y => y.model))).sort();
     const modelCounts = {};
     models.forEach(model => {
@@ -432,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Store current selection
     const currentSelection = modelFilter.value;
 
-    modelFilter.innerHTML = `<option value="">All Models (${filteredYoyos.length})</option>`;
+    modelFilter.innerHTML = `<option value="">All Models (${models.length})</option>`;
     models.forEach(model => {
       const opt = document.createElement('option');
       opt.value = model;
@@ -471,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Store current selection
     const currentSelection = colorwayFilter.value;
 
-    colorwayFilter.innerHTML = `<option value="">All Colorways (${filteredYoyos.length})</option>`;
+    colorwayFilter.innerHTML = `<option value="">All Colorways (${colorways.length})</option>`;
     colorways.forEach(colorway => {
       const opt = document.createElement('option');
       opt.value = colorway;
@@ -1119,9 +1113,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Populate details with model and colorway at the top
     const specs = specsData.find(spec => spec.model === yoyo.model);
-    console.log('Opening modal for:', yoyo.model);
-    console.log('Specs data array length:', specsData.length);
-    console.log('Found specs:', specs);
+    if (DEBUG) console.log('Found specs:', specs);
     
     // Only show selected fields, with user-friendly labels and units
     // Compose 'Composition' from Body and Rims
