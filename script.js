@@ -1151,7 +1151,13 @@ document.addEventListener('DOMContentLoaded', () => {
       .filter(field => specs[field.key] && specs[field.key] !== 'N/A' && specs[field.key] !== '-')
       .map(field => {
         let value = specs[field.key];
-        if (field.unit && value && !String(value).includes(field.unit)) {
+        if (field.key === 'released') {
+          // Format the date as Month YYYY
+          const date = new Date(value);
+          if (!isNaN(date)) {
+            value = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+          }
+        } else if (field.unit && value && !String(value).includes(field.unit)) {
           value = `${value} ${field.unit}`;
         }
         return `<div class=\"text-gray-400\">${field.label}:</div><div class=\"text-white\">${value}</div>`;
