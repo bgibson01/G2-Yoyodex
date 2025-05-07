@@ -1,23 +1,15 @@
 const DEBUG = true;
 
+// App configuration
+const APP_CONFIG = {
+  VERSION: '1.1.3'
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   // Register service worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js')
-        //.then((registration) => {
-        //  console.log('ServiceWorker registration successful');
-        //.then((registration) => {
-        // ... existing code ...
-        //      if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-        //        console.log('New version available');
-        // ... existing code ...
-        //.catch((err) => {
-        //  console.log('ServiceWorker registration failed: ', err);
-        // ... existing code ...
-        //console.log('User accepted the install prompt');
-        //console.log('User dismissed the install prompt');
-        //console.log('PWA was installed');
         .catch((err) => {
           console.log('ServiceWorker registration failed: ', err);
         });
@@ -41,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   installButton.className = 'install-button';
   installButton.style.position = 'fixed';
   installButton.style.bottom = '20px';
-  installButton.style.right = '20px';
+  installButton.style.left = '20px';
   installButton.style.padding = '10px 20px';
   installButton.style.backgroundColor = '#4CAF50';
   installButton.style.color = 'white';
@@ -84,15 +76,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const CONFIG = {
-    yoyosDataUrl: 'https://script.google.com/macros/s/AKfycby-6xXDgtZIaMa0-SV5kmNwDIh5IbCyvCH8bjgs22eUVu4HbtX6RiOYItejI5fMzJywzQ/exec?sheet=yoyos',
-    specsDataUrl: 'https://script.google.com/macros/s/AKfycby-6xXDgtZIaMa0-SV5kmNwDIh5IbCyvCH8bjgs22eUVu4HbtX6RiOYItejI5fMzJywzQ/exec?sheet=specs',
-    placeholderImage: 'assets/placeholder.jpg'
+    yoyosDataUrl: window.APP_CONFIG.API.YOYOS_URL,
+    specsDataUrl: window.APP_CONFIG.API.SPECS_URL,
+    placeholderImage: window.APP_CONFIG.ASSETS.PLACEHOLDER_IMAGE
   };
 
   const CACHE_CONFIG = {
-    yoyosCacheKey: 'yoyodex_yoyos_cache',
-    specsCacheKey: 'yoyodex_specs_cache',
-    cacheExpiration: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+    yoyosCacheKey: window.APP_CONFIG.CACHE.KEYS.YOYOS,
+    specsCacheKey: window.APP_CONFIG.CACHE.KEYS.SPECS,
+    cacheExpiration: window.APP_CONFIG.CACHE.EXPIRATION
   };
 
   const yoyoGrid = document.getElementById('yoyo-grid');
@@ -251,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Helper function to get the current app version
   function getCurrentAppVersion() {
-    return '1.1.2';
+    return window.APP_CONFIG.VERSION;
   }
 
   async function fetchYoyoData() {
@@ -395,7 +387,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateSortButton(button, sortType) {
     const icon = button.querySelector('.sort-icon');
-    icon.textContent = sortType === 'alpha' ? 'A↓' : '#↓';
+    if (sortType === 'alpha') {
+      icon.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18M3 12h18M3 18h18"/>
+        </svg>
+        A-Z
+      `;
+    } else {
+      icon.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18M3 12h18M3 18h18"/>
+        </svg>
+        #↓
+      `;
+    }
     button.dataset.sort = sortType;
     
     // Set active state
@@ -583,21 +589,19 @@ document.addEventListener('DOMContentLoaded', () => {
     currentPage = 1;
     updateClearFiltersButton();
     scrollToTopSmooth();
-    displayYoyoCards();
+    displayYoyoCards(true);
     trackEvent('Engagement', 'Search', searchTerm);
   }, 300));
 
   document.getElementById('clear-search').addEventListener('click', () => {
-    // If there are other active filters, clear everything
     if (selectedModel || selectedColorway || modelSortDesc || colorwaySortDesc || !sortDateDesc) {
       clearAllFilters();
     } else {
-      // Otherwise just clear the search as before
-    searchTerm = '';
-    document.getElementById('search').value = '';
-    currentPage = 1;
-    scrollToTopSmooth();
-    displayYoyoCards();
+      searchTerm = '';
+      document.getElementById('search').value = '';
+      currentPage = 1;
+      scrollToTopSmooth();
+      displayYoyoCards(true);
     }
   });
 
@@ -607,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
     currentPage = 1;
     updateClearFiltersButton();
     scrollToTopSmooth();
-    displayYoyoCards();
+    displayYoyoCards(true);
     trackEvent('Engagement', 'Filter Model', selectedModel);
   });
 
@@ -617,7 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
     currentPage = 1;
     updateClearFiltersButton();
     scrollToTopSmooth();
-    displayYoyoCards();
+    displayYoyoCards(true);
     trackEvent('Engagement', 'Filter Colorway', selectedColorway);
   });
 
@@ -625,42 +629,46 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('DOMContentLoaded', function() {
     const sortDateButton = document.getElementById('sort-date');
     if (sortDateButton) {
-      sortDateButton.setAttribute('data-active', 'true');
+      sortDateButton.setAttribute('data-active', 'false');
       const sortIcon = sortDateButton.querySelector('.sort-icon');
       if (sortIcon) {
-        sortIcon.textContent = 'New to Old';
+        sortIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Newest First';
       }
     }
   });
 
   // Date sort button click handler
   document.getElementById('sort-date').addEventListener('click', function() {
+    const button = this;
+    const sortIcon = button.querySelector('.sort-icon');
+    
     sortDateDesc = !sortDateDesc;
-    const sortIcon = this.querySelector('.sort-icon');
-    
-    if (sortDateDesc) {
-      // When returning to newest first (default), remove active state
-      this.classList.remove('bg-purple-900');
-      this.classList.add('bg-gray-800');
-      this.setAttribute('data-active', 'false');
-      if (sortIcon) {
-        sortIcon.textContent = 'New to Old' ;
-      }
-    } else {
-      // When showing oldest first, add active state
-      this.classList.remove('bg-gray-800');
-      this.classList.add('bg-purple-900');
-      this.setAttribute('data-active', 'true');
-      if (sortIcon) {
-        sortIcon.textContent = 'Old to New';
-      }
-      trackEvent('Engagement', 'Sort Date', sortDateDesc ? 'New to Old' : 'Old to New');
-    }
-    
     currentPage = 1;
     updateClearFiltersButton();
     scrollToTopSmooth();
-    displayYoyoCards();
+    
+    button.style.transition = 'none';
+    
+    if (sortDateDesc) {
+      button.setAttribute('data-active', 'false');
+      if (sortIcon) {
+        sortIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Newest First';
+      }
+    } else {
+      button.setAttribute('data-active', 'true');
+      if (sortIcon) {
+        sortIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Oldest First';
+      }
+      trackEvent('Engagement', 'Sort Date', sortDateDesc ? 'Newest First' : 'Oldest First');
+    }
+    
+    button.offsetHeight;
+    
+    setTimeout(() => {
+      button.style.transition = '';
+    }, 50);
+    
+    displayYoyoCards(true);
   });
 
   function createSkeletonCard() {
@@ -712,7 +720,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function displayYoyoCards() {
+  function displayYoyoCards(shouldClearGrid = false) {
     const yoyoGrid = document.getElementById('yoyo-grid');
     
     if (isLoading) {
@@ -723,9 +731,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       return;
     }
-
-    // Clear the grid
-    yoyoGrid.innerHTML = '';
 
     // Get filtered yoyos
     let filtered = filterYoyos(yoyoData);
@@ -748,20 +753,49 @@ document.addEventListener('DOMContentLoaded', () => {
       const noResults = document.createElement('div');
       noResults.classList.add('col-span-full', 'text-center', 'py-8', 'text-gray-400');
       noResults.textContent = 'No yoyos found matching your search criteria';
+      yoyoGrid.innerHTML = '';
       yoyoGrid.appendChild(noResults);
       return;
     }
 
-    // Create and append all yoyo cards (no pagination)
-    filtered.forEach(yoyo => {
+    // Calculate how many items to show
+    const itemsToShow = currentPage * itemsPerPage;
+    const paginatedYoyos = filtered.slice(0, itemsToShow);
+
+    // Clear the grid if it's the first page or if filters have changed
+    if (currentPage === 1 || shouldClearGrid) {
+      yoyoGrid.innerHTML = '';
+    }
+
+    // Create and append yoyo cards
+    paginatedYoyos.forEach(yoyo => {
       const yoyoCard = createYoyoCard(yoyo);
       yoyoGrid.appendChild(yoyoCard);
     });
+
+    // Show/hide loading spinner based on whether there are more items to load
+    const loadingSpinner = document.getElementById('main-loading-spinner');
+    if (loadingSpinner) {
+      loadingSpinner.style.display = itemsToShow < filtered.length ? 'flex' : 'none';
+    }
+
+    // Log for debugging
+    if (DEBUG) {
+      console.log('Displaying yoyos:', {
+        currentPage,
+        itemsPerPage,
+        itemsToShow,
+        totalFiltered: filtered.length,
+        remaining: filtered.length - itemsToShow,
+        shouldClearGrid,
+        gridChildren: yoyoGrid.children.length
+      });
+    }
   }
 
   function createYoyoCard(yoyo) {
     const card = document.createElement('div');
-    card.classList.add('card', 'relative', 'bg-gray-800', 'rounded-lg', 'overflow-hidden', 'shadow-lg', 'hover:shadow-xl', 'transition-shadow');
+    card.classList.add('card');
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'button');
     card.setAttribute('aria-label', `${yoyo.model} - ${yoyo.colorway}`);
@@ -779,7 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Add loading spinner for image
     const imageSpinner = document.createElement('div');
-    imageSpinner.classList.add('loading-spinner', 'absolute', 'inset-0', 'm-auto');
+    imageSpinner.classList.add('loading-spinner');
     imageContainer.appendChild(imageSpinner);
 
     // Handle image load
@@ -801,18 +835,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Card content
     const content = document.createElement('div');
-    content.classList.add('p-4', 'flex', 'flex-col', 'flex-grow');
+    content.classList.add('card-content');
 
     const model = document.createElement('h3');
-    model.classList.add('model-name', 'text-lg', 'font-bold', 'mb-1');
+    model.classList.add('model-name');
     model.textContent = yoyo.model;
 
-      const colorway = document.createElement('p');
-    colorway.classList.add('colorway-name', 'mb-2');
-      colorway.textContent = yoyo.colorway;
+    const colorway = document.createElement('p');
+    colorway.classList.add('colorway-name');
+    colorway.textContent = yoyo.colorway;
 
     const details = document.createElement('div');
-    details.classList.add('text-sm', 'text-gray-400', 'mb-2');
+    details.classList.add('card-details');
     
     const date = document.createElement('p');
     date.textContent = `Released: ${formatDate(yoyo.release_date)}`;
@@ -820,7 +854,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (yoyo.quantity) {
       const quantity = document.createElement('p');
-        quantity.textContent = `Quantity: ${yoyo.quantity}`;
+      quantity.textContent = `Quantity: ${yoyo.quantity}`;
       details.appendChild(quantity);
     }
 
@@ -828,41 +862,41 @@ document.addEventListener('DOMContentLoaded', () => {
     content.appendChild(colorway);
     content.appendChild(details);
 
-    // ─── Show description on card ─────────────────────────
+    // Show description on card
     if (yoyo.description) {
       const cardDesc = document.createElement('p');
-      cardDesc.classList.add('text-sm', 'text-gray-400', 'mb-2');
+      cardDesc.classList.add('card-description');
       cardDesc.textContent = yoyo.description;
       content.appendChild(cardDesc);
     }
 
     // Add actions container for wishlist and owned buttons
-      const actions = document.createElement('div');
-    actions.classList.add('card-actions', 'mt-auto', 'flex', 'gap-2', 'justify-center');
+    const actions = document.createElement('div');
+    actions.classList.add('card-actions');
 
     // Generate unique keys for localStorage
-      const wishlistKey = `wishlist_${yoyo.model}_${yoyo.colorway}`;
-      const ownedKey = `owned_${yoyo.model}_${yoyo.colorway}`;
+    const wishlistKey = `wishlist_${yoyo.model}_${yoyo.colorway}`;
+    const ownedKey = `owned_${yoyo.model}_${yoyo.colorway}`;
 
     // Wishlist button
-      const wishlistBtn = document.createElement('button');
-    wishlistBtn.classList.add('wishlist-btn', 'p-2', 'rounded-full', 'hover:bg-gray-700', 'transition-colors');
-      wishlistBtn.setAttribute('aria-label', 'Add to Wishlist');
+    const wishlistBtn = document.createElement('button');
+    wishlistBtn.classList.add('wishlist-btn');
+    wishlistBtn.setAttribute('aria-label', 'Add to Wishlist');
     wishlistBtn.setAttribute('data-tooltip', 'Add to Wishlist');
-      wishlistBtn.innerHTML = localStorage.getItem(wishlistKey) ? '💖' : '🤍';
-        if (localStorage.getItem(wishlistKey)) {
+    wishlistBtn.innerHTML = localStorage.getItem(wishlistKey) ? '💖' : '🤍';
+    if (localStorage.getItem(wishlistKey)) {
       wishlistBtn.classList.add('active');
       wishlistBtn.setAttribute('data-tooltip', 'Remove from Wishlist');
     }
     
-      wishlistBtn.addEventListener('click', (e) => {
+    wishlistBtn.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevent modal from opening
       const isAdding = !wishlistBtn.classList.contains('active');
       
       if (isAdding) {
-          localStorage.setItem(wishlistKey, '1');
-          wishlistBtn.innerHTML = '💖';
-          wishlistBtn.classList.add('active');
+        localStorage.setItem(wishlistKey, '1');
+        wishlistBtn.innerHTML = '💖';
+        wishlistBtn.classList.add('active');
         wishlistBtn.setAttribute('data-tooltip', 'Remove from Wishlist');
         trackEvent('Engagement', 'Add to Wishlist', yoyo.model);
       } else {
@@ -875,28 +909,27 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Update the counts immediately after changing the wishlist status
       updateFavoritesAndOwnedCounts();
-    
     });
 
     // Owned button
-      const ownedBtn = document.createElement('button');
-    ownedBtn.classList.add('owned-btn', 'p-2', 'rounded-full', 'hover:bg-gray-700', 'transition-colors');
-      ownedBtn.setAttribute('aria-label', 'Mark as Owned');
+    const ownedBtn = document.createElement('button');
+    ownedBtn.classList.add('owned-btn');
+    ownedBtn.setAttribute('aria-label', 'Mark as Owned');
     ownedBtn.setAttribute('data-tooltip', 'Mark as Owned');
-      ownedBtn.innerHTML = localStorage.getItem(ownedKey) ? '✅' : '🛒';
-        if (localStorage.getItem(ownedKey)) {
+    ownedBtn.innerHTML = localStorage.getItem(ownedKey) ? '✅' : '🛒';
+    if (localStorage.getItem(ownedKey)) {
       ownedBtn.classList.add('active');
       ownedBtn.setAttribute('data-tooltip', 'Remove from Owned');
     }
     
-      ownedBtn.addEventListener('click', (e) => {
+    ownedBtn.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevent modal from opening
       const isAdding = !ownedBtn.classList.contains('active');
       
       if (isAdding) {
-          localStorage.setItem(ownedKey, '1');
-          ownedBtn.innerHTML = '✅';
-          ownedBtn.classList.add('active');
+        localStorage.setItem(ownedKey, '1');
+        ownedBtn.innerHTML = '✅';
+        ownedBtn.classList.add('active');
         ownedBtn.setAttribute('data-tooltip', 'Remove from Owned');
         trackEvent('Engagement', 'Add to Owned', yoyo.model);
       } else {
@@ -909,12 +942,10 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Update the counts immediately after changing the owned status
       updateFavoritesAndOwnedCounts();
-      
-      // Track owned action (split above)
-      });
+    });
 
-      actions.appendChild(wishlistBtn);
-      actions.appendChild(ownedBtn);
+    actions.appendChild(wishlistBtn);
+    actions.appendChild(ownedBtn);
     card.appendChild(content);
     card.appendChild(actions);
 
@@ -936,7 +967,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const specs = specsData.find(spec => spec.model === model);
     if (specs) {
       // Create modal content
-      let html = `<h2 class="text-lg font-bold mb-2">${model} Specs</h2><ul>`;
+      let html = `<h2 class="specs-title">${model} Specs</h2><ul>`;
       for (const [key, value] of Object.entries(specs)) {
         if (key !== "Model" && value && value !== "N/A" && value !== "-") {
           html += `<li><strong>${key.replace(/_/g, ' ')}:</strong> ${value}</li>`;
@@ -978,6 +1009,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModalBtn = document.getElementById('close-modal');
     const modalMainImage = document.getElementById('modal-main-image');
     const modalImages = document.getElementById('modal-images');
+    const modalContent = modal.querySelector('.modal-content');
+
+    // Only add touch events on mobile devices
+    if (window.innerWidth <= 768) {
+      // Touch event variables
+      let touchStartY = 0;
+      let touchEndY = 0;
+      const swipeThreshold = 100; // Minimum distance for swipe
+
+      // Handle touch start
+      modalContent.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+
+      // Handle touch move
+      modalContent.addEventListener('touchmove', (e) => {
+        touchEndY = e.touches[0].clientY;
+        const swipeDistance = touchEndY - touchStartY;
+        
+        // Only allow downward swipe
+        if (swipeDistance > 0) {
+          // Add transform to follow finger
+          modalContent.style.transform = `translateY(${swipeDistance}px)`;
+          // Add opacity to overlay based on swipe distance
+          modalOverlay.style.opacity = 1 - (swipeDistance / 500);
+        }
+      }, { passive: true });
+
+      // Handle touch end
+      modalContent.addEventListener('touchend', () => {
+        const swipeDistance = touchEndY - touchStartY;
+        
+        // Reset transform and opacity
+        modalContent.style.transform = '';
+        modalOverlay.style.opacity = '';
+        
+        // If swipe distance is greater than threshold, close modal
+        if (swipeDistance > swipeThreshold) {
+          closeModal();
+        }
+      }, { passive: true });
+    }
 
     // Handle escape key
     document.addEventListener('keydown', (e) => {
@@ -1003,11 +1076,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Close modal when clicking outside
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      closeModal();
-    }
-  });
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal || e.target === modalOverlay) {
+        closeModal();
+      }
+    });
 
     if (closeModalBtn) {
       closeModalBtn.addEventListener('click', closeModal);
@@ -1015,10 +1088,74 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Prevent clicks inside modal content from closing the modal
-    const modalContent = modal.querySelector('.modal-content');
     if (modalContent) {
       modalContent.addEventListener('click', (e) => {
         e.stopPropagation();
+      });
+    }
+  }
+
+  function updateThumbnails(images, activeIndex, modalMainImage, mainImageSpinner) {
+    const modalImages = document.getElementById('modal-images');
+    modalImages.innerHTML = '';
+    modalImages.style.display = images.length > 1 ? 'flex' : 'none';
+    
+    if (images.length > 1) {
+      // Create thumbnails for all images, highlighting the active one
+      images.forEach((url, index) => {
+        const thumbContainer = document.createElement('div');
+        thumbContainer.classList.add('thumbnail-container');
+        
+        const thumb = document.createElement('img');
+        thumb.src = CONFIG.placeholderImage;
+        thumb.loading = 'lazy';
+        thumb.classList.add('modal-thumbnail');
+        
+        // Add active class to the current thumbnail
+        if (index === activeIndex) {
+          thumb.classList.add('active');
+        }
+        
+        const thumbSpinner = document.createElement('div');
+        thumbSpinner.classList.add('loading-spinner');
+        thumbContainer.appendChild(thumbSpinner);
+        thumbContainer.appendChild(thumb);
+        
+        // Load the actual thumbnail image
+        const actualThumb = new Image();
+        actualThumb.onload = () => {
+          thumb.src = url;
+          thumbSpinner.style.display = 'none';
+        };
+        actualThumb.onerror = () => {
+          thumbSpinner.style.display = 'none';
+        };
+        actualThumb.src = url;
+        
+        thumb.addEventListener('click', () => {
+          modalMainImage.src = CONFIG.placeholderImage;
+          if (mainImageSpinner) {
+            mainImageSpinner.style.display = 'block';
+          }
+          
+          const newMainImage = new Image();
+          newMainImage.onload = () => {
+            modalMainImage.src = url;
+            if (mainImageSpinner) {
+              mainImageSpinner.style.display = 'none';
+            }
+            // Update thumbnails after loading new image
+            updateThumbnails(images, index, modalMainImage, mainImageSpinner);
+          };
+          newMainImage.onerror = () => {
+            if (mainImageSpinner) {
+              mainImageSpinner.style.display = 'none';
+            }
+          };
+          newMainImage.src = url;
+        });
+        
+        modalImages.appendChild(thumbContainer);
       });
     }
   }
@@ -1052,175 +1189,163 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Load main image with loading state
     modalMainImage.src = CONFIG.placeholderImage;
-    const mainImageSpinner = document.createElement('div');
-    mainImageSpinner.classList.add('loading-spinner', 'absolute', 'inset-0', 'm-auto');
-    modalMainImage.parentElement.appendChild(mainImageSpinner);
+    const mainImageContainer = modalMainImage.parentElement;
+    const mainImageSpinner = mainImageContainer.querySelector('.loading-spinner');
+    
+    if (mainImageSpinner) {
+      mainImageSpinner.style.display = 'block';
+    }
     
     const tempImage = new Image();
     tempImage.onload = () => {
       modalMainImage.src = images[0];
-      mainImageSpinner.style.display = 'none';
+      if (mainImageSpinner) {
+        mainImageSpinner.style.display = 'none';
+      }
+      // Initialize thumbnails after loading first image
+      updateThumbnails(images, 0, modalMainImage, mainImageSpinner);
+    };
+    tempImage.onerror = () => {
+      if (mainImageSpinner) {
+        mainImageSpinner.style.display = 'none';
+      }
     };
     tempImage.src = images[0];
   
-    // Clear and populate thumbnails with lazy loading
-    modalImages.innerHTML = '';
-    modalImages.style.display = images.length > 1 ? 'flex' : 'none';
-    
-    if (images.length > 1) {
-      images.forEach((url, index) => {
-        const thumbContainer = document.createElement('div');
-        thumbContainer.classList.add('relative', 'w-20', 'h-20', 'flex-shrink-0');
-        
-        const thumb = document.createElement('img');
-        thumb.src = CONFIG.placeholderImage;
-        thumb.loading = 'lazy';
-        thumb.classList.add('modal-thumbnail', 'w-full', 'h-full', 'object-cover', 'rounded');
-        if (index === 0) thumb.classList.add('active');
-        
-        const thumbSpinner = document.createElement('div');
-        thumbSpinner.classList.add('loading-spinner', 'absolute', 'inset-0', 'm-auto');
-        thumbContainer.appendChild(thumbSpinner);
-        thumbContainer.appendChild(thumb);
-        
-        // Load the actual thumbnail image
-        const actualThumb = new Image();
-        actualThumb.onload = () => {
-          thumb.src = url;
-          thumbSpinner.style.display = 'none';
-        };
-        actualThumb.src = url;
-        
-        thumb.addEventListener('click', () => {
-          modalMainImage.src = CONFIG.placeholderImage;
-          mainImageSpinner.style.display = 'block';
-          
-          const newMainImage = new Image();
-          newMainImage.onload = () => {
-            modalMainImage.src = url;
-            mainImageSpinner.style.display = 'none';
-          };
-          newMainImage.src = url;
-          
-          // Update active thumbnail
-          document.querySelectorAll('.modal-thumbnail').forEach(t => t.classList.remove('active'));
-          thumb.classList.add('active');
-        });
-        
-        modalImages.appendChild(thumbContainer);
-      });
-    }
-  
-    // Populate details with model and colorway at the top
-    const specs = specsData.find(spec => spec.model === yoyo.model);
-    if (DEBUG) console.log('Found specs:', specs);
-    
-    // Only show selected fields, with user-friendly labels and units
-    // Compose 'Composition' from Body and Rims
-    let composition = '';
-    if (specs) {
-      const body = specs['body'];
-      const rims = specs['rims'];
-      if (body && body !== 'N/A' && body !== '-') {
-        if (rims && rims !== 'N/A' && rims !== '-') {
-          composition = `${body} with ${rims} rims`;
-        } else {
-          composition = body;
-        }
-      }
-    }
-    const specFields = [
-      // Composition is handled separately
-      { key: 'info', label: 'Additional Info' },
-      { key: 'dia', label: 'Diameter', unit: 'mm' },
-      { key: 'wid', label: 'Width', unit: 'mm' },
-      { key: 'wt', label: 'Weight', unit: 'g' },
-      { key: 'pads', label: 'Response' },
-      { key: 'bearing', label: 'Bearing' },
-      { key: 'axle', label: 'Axle', unit: 'mm' },     
-      { key: 'released', label: 'Model Released' },
-      { key: 'status', label: 'Status' },
-      { key: 'source', label: 'Source' }
-    ];
-    
-    let specHtml = '';
-    if (composition) {
-      specHtml += `<div class=\"text-gray-400\">Composition:</div><div class=\"text-white\">${composition}</div>`;
-    }
-    specHtml += specs ? specFields
-      .filter(field => specs[field.key] && specs[field.key] !== 'N/A' && specs[field.key] !== '-')
-      .map(field => {
-        let value = specs[field.key];
-        if (field.key === 'released') {
-          // Format the date as Month YYYY
-          const date = new Date(value);
-          if (!isNaN(date)) {
-            value = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-          }
-        } else if (field.unit && value && !String(value).includes(field.unit)) {
-          value = `${value} ${field.unit}`;
-        }
-        return `<div class=\"text-gray-400\">${field.label}:</div><div class=\"text-white\">${value}</div>`;
-      })
-      .join('') : '';
-    
+    // Show loading state for specs
     modalDetails.innerHTML = `
-      <div class="space-y-4">
-        <div>
+      <div class="modal-details-content">
+        <div class="modal-header">
           <h2 class="modal-title">${yoyo.model}</h2>
           <p class="modal-subtitle">${yoyo.colorway}</p>
         </div>
 
-        <div class="space-y-2 text-gray-300">
-          <p class="flex items-center gap-2">
-            <span class="text-gray-400">Released:</span>
-            <span class="text-white">${formatDate(yoyo.release_date)}</span>
+        <div class="modal-info">
+          <p class="modal-info-row">
+            <span class="modal-label">Released:</span>
+            <span class="modal-value">${formatDate(yoyo.release_date)}</span>
           </p>
           ${yoyo.quantity ? `
-            <p class="flex items-center gap-2">
-              <span class="text-gray-400">Quantity:</span>
-              <span class="text-white">${yoyo.quantity}</span>
+            <p class="modal-info-row">
+              <span class="modal-label">Quantity:</span>
+              <span class="modal-value">${yoyo.quantity}</span>
             </p>
           ` : ''}
         </div>
 
         ${yoyo.description ? `
-          <div class="mt-4">
-            <h3 class="text-lg font-semibold mb-2 text-gray-200">Description</h3>
-            <p class="text-gray-300">${yoyo.description}</p>
+          <div class="modal-description">
+            <h3 class="modal-section-title">Description</h3>
+            <p class="modal-description-text">${yoyo.description}</p>
           </div>
         ` : ''}
 
-        ${specHtml ? `
-          <div class="specs-section mt-4">
-            <h3 class="text-lg font-semibold mb-3 text-gray-200">Specifications</h3>
-            <div class="grid grid-cols-2 gap-2">
-              ${specHtml}
+        <div class="modal-specs">
+          <div class="modal-specs-grid">
+            <div class="loading-spinner-container">
+              <div class="loading-spinner"></div>
+              <p class="loading-text">Loading specs...</p>
             </div>
           </div>
-        ` : ''}
+        </div>
       </div>
     `;
 
+    // Load specs data if not already loaded
+    if (!specsData || specsData.length === 0) {
+      fetchSpecsData().then(() => {
+        updateModalSpecs(yoyo.model);
+      });
+    } else {
+      updateModalSpecs(yoyo.model);
+    }
+
     // Track modal view
     trackEvent('Content', 'View Yoyo Details', `${yoyo.model} - ${yoyo.colorway}`);
+
+    // Add swipe indicator
+    const swipeIndicator = document.createElement('div');
+    swipeIndicator.className = 'modal-swipe-indicator';
+    swipeIndicator.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14M5 12l7-7 7 7"/>
+      </svg>
+      <span>Swipe down to close</span>
+    `;
+    modalContent.insertBefore(swipeIndicator, modalContent.firstChild);
+
+    // Hide swipe indicator after 3 seconds
+    setTimeout(() => {
+      swipeIndicator.classList.add('hidden');
+    }, 3000);
   }
 
-  function updatePagination(totalCount = yoyoData.length) {
-    const totalPages = Math.ceil(totalCount / itemsPerPage);
-    paginationContainer.innerHTML = '';
-    for (let i = 1; i <= totalPages; i++) {
-      const pageButton = document.createElement('button');
-      pageButton.textContent = i;
-      pageButton.classList.add('pagination-button');
-      pageButton.addEventListener('click', () => {
-        currentPage = i;
-        displayYoyoCards();
-      });
-      if (i === currentPage) {
-        pageButton.classList.add('active');
-      }
-      paginationContainer.appendChild(pageButton);
+  function updateModalSpecs(model) {
+    const modalDetails = document.getElementById('modal-details');
+    const specs = specsData.find(spec => spec.model === model);
+    
+    if (!specs) {
+        const specsGrid = modalDetails.querySelector('.modal-specs-grid');
+        if (specsGrid) {
+            specsGrid.innerHTML = '<div class="modal-specs-empty">No specifications available</div>';
+        }
+        return;
+    }
+
+    // Compose 'Composition' from Body and Rims
+    let composition = '';
+    const body = specs['body'];
+    const rims = specs['rims'];
+    if (body && body !== 'N/A' && body !== '-') {
+        if (rims && rims !== 'N/A' && rims !== '-') {
+            composition = `${body} with ${rims} rims`;
+        } else {
+            composition = body;
+        }
+    }
+
+    const specFields = [
+        { key: 'info', label: 'Additional Info' },
+        { key: 'dia', label: 'Diameter', unit: 'mm' },
+        { key: 'wid', label: 'Width', unit: 'mm' },
+        { key: 'wt', label: 'Weight', unit: 'g' },
+        { key: 'pads', label: 'Response' },
+        { key: 'bearing', label: 'Bearing' },
+        { key: 'axle', label: 'Axle', unit: 'mm' },     
+        { key: 'released', label: 'Model Released' },
+        { key: 'status', label: 'Status' },
+        { key: 'source', label: 'Source' }
+    ];
+
+    let specHtml = '';
+    if (composition) {
+        specHtml += `<div class="modal-specs-label">Composition:</div><div class="modal-specs-value">${composition}</div>`;
+    }
+    
+    specHtml += specFields
+        .filter(field => specs[field.key] && specs[field.key] !== 'N/A' && specs[field.key] !== '-')
+        .map(field => {
+            let value = specs[field.key];
+            if (field.key === 'released') {
+                const date = new Date(value);
+                if (!isNaN(date)) {
+                    value = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                }
+            } else if (field.unit && value && !String(value).includes(field.unit)) {
+                value = `${value} ${field.unit}`;
+            }
+            return `<div class="modal-specs-label">${field.label}:</div><div class="modal-specs-value">${value}</div>`;
+        })
+        .join('');
+
+    const specsSection = modalDetails.querySelector('.modal-specs');
+    if (specsSection) {
+        specsSection.innerHTML = `
+            <h3 class="modal-section-title">Specifications</h3>
+            <div class="modal-specs-grid">
+                ${specHtml}
+            </div>
+        `;
     }
   }
 
@@ -1341,7 +1466,7 @@ function scrollToTopSmooth() {
       dateSortButton.setAttribute('data-active', 'false');
       const sortIcon = dateSortButton.querySelector('.sort-icon');
       if (sortIcon) {
-        sortIcon.textContent = '↑';
+        sortIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Newest First';
       }
     }
     
@@ -1459,4 +1584,59 @@ function scrollToTopSmooth() {
       trackEvent('Engagement', 'Footer Link Click', btn.textContent.trim());
     });
   });
+
+  // Update scroll event listener for infinite scroll
+  let isLoadingMore = false;
+  window.addEventListener('scroll', debounce(() => {
+    if (isLoadingMore) return;
+
+    const scrollPosition = window.innerHeight + window.scrollY;
+    const scrollThreshold = document.documentElement.scrollHeight - 800;
+    const footer = document.querySelector('.app-footer');
+    const footerRect = footer.getBoundingClientRect();
+    const footerVisible = footerRect.top <= window.innerHeight;
+
+    // Debug logging
+    if (DEBUG) {
+      console.log('Scroll check:', {
+        scrollPosition,
+        scrollThreshold,
+        documentHeight: document.documentElement.scrollHeight,
+        windowHeight: window.innerHeight,
+        scrollY: window.scrollY,
+        footerVisible,
+        currentPage,
+        itemsPerPage
+      });
+    }
+
+    // Load more if we're near the bottom (before footer becomes visible)
+    if (scrollPosition >= scrollThreshold) {
+      const filtered = filterYoyos(yoyoData);
+      const itemsToShow = currentPage * itemsPerPage;
+      
+      if (itemsToShow < filtered.length) {
+        if (DEBUG) console.log('Loading more items:', {
+          currentItems: itemsToShow,
+          totalItems: filtered.length,
+          newPage: currentPage + 1
+        });
+        
+        isLoadingMore = true;
+        currentPage++;
+        displayYoyoCards(false);
+        isLoadingMore = false;
+      }
+    }
+  }, 100));
+
+  // Add resize handler to ensure proper layout on orientation changes
+  window.addEventListener('resize', debounce(() => {
+    const newItemsPerPage = getItemsPerPage();
+    if (newItemsPerPage !== itemsPerPage) {
+      itemsPerPage = newItemsPerPage;
+      currentPage = 1;
+      displayYoyoCards(true);
+    }
+  }, 250));
 });

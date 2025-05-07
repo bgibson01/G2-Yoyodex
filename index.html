@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="G² Releases Database - Community Project">
-  <title>G² Releases Database</title>
+  <title>G2 Releases Database</title>
   
   <!-- Cache Control -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -29,18 +29,18 @@
     });
   </script>
   
-  <link rel="stylesheet" href="styles.css?v=1.0.4">
+  <script src="config.js"></script>
+  <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
   <link rel="apple-touch-icon" href="assets/icon-192.png">
   <meta name="theme-color" content="#1e1e1e">
 </head>
-<body class="bg-gray-900 text-white">
-  <main>
+<body class="app-body">
+  <main class="main-content">
     <!-- Header Section -->
-    <header class="p-4 bg-gray-800 text-center" role="banner">
-      <h1 class="text-2xl">G2 Releases Database
-      <span class="community-badge">Community Project by Sploozel</span></h1>
+    <header class="app-header" role="banner">
+      <h1>G2 Releases Database</h1>
     </header>
 
     <!-- Controls Container -->
@@ -58,8 +58,13 @@
             <select id="model-filter" class="filter-select" data-tooltip="Filter by model">
               <option value="">All Models</option>
             </select>
-            <button id="sort-model-filter" class="sort-button" data-active="false" data-tooltip="Toggle model sort">
-              <span class="sort-icon">A↓</span>
+            <button id="sort-model-filter" class="sort-button" data-active="false" data-tooltip="Toggle between alphabetical and quantity sort">
+              <span class="sort-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18M3 12h18M3 18h18"/>
+                </svg>
+                A-Z
+              </span>
             </button>
           </div>
           
@@ -67,8 +72,13 @@
             <select id="colorway-filter" class="filter-select" data-tooltip="Filter by colorway">
               <option value="">All Colorways</option>
             </select>
-            <button id="sort-colorway-filter" class="sort-button" data-active="false" data-tooltip="Toggle colorway sort">
-              <span class="sort-icon">A↓</span>
+            <button id="sort-colorway-filter" class="sort-button" data-active="false" data-tooltip="Toggle between alphabetical and quantity sort">
+              <span class="sort-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18M3 12h18M3 18h18"/>
+                </svg>
+                A-Z
+              </span>
             </button>
           </div>
           
@@ -80,8 +90,11 @@
             <span class="filter-text">Owned</span>
           </button>
           
-          <button id="sort-date" class="sort-button" data-active="false" data-tooltip="Toggle release-date order">
-            <span class="sort-icon">Date ↓</span>
+          <button id="sort-date" class="sort-button" data-active="false" data-tooltip="Toggle between newest and oldest first">
+            <span class="sort-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              Newest First
+            </span>
           </button>
           
           <button id="clear-filters" class="clear-filters-button" data-active="false" data-tooltip="Clear all filters">
@@ -93,9 +106,8 @@
 
     <!-- Scrollable Content Area -->
     <div class="content-scroll-area">
-    <!-- Yoyo Cards Grid -->
-      <div id="yoyo-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" 
-           role="grid" aria-label="Yoyo collection"></div>
+      <!-- Yoyo Cards Grid -->
+      <div id="yoyo-grid" class="yoyo-grid" role="grid" aria-label="Yoyo collection"></div>
       
       <div id="main-loading-spinner" class="loading-spinner-container" aria-live="polite">
         <div class="loading-spinner"></div>
@@ -107,22 +119,16 @@
   </main>
 
   <!-- Footer -->
-  <footer class="p-4 bg-gray-800 text-white text-center" role="contentinfo">
-    <div class="flex flex-wrap items-center justify-center gap-4 mb-2">
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSd9_wiR1osfAkNYXjInFzlU0gPBYNi46ukfGPUfk1c0m8Po8Q/viewform?usp=dialog" target="_blank" rel="noopener" class="gradient-button" aria-label="Submit New Yoyo">
-        Submit Yoyo
-      </a>
+  <footer class="app-footer" role="contentinfo">
+    <div class="footer-content">
       <span id="results-counter" class="results-counter"></span>
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSc0WW8lxNugEaV0AMJvSichBZ8fqP_qLMIpD39V5vcvq3-a-Q/viewform?usp=header" target="_blank" rel="noopener" class="gradient-button" aria-label="Submit Yoyo Specifications">
-        Submit Specs
-      </a>
+      <p>This is a community driven project by <span class="gradient-text model">G2 Nation</span> and <span class="gradient-text colorway">Sploozel</span><br>All data is collected from public sources</p>
+      <p class="footer-links">
+        <a href="https://www.gsquaredyoyos.com" target="_blank" rel="noopener">Visit the official site</a>
+        <span class="footer-separator">|</span>
+        <a href="privacy.html">Privacy Policy</a>
+      </p>
     </div>
-    <p>This is an independent community project. All yoyo data is collected from public sources.</p>
-    <p class="footer-links">
-      <a href="https://www.gsquaredyoyos.com" target="_blank" rel="noopener">Visit the official site</a>
-      <span class="footer-separator">|</span>
-      <a href="privacy.html" class="text-blue-400 hover:text-blue-300 transition-colors">Privacy Policy</a>
-    </p>
   </footer>
 
   <!-- Scroll to Top Button -->
@@ -133,65 +139,38 @@
   </button>
 
   <!-- Modal -->
-  <div id="modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center" 
-       role="dialog" aria-modal="true" aria-hidden="true">
-    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-75"></div>
-    <div class="modal-content relative bg-gray-800 rounded-lg shadow-xl max-w-6xl w-11/12">
-      <button id="close-modal" class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-10" 
-              aria-label="Close modal">
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
+    <div id="modal-overlay" class="modal-overlay"></div>
+    <div class="modal-content">
+      <button id="close-modal" class="modal-close" aria-label="Close modal">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
       
-      <div class="modal-inner p-6">
-        <div class="flex gap-6">
+      <div class="modal-inner">
+        <div class="modal-layout">
           <!-- Left: Main Image -->
-          <div class="w-2/3">
-            <div class="modal-image-container bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center">
-              <img id="modal-main-image" src="" class="max-h-[60vh] w-auto object-contain" alt="Yoyo Image">
+          <div class="modal-image-section">
+            <div class="modal-image-container">
+              <div class="loading-spinner"></div>
+              <img id="modal-main-image" src="" alt="Yoyo Image">
             </div>
             <!-- Thumbnails below main image -->
-            <div id="modal-images" class="mt-4 flex gap-2 overflow-x-auto py-2" role="tablist" aria-label="Image gallery"></div>
+            <div id="modal-images" class="modal-thumbnails" role="tablist" aria-label="Image gallery">
+              <!-- Thumbnails will be dynamically populated -->
+            </div>
           </div>
 
           <!-- Right: Details -->
-          <div id="modal-details" class="w-1/3 overflow-y-auto bg-gray-900 rounded-lg p-4">
-            <div class="space-y-4">
-              <!-- Title and release info are working correctly -->
-              <div>
-                <h2 class="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">
-                  Loadout
-                </h2>
-                <p class="text-xl bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                  Weapon X
-                </p>
-              </div>
-
-              <div class="space-y-2 text-gray-300">
-                <p class="flex items-center gap-2">
-                  <span class="text-gray-400">Released:</span>
-                  <span class="text-white">March 18, 2025</span>
-                </p>
-                <p class="flex items-center gap-2">
-                  <span class="text-gray-400">Quantity:</span>
-                  <span class="text-white">12</span>
-                </p>
-              </div>
-            </div>
-            <div class="specs-section mt-4">
-              <h3 class="text-lg font-semibold mb-3 text-gray-200">Specifications</h3>
-              <div class="grid grid-cols-2 gap-2">
-                <!-- Dynamically loaded specs would go here -->
-              </div>
-            </div>
+          <div id="modal-details" class="modal-details">
+            <!-- Content will be dynamically populated -->
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Link to the main JavaScript file -->
-  <script src="script.js?v=1.1.3"></script>
+  <script src="script.js"></script>
 </body>
 </html>

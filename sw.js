@@ -1,5 +1,8 @@
+// Import config
+importScripts('config.js');
+
 // Version-based cache name
-const CACHE_VERSION = '1.1.0';
+const CACHE_VERSION = CONFIG.VERSION;
 const CACHE_NAME = `yoyodex-cache-v${CACHE_VERSION}`;
 
 // Assets to cache
@@ -8,6 +11,7 @@ const ASSETS_TO_CACHE = [
   './index.html',
   './styles.css',
   './script.js',
+  './config.js',
   './manifest.json',
   './assets/g2-logo.png',
   './assets/placeholder.jpg',
