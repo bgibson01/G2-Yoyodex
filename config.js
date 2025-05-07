@@ -1,9 +1,9 @@
 // G2 Releases Database Configuration
 const CONFIG = {
-  VERSION: '2.0.0',
+  VERSION: '2.0.1',
   APP_NAME: 'G2 Releases Database',
   CACHE: {
-    EXPIRATION:24 * 60 * 60 * 1000, // 12 hours in milliseconds
+    EXPIRATION: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
     KEYS: {
       YOYOS: 'yoyodex_yoyos_cache',
       SPECS: 'yoyodex_specs_cache'
@@ -21,6 +21,10 @@ const CONFIG = {
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = CONFIG;
+} else if (typeof self !== 'undefined') {
+  // Service worker context
+  self.APP_CONFIG = CONFIG;
 } else {
+  // Main thread context
   window.APP_CONFIG = CONFIG;
 } 

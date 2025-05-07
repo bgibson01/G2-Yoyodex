@@ -2,7 +2,7 @@
 importScripts('config.js');
 
 // Version-based cache name
-const CACHE_VERSION = CONFIG.VERSION;
+const CACHE_VERSION = self.APP_CONFIG.VERSION;
 const CACHE_NAME = `yoyodex-cache-v${CACHE_VERSION}`;
 
 // Assets to cache

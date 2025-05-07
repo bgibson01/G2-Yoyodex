@@ -1,18 +1,18 @@
 const DEBUG = true;
 
-// App configuration
-const APP_CONFIG = {
-  VERSION: '1.1.3'
-};
-
 document.addEventListener('DOMContentLoaded', () => {
   // Register service worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
+      if (DEBUG) console.log('Registering service worker...');
+      
       navigator.serviceWorker.register('sw.js')
         .then(registration => {
+          if (DEBUG) console.log('Service worker registered successfully:', registration);
+          
           // Check for updates every hour
           setInterval(() => {
+            if (DEBUG) console.log('Checking for service worker updates...');
             registration.update();
           }, 60 * 60 * 1000);
 
@@ -20,16 +20,21 @@ document.addEventListener('DOMContentLoaded', () => {
           let refreshing = false;
           navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (!refreshing) {
+              if (DEBUG) console.log('New service worker activated, reloading page...');
               refreshing = true;
               window.location.reload();
             }
           });
 
           // Check for updates immediately
+          if (DEBUG) console.log('Performing initial service worker update check...');
           registration.update();
         })
         .catch((err) => {
-          console.log('ServiceWorker registration failed: ', err);
+          console.error('ServiceWorker registration failed:', err);
+          // Log more details about the error
+          if (err.message) console.error('Error message:', err.message);
+          if (err.stack) console.error('Error stack:', err.stack);
         });
     });
   }
@@ -767,9 +772,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Calculate how many items to show
-    const itemsToShow = currentPage * itemsPerPage;
-    const paginatedYoyos = filtered.slice(0, itemsToShow);
+    // Calculate start and end indices for the current page
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = currentPage * itemsPerPage;
+    const paginatedYoyos = filtered.slice(startIndex, endIndex);
 
     // Clear the grid if it's the first page or if filters have changed
     if (currentPage === 1 || shouldClearGrid) {
@@ -785,7 +791,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show/hide loading spinner based on whether there are more items to load
     const loadingSpinner = document.getElementById('main-loading-spinner');
     if (loadingSpinner) {
-      loadingSpinner.style.display = itemsToShow < filtered.length ? 'flex' : 'none';
+      loadingSpinner.style.display = endIndex < filtered.length ? 'flex' : 'none';
     }
 
     // Log for debugging
@@ -793,9 +799,10 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Displaying yoyos:', {
         currentPage,
         itemsPerPage,
-        itemsToShow,
+        startIndex,
+        endIndex,
         totalFiltered: filtered.length,
-        remaining: filtered.length - itemsToShow,
+        remaining: filtered.length - endIndex,
         shouldClearGrid,
         gridChildren: yoyoGrid.children.length
       });
@@ -1086,7 +1093,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Close modal when clicking outside
     modal.addEventListener('click', (e) => {
-      if (e.target === modal || e.target === modalOverlay) {
+      if (e.target === modal) {
         closeModal();
       }
     });
@@ -1174,6 +1181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalMainImage = document.getElementById('modal-main-image');
     const modalImages = document.getElementById('modal-images');
     const modalDetails = document.getElementById('modal-details');
+    const modalContent = modal.querySelector('.modal-content');
   
     // Show modal and set focus
     modal.classList.remove('hidden');
@@ -1272,21 +1280,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Track modal view
     trackEvent('Content', 'View Yoyo Details', `${yoyo.model} - ${yoyo.colorway}`);
 
-    // Add swipe indicator
-    const swipeIndicator = document.createElement('div');
-    swipeIndicator.className = 'modal-swipe-indicator';
-    swipeIndicator.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 5v14M5 12l7-7 7 7"/>
-      </svg>
-      <span>Swipe down to close</span>
-    `;
-    modalContent.insertBefore(swipeIndicator, modalContent.firstChild);
+    // Add swipe indicator only on mobile devices
+    if (window.innerWidth <= 768) {
+      const swipeIndicator = document.createElement('div');
+      swipeIndicator.className = 'modal-swipe-indicator';
+      swipeIndicator.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 19v-14M5 12l7 7 7-7"/>
+        </svg>
+        <span>Swipe down to close</span>
+      `;
+      modalContent.insertBefore(swipeIndicator, modalContent.firstChild);
 
-    // Hide swipe indicator after 3 seconds
-    setTimeout(() => {
-      swipeIndicator.classList.add('hidden');
-    }, 3000);
+      // Hide swipe indicator after 3 seconds
+      setTimeout(() => {
+        swipeIndicator.classList.add('hidden');
+      }, 3000);
+    }
   }
 
   function updateModalSpecs(model) {
