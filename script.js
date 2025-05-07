@@ -1,4 +1,4 @@
-const DEBUG = true;
+const DEBUG = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   // Register service worker
