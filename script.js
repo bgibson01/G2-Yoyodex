@@ -1615,32 +1615,13 @@ function scrollToTopSmooth() {
     const footerRect = footer.getBoundingClientRect();
     const footerVisible = footerRect.top <= window.innerHeight;
 
-    // Debug logging
-    if (DEBUG) {
-      console.log('Scroll check:', {
-        scrollPosition,
-        scrollThreshold,
-        documentHeight: document.documentElement.scrollHeight,
-        windowHeight: window.innerHeight,
-        scrollY: window.scrollY,
-        footerVisible,
-        currentPage,
-        itemsPerPage
-      });
-    }
-
     // Load more if we're near the bottom (before footer becomes visible)
     if (scrollPosition >= scrollThreshold) {
       const filtered = filterYoyos(yoyoData);
-      const itemsToShow = currentPage * itemsPerPage;
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = currentPage * itemsPerPage;
       
-      if (itemsToShow < filtered.length) {
-        if (DEBUG) console.log('Loading more items:', {
-          currentItems: itemsToShow,
-          totalItems: filtered.length,
-          newPage: currentPage + 1
-        });
-        
+      if (endIndex < filtered.length) {
         isLoadingMore = true;
         currentPage++;
         displayYoyoCards(false);
