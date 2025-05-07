@@ -221,14 +221,16 @@ document.addEventListener('DOMContentLoaded', () => {
           if (changes.length > 0) {
             console.log(`Cache changes for ${key}:`, changes);
             
-            // Log details of added items
-            if (added.length > 0) {
-              console.log('Added items:', added.map(item => item.model || item.id));
-            }
-            
-            // Log details of removed items
-            if (removed.length > 0) {
-              console.log('Removed items:', removed.map(item => item.model || item.id));
+            if (DEBUG) {
+              // Log details of added items
+              if (added.length > 0) {
+                console.log('Added items:', added.map(item => item.model || item.id));
+              }
+              
+              // Log details of removed items
+              if (removed.length > 0) {
+                console.log('Removed items:', removed.map(item => item.model || item.id));
+              }
             }
           }
         }
@@ -290,8 +292,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3) Fetch fresh in background
     try {
-      if (DEBUG) console.log('Fetching latest yoyo data…');
-      const resp  = await fetch(CONFIG.yoyosDataUrl);
+      if (DEBUG) {
+        console.log('Fetching latest yoyo data…');
+        console.log('Loaded specs:', specsData, 'Count:', specsData.length);
+      }
+      const resp = await fetch(CONFIG.yoyosDataUrl);
       const fresh = await resp.json();
 
       // 4) If no cache yet, or the payload actually changed, update UI
