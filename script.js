@@ -1078,11 +1078,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Close modal when clicking outside
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        closeModal();
-      }
+    // Close modal when clicking the overlay
+    modalOverlay.addEventListener('click', () => {
+      closeModal();
     });
 
     if (closeModalBtn) {
