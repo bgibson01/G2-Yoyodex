@@ -654,27 +654,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Date sort button click handler
   document.getElementById('sort-date').addEventListener('click', function() {
     const button = this;
-    const sortIcon = button.querySelector('.sort-icon');
-    
     sortDateDesc = !sortDateDesc;
     currentPage = 1;
     updateClearFiltersButton();
     scrollToTopSmooth();
     
     button.style.transition = 'none';
-    
-    if (sortDateDesc) {
-      button.setAttribute('data-active', 'false');
-      if (sortIcon) {
-        sortIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Newest First';
-      }
-    } else {
-      button.setAttribute('data-active', 'true');
-      if (sortIcon) {
-        sortIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Oldest First';
-      }
-      trackEvent('Engagement', 'Sort Date', sortDateDesc ? 'Newest First' : 'Oldest First');
-    }
+    button.setAttribute('data-active', !sortDateDesc);
     
     button.offsetHeight;
     
@@ -683,6 +669,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 50);
     
     displayYoyoCards(true);
+    trackEvent('Engagement', 'Sort Date', sortDateDesc ? 'Newest First' : 'Oldest First');
   });
 
   function createSkeletonCard() {
@@ -1483,10 +1470,6 @@ function scrollToTopSmooth() {
     
     if (dateSortButton) {
       dateSortButton.setAttribute('data-active', 'false');
-      const sortIcon = dateSortButton.querySelector('.sort-icon');
-      if (sortIcon) {
-        sortIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Newest First';
-      }
     }
     
     // Reset filter buttons
