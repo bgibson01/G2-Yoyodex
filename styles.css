@@ -890,7 +890,7 @@ footer a:hover {
 .modal-content {
   position: relative;
   width: 95%;
-  max-width: 85%;
+  max-width: fit-content;
   max-height: 98vh;
   background: var(--surface-color);
   border-radius: var(--radius-lg);
@@ -933,7 +933,6 @@ footer a:hover {
   position: relative;
   width: fit-content;
   max-width: 100%;
-  aspect-ratio: 1;
 }
 
 .modal-image-container .loading-spinner {
