@@ -1,4 +1,4 @@
-const DEBUG = true;
+const DEBUG = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   // Ensure APP_CONFIG is loaded
