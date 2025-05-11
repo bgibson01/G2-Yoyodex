@@ -1,6 +1,35 @@
-const DEBUG = false;
+const DEBUG = true;
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Ensure APP_CONFIG is loaded
+  if (!window.APP_CONFIG) {
+    console.error('APP_CONFIG not loaded. Make sure config.js is loaded before script.js');
+    return;
+  }
+
+  // Initialize CONFIG object
+  const CONFIG = {
+    yoyosDataUrl: window.APP_CONFIG.API.YOYOS_URL,
+    specsDataUrl: window.APP_CONFIG.API.SPECS_URL,
+    placeholderImage: window.APP_CONFIG.ASSETS.PLACEHOLDER_IMAGE
+  };
+
+  // Initialize CACHE_CONFIG object
+  const CACHE_CONFIG = {
+    yoyosCacheKey: window.APP_CONFIG.CACHE.KEYS.YOYOS,
+    specsCacheKey: window.APP_CONFIG.CACHE.KEYS.SPECS,
+    cacheExpiration: window.APP_CONFIG.CACHE.EXPIRATION
+  };
+
+  if (DEBUG) {
+    console.log('App initialized:', {
+      version: window.APP_CONFIG.VERSION,
+      name: window.APP_CONFIG.APP_NAME,
+      config: CONFIG,
+      cacheConfig: CACHE_CONFIG
+    });
+  }
+
   // Register service worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -8,11 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
       
       navigator.serviceWorker.register('sw.js')
         .then(registration => {
-          if (DEBUG) console.log('Service worker registered successfully:', registration);
+          if (DEBUG) console.log('Service worker registered:', registration.scope);
           
           // Check for updates every hour
           setInterval(() => {
-            if (DEBUG) console.log('Checking for service worker updates...');
             registration.update();
           }, 60 * 60 * 1000);
 
@@ -20,14 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
           let refreshing = false;
           navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (!refreshing) {
-              if (DEBUG) console.log('New service worker activated, reloading page...');
+              if (DEBUG) console.log('New service worker activated, reloading...');
               refreshing = true;
               window.location.reload();
             }
           });
 
           // Check for updates immediately
-          if (DEBUG) console.log('Performing initial service worker update check...');
           registration.update();
         })
         .catch((err) => {
@@ -39,44 +66,336 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Handle install prompt
+  // Add these variables at the top with other state variables
+  let installPromptDismissed = false;
+  const INSTALL_PROMPT_DISMISSED_KEY = 'install_prompt_dismissed';
+  const INSTALL_REMINDER_DELAY = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+  let pageLoadTime = Date.now();
+
+  // Add display constants
+  const DISPLAY_NONE = 'none';
+  const DISPLAY_FLEX = 'flex';
+
+  // Check PWA installation criteria
+  if (DEBUG) {
+    console.log('PWA Installation Criteria:', {
+      hasServiceWorker: 'serviceWorker' in navigator,
+      isHTTPS: window.location.protocol === 'https:',
+      hasManifest: document.querySelector('link[rel="manifest"]') !== null,
+      isStandalone: window.matchMedia('(display-mode: standalone)').matches,
+      displayMode: window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser',
+      userAgent: window.navigator.userAgent
+    });
+  }
+
+  // Create and setup install button
   let deferredPrompt;
-  const installButton = document.createElement('button');
-  installButton.style.display = 'none';
-  installButton.textContent = 'Install App';
+  const installButton = document.createElement('div');
+  installButton.style.display = DISPLAY_NONE; // Start hidden
   installButton.className = 'install-button';
   installButton.style.position = 'fixed';
   installButton.style.bottom = '20px';
   installButton.style.left = '20px';
-  installButton.style.padding = '10px 20px';
+  installButton.style.padding = '10px';
   installButton.style.backgroundColor = '#4CAF50';
   installButton.style.color = 'white';
   installButton.style.border = 'none';
   installButton.style.borderRadius = '5px';
   installButton.style.cursor = 'pointer';
   installButton.style.zIndex = '1000';
-  document.body.appendChild(installButton);
+  installButton.style.alignItems = 'center';
+  installButton.style.gap = '10px';
 
-  window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent Chrome 67 and earlier from automatically showing the prompt
-    e.preventDefault();
-    // Stash the event so it can be triggered later
-    deferredPrompt = e;
-    // Show the install button
-    installButton.style.display = 'block';
+  // Create the install text
+  const installText = document.createElement('span');
+  installText.textContent = 'Install App';
+  installButton.appendChild(installText);
+
+  // Create the close button
+  const closeButton = document.createElement('button');
+  closeButton.innerHTML = '×';
+  closeButton.className = 'clear-button';
+  closeButton.setAttribute('aria-label', 'Dismiss install prompt');
+  closeButton.setAttribute('data-tooltip', 'Dismiss install prompt');
+  
+  // Add click handler to close button
+  closeButton.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent event from bubbling up to install button
+    confirmModal.classList.remove('hidden'); // Show the confirmation modal
+    trackEvent('Engagement', 'Dismiss Install Prompt', 'Show Confirm');
   });
 
+  // Create the confirmation modal
+  const confirmModal = document.createElement('div');
+  confirmModal.className = 'install-confirm-modal hidden';
+  confirmModal.innerHTML = `
+    <div class="install-confirm-content">
+      <div class="install-confirm-header">
+        <h2>Install App</h2>
+        <button class="clear-button" id="close-confirm-modal">×</button>
+      </div>
+      <div class="install-confirm-body">
+        <p>Would you like to:</p>
+        <div class="install-confirm-actions">
+          <button class="gradient-button" id="remind-later">Remind me in 7 days</button>
+          <button class="gradient-button" id="never-show">Never show again</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Add styles for the confirmation modal
+  const style = document.createElement('style');
+  style.textContent = `
+    .install-confirm-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+    }
+    
+    .install-confirm-modal.hidden {
+      display: none;
+    }
+    
+    .install-confirm-content {
+      background: var(--bg-color);
+      border-radius: 8px;
+      padding: 1rem;
+      width: 90%;
+      max-width: 320px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .install-confirm-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .install-confirm-header h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    
+    .install-confirm-body {
+      font-size: 0.9rem;
+    }
+    
+    .install-confirm-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .install-confirm-actions button {
+      width: 100%;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      color: white;
+    }
+    
+    .install-confirm-actions button:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    #remind-later {
+      background-color: #FFD700;
+      color: #333;
+    }
+
+    #never-show {
+      background-color: #FF4444;
+    }
+    
+    @media (max-width: 640px) {
+      .install-confirm-content {
+        width: 85%;
+        padding: 0.75rem;
+      }
+      
+      .install-confirm-header h2 {
+        font-size: 1.1rem;
+      }
+      
+      .install-confirm-body {
+        font-size: 0.85rem;
+      }
+      
+      .install-confirm-actions button {
+        padding: 0.4rem;
+        font-size: 0.85rem;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+  document.body.appendChild(confirmModal);
+
+  // Add click handler
+  if (DEBUG) console.log('Adding click handler to close button');
+  const confirmCloseButton = document.getElementById('close-confirm-modal');
+  if (confirmCloseButton) {
+    confirmCloseButton.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent triggering the install prompt
+      if (DEBUG) console.log('Close button clicked');
+      confirmModal.classList.add('hidden');
+    });
+  } else {
+    console.warn('Close button not found in DOM');
+  }
+
+  // Handle modal actions
+  const remindLaterBtn = document.getElementById('remind-later');
+  const neverShowBtn = document.getElementById('never-show');
+  const cancelDismissBtn = document.getElementById('cancel-dismiss');
+
+  if (remindLaterBtn) {
+    remindLaterBtn.addEventListener('click', () => {
+      if (DEBUG) console.log('Setting reminder for later');
+      const timestamp = Date.now();
+      localStorage.setItem(INSTALL_PROMPT_DISMISSED_KEY, timestamp.toString());
+      installButton.style.display = DISPLAY_NONE;
+      confirmModal.classList.add('hidden');
+      trackEvent('Engagement', 'Dismiss Install Prompt', 'Remind Later');
+    });
+  }
+
+  if (neverShowBtn) {
+    neverShowBtn.addEventListener('click', () => {
+      if (DEBUG) console.log('Never showing again');
+      localStorage.setItem(INSTALL_PROMPT_DISMISSED_KEY, 'never');
+      installButton.style.display = DISPLAY_NONE;
+      confirmModal.classList.add('hidden');
+      trackEvent('Engagement', 'Dismiss Install Prompt', 'Never Show');
+    });
+  }
+
+  if (cancelDismissBtn) {
+    cancelDismissBtn.addEventListener('click', () => {
+      if (DEBUG) console.log('Cancelled dismissal');
+      confirmModal.classList.add('hidden');
+      trackEvent('Engagement', 'Dismiss Install Prompt', 'Cancelled');
+    });
+  }
+
+  // Add button to install prompt
+  if (DEBUG) console.log('Appending close button to install button');
+  installButton.appendChild(closeButton);
+
+  // Add install button to document
+  if (DEBUG) console.log('Appending install button to document body');
+  document.body.appendChild(installButton);
+
+  // Add debug logging for beforeinstallprompt
+  if (DEBUG) {
+    console.log('Setting up beforeinstallprompt listener');
+    console.log('Current display mode:', window.matchMedia('(display-mode: standalone)').matches);
+    console.log('Current standalone:', window.navigator.standalone);
+  }
+
+  // Modify the beforeinstallprompt handler
+  window.addEventListener('beforeinstallprompt', (e) => {
+    if (DEBUG) {
+      console.log('Install prompt state:', {
+        isStandalone: window.matchMedia('(display-mode: standalone)').matches,
+        lastDismissed: localStorage.getItem(INSTALL_PROMPT_DISMISSED_KEY),
+        buttonDisplay: installButton.style.display,
+        event: e
+      });
+    }
+    
+    // Prevent Chrome 67 and earlier from automatically showing the prompt
+    e.preventDefault();
+    
+    // Check if the app is already installed
+    if (window.matchMedia('(display-mode: standalone)').matches || 
+        window.navigator.standalone === true) {
+      if (DEBUG) console.log('App already installed, hiding install button');
+      installButton.style.display = DISPLAY_NONE;
+      return;
+    }
+    
+    // Check if we should show the prompt based on previous dismissal
+    const lastDismissed = localStorage.getItem(INSTALL_PROMPT_DISMISSED_KEY);
+    
+    // If 'never' was selected, don't show the prompt
+    if (lastDismissed === 'never') {
+      if (DEBUG) console.log('User chose to never show the prompt');
+      installButton.style.display = DISPLAY_NONE;
+      return;
+    }
+    
+    if (lastDismissed) {
+      const timeSinceDismissed = Date.now() - parseInt(lastDismissed);
+      if (timeSinceDismissed < INSTALL_REMINDER_DELAY) {
+        if (DEBUG) console.log('Within reminder delay, hiding install button');
+        installButton.style.display = DISPLAY_NONE;
+        return;
+      }
+    }
+    
+    // Only stash the event if we're going to show the prompt
+    deferredPrompt = e;
+    // Show the install button
+    if (DEBUG) console.log('Showing install button');
+    installButton.style.display = DISPLAY_FLEX;
+  });
+
+  // Add a check for standalone mode on page load
+  if (window.matchMedia('(display-mode: standalone)').matches || 
+      window.navigator.standalone === true) {
+    if (DEBUG) console.log('App is running in standalone mode, hiding install button');
+    installButton.style.display = DISPLAY_NONE;
+  }
+
+  // Add a check for why beforeinstallprompt might not fire
+  window.addEventListener('load', () => {
+    if (DEBUG && !deferredPrompt) {
+      console.log('beforeinstallprompt did not fire. Possible reasons:', {
+        isHTTPS: window.location.protocol === 'https:',
+        hasManifest: document.querySelector('link[rel="manifest"]') !== null,
+        isStandalone: window.matchMedia('(display-mode: standalone)').matches,
+        displayMode: window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser',
+        userAgent: window.navigator.userAgent
+      });
+    }
+  });
+
+  // Modify the install button click handler
   installButton.addEventListener('click', () => {
     // Hide the app provided install prompt
-    installButton.style.display = 'none';
+    installButton.style.display = DISPLAY_NONE;
     // Show the install prompt
     deferredPrompt.prompt();
     // Wait for the user to respond to the prompt
     deferredPrompt.userChoice.then((choiceResult) => {
       if (choiceResult.outcome === 'accepted') {
-        //console.log('User accepted the install prompt');
+        trackEvent('Engagement', 'Install App', 'Accepted');
       } else {
-        //console.log('User dismissed the install prompt');
+        trackEvent('Engagement', 'Install App', 'Declined');
+        // Only store dismissal if they explicitly click "Not now" or similar
+        // Clicking X on the prompt should not count as a dismissal
+        if (choiceResult.outcome === 'dismissed' && choiceResult.platform === 'web') {
+          // Store the dismissal timestamp
+          localStorage.setItem(INSTALL_PROMPT_DISMISSED_KEY, Date.now().toString());
+        } else {
+          // For any other outcome (including clicking X), clear any existing dismissal
+          localStorage.removeItem(INSTALL_PROMPT_DISMISSED_KEY);
+        }
       }
       // Clear the saved prompt since it can't be used again
       deferredPrompt = null;
@@ -85,30 +404,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Listen for successful installation
   window.addEventListener('appinstalled', () => {
-    //console.log('PWA was installed');
-    installButton.style.display = 'none';
+    trackEvent('Engagement', 'Install App', 'Completed');
+    installButton.style.display = DISPLAY_NONE;
+    // Clear the dismissal timestamp since they've installed
+    localStorage.removeItem(INSTALL_PROMPT_DISMISSED_KEY);
   });
 
-  const CONFIG = {
-    yoyosDataUrl: window.APP_CONFIG.API.YOYOS_URL,
-    specsDataUrl: window.APP_CONFIG.API.SPECS_URL,
-    placeholderImage: window.APP_CONFIG.ASSETS.PLACEHOLDER_IMAGE
-  };
-
-  const CACHE_CONFIG = {
-    yoyosCacheKey: window.APP_CONFIG.CACHE.KEYS.YOYOS,
-    specsCacheKey: window.APP_CONFIG.CACHE.KEYS.SPECS,
-    cacheExpiration: window.APP_CONFIG.CACHE.EXPIRATION
-  };
-
+  // Initialize DOM elements
   const yoyoGrid = document.getElementById('yoyo-grid');
   const modal = document.getElementById('modal');
   const closeModalBtn = document.getElementById('close-modal');
   const modalOverlay = document.getElementById('modal-overlay');
   const modalMainImage = document.getElementById('modal-main-image');
   const modalImages = document.getElementById('modal-images');
-  const paginationContainer = document.getElementById('pagination-container'); // Pagination container
+  const paginationContainer = document.getElementById('pagination-container');
 
+  // Initialize state variables
   let currentPage = 1;
   let itemsPerPage = getItemsPerPage(); // Dynamically determine items per page
   let yoyoData = [];
@@ -266,6 +577,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainLoadingSpinner = document.getElementById('main-loading-spinner');
     const yoyoGrid           = document.getElementById('yoyo-grid');
 
+    if (DEBUG) {
+      console.log('Starting fetchYoyoData...');
+      console.log('CONFIG:', CONFIG);
+      console.log('yoyosDataUrl:', CONFIG.yoyosDataUrl);
+    }
+
     // 1) Show spinner & clear grid
     if (mainLoadingSpinner) mainLoadingSpinner.style.display = 'flex';
     if (yoyoGrid) {
@@ -294,10 +611,14 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       if (DEBUG) {
         console.log('Fetching latest yoyo data…');
-        console.log('Loaded specs:', specsData, 'Count:', specsData.length);
+        console.log('URL:', CONFIG.yoyosDataUrl);
       }
       const resp = await fetch(CONFIG.yoyosDataUrl);
+      if (!resp.ok) {
+        throw new Error(`HTTP error! status: ${resp.status}`);
+      }
       const fresh = await resp.json();
+      if (DEBUG) console.log('Received fresh data:', fresh);
 
       // 4) If no cache yet, or the payload actually changed, update UI
       if (!hasCache || JSON.stringify(fresh) !== JSON.stringify(cachedYoyos)) {
@@ -308,7 +629,10 @@ document.addEventListener('DOMContentLoaded', () => {
         gotFreshUpdate = true;
         yoyoData = fresh;
         // Defensive: ensure yoyoData is always an array
-        if (!Array.isArray(yoyoData)) yoyoData = [];
+        if (!Array.isArray(yoyoData)) {
+          console.error('Received non-array data:', yoyoData);
+          yoyoData = [];
+        }
         setCachedData(cacheKey, fresh);
         populateModelFilter();
         populateColorwayFilter();
@@ -320,6 +644,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (err) {
       console.error('Error fetching yoyo data:', err);
+      console.error('Error details:', {
+        message: err.message,
+        stack: err.stack,
+        url: CONFIG.yoyosDataUrl
+      });
     } finally {
       // 5) Hide spinner and, if this was the first load, draw cards
       if (mainLoadingSpinner) mainLoadingSpinner.style.display = 'none';
@@ -435,13 +764,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modelFilter = document.getElementById('model-filter');
     let filteredYoyos = yoyoData;
 
-    // If a colorway is selected, filter yoyos by that colorway first
-    if (selectedColorway) {
-      // coerce both sides to string so numeric colorways like "117" still match
-      filteredYoyos = filteredYoyos.filter(y => String(y.colorway) === selectedColorway);
-    }
-
-    // Get unique models
+    // Get unique models from all yoyos, not filtered by colorway
     const models = Array.from(new Set(filteredYoyos.map(y => y.model))).sort();
     const modelCounts = {};
     models.forEach(model => {
@@ -474,17 +797,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function populateColorwayFilter() {
     const colorwayFilter = document.getElementById('colorway-filter');
-    let filteredYoyos = yoyoData;
 
-    // If a model is selected, filter yoyos by that model first
-    if (selectedModel) {
-      filteredYoyos = filteredYoyos.filter(y => y.model === selectedModel);
-    }
-
-    const colorways = Array.from(new Set(filteredYoyos.map(y => y.colorway))).sort();
+    // Get unique colorways from all yoyos, not filtered by model
+    const colorways = Array.from(new Set(yoyoData.map(y => y.colorway))).sort();
     const colorwayCounts = {};
     colorways.forEach(colorway => {
-      colorwayCounts[colorway] = filteredYoyos.filter(y => y.colorway === colorway).length;
+      colorwayCounts[colorway] = yoyoData.filter(y => y.colorway === colorway).length;
     });
 
     // Store current selection
@@ -503,7 +821,7 @@ document.addEventListener('DOMContentLoaded', () => {
     colorwayFilter.innerHTML = '';
     sortedOptions.forEach(opt => colorwayFilter.appendChild(opt));
     
-    // Restore selection if it still exists in the filtered list
+    // Restore selection if it still exists
     if (currentSelection && colorways.includes(currentSelection)) {
       colorwayFilter.value = currentSelection;
     } else {
@@ -626,6 +944,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('model-filter').addEventListener('change', (e) => {
     selectedModel = e.target.value;
+    // If manually selecting "All", clear all filters
+    if (!selectedModel) {
+      clearAllFilters();
+      return;
+    }
+    // Clear search term if it exists
+    if (searchTerm) {
+      searchTerm = '';
+      document.getElementById('search').value = '';
+    }
+    // Clear colorway filter
+    selectedColorway = "";
+    document.getElementById('colorway-filter').value = "";
     populateColorwayFilter();
     currentPage = 1;
     updateClearFiltersButton();
@@ -636,6 +967,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('colorway-filter').addEventListener('change', (e) => {
     selectedColorway = e.target.value;
+    // If manually selecting "All", clear all filters
+    if (!selectedColorway) {
+      clearAllFilters();
+      return;
+    }
+    // Clear search term if it exists
+    if (searchTerm) {
+      searchTerm = '';
+      document.getElementById('search').value = '';
+    }
+    // Clear model filter
+    selectedModel = "";
+    document.getElementById('model-filter').value = "";
     populateModelFilter();
     currentPage = 1;
     updateClearFiltersButton();
@@ -1381,17 +1725,30 @@ document.addEventListener('DOMContentLoaded', () => {
   // Add event listeners for show wishlist and show owned buttons
   document.getElementById('show-wishlist').addEventListener('click', () => {
     showWishlist = !showWishlist;
-    const button = document.getElementById('show-wishlist');
+    const wishlistBtn = document.getElementById('show-wishlist');
+    const ownedBtn = document.getElementById('show-owned');
     
+    // Clear all other filters
+    searchTerm = '';
+    document.getElementById('search').value = '';
+    selectedModel = '';
+    document.getElementById('model-filter').value = '';
+    selectedColorway = '';
+    document.getElementById('colorway-filter').value = '';
+    sortDateDesc = true;
+    document.getElementById('sort-date').setAttribute('data-active', 'false');
+    
+    // If wishlist is being activated, deactivate owned
     if (showWishlist) {
-      button.classList.remove('bg-gray-800');
-      button.classList.add('bg-yellow-900');
-      button.setAttribute('data-active', 'true');
+      showOwned = false;
+      ownedBtn.classList.remove('active');
+      ownedBtn.setAttribute('data-active', 'false');
+      wishlistBtn.classList.add('active');
+      wishlistBtn.setAttribute('data-active', 'true');
       trackEvent('Engagement', 'Filter', 'Show Wishlist');
     } else {
-      button.classList.remove('bg-yellow-900');
-      button.classList.add('bg-gray-800');
-      button.setAttribute('data-active', 'false');
+      wishlistBtn.classList.remove('active');
+      wishlistBtn.setAttribute('data-active', 'false');
       trackEvent('Engagement', 'Filter', 'Hide Wishlist');
     }
     
@@ -1403,17 +1760,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('show-owned').addEventListener('click', () => {
     showOwned = !showOwned;
-    const button = document.getElementById('show-owned');
+    const ownedBtn = document.getElementById('show-owned');
+    const wishlistBtn = document.getElementById('show-wishlist');
     
+    // Clear all other filters
+    searchTerm = '';
+    document.getElementById('search').value = '';
+    selectedModel = '';
+    document.getElementById('model-filter').value = '';
+    selectedColorway = '';
+    document.getElementById('colorway-filter').value = '';
+    sortDateDesc = true;
+    document.getElementById('sort-date').setAttribute('data-active', 'false');
+    
+    // If owned is being activated, deactivate wishlist
     if (showOwned) {
-      button.classList.remove('bg-gray-800');
-      button.classList.add('bg-blue-900');
-      button.setAttribute('data-active', 'true');
+      showWishlist = false;
+      wishlistBtn.classList.remove('active');
+      wishlistBtn.setAttribute('data-active', 'false');
+      ownedBtn.classList.add('active');
+      ownedBtn.setAttribute('data-active', 'true');
       trackEvent('Engagement', 'Filter', 'Show Owned');
     } else {
-      button.classList.remove('bg-blue-900');
-      button.classList.add('bg-gray-800');
-      button.setAttribute('data-active', 'false');
+      ownedBtn.classList.remove('active');
+      ownedBtn.setAttribute('data-active', 'false');
       trackEvent('Engagement', 'Filter', 'Hide Owned');
     }
     

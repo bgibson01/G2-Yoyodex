@@ -1,5 +1,5 @@
-// Import config
-importScripts('config.js');
+// Import service worker config
+importScripts('sw-config.js');
 
 // Version-based cache name
 const CACHE_VERSION = self.APP_CONFIG.VERSION;
@@ -12,6 +12,7 @@ const ASSETS_TO_CACHE = [
   './styles.css',
   './script.js',
   './config.js',
+  './sw-config.js',
   './manifest.json',
   './assets/g2-logo.png',
   './assets/placeholder.jpg',
@@ -28,7 +29,14 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        return cache.addAll(ASSETS_TO_CACHE);
+        // Cache each asset individually to handle failures gracefully
+        return Promise.allSettled(
+          ASSETS_TO_CACHE.map(url => 
+            cache.add(url).catch(error => {
+              console.warn(`Failed to cache ${url}:`, error);
+            })
+          )
+        );
       })
   );
 });
@@ -73,7 +81,10 @@ self.addEventListener('fetch', (event) => {
         // Update cache in the background
         caches.open(CACHE_NAME)
           .then((cache) => {
-            cache.put(event.request, responseToCache);
+            cache.put(event.request, responseToCache)
+              .catch(error => {
+                console.warn('Failed to update cache:', error);
+              });
           });
 
         return response;

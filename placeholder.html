@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>G2 Releases Database Image Generator</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            background: #f5f5f5;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .image-container {
+            position: relative;
+            border: 1px solid #ccc;
+            margin: 10px;
+        }
+        .placeholder {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ffffff;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        button {
+            padding: 10px 20px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background: #357abd;
+        }
+        .instructions {
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .preview {
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .preview-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .preview-item img {
+            border: 1px solid #ccc;
+        }
+        .save-all {
+            margin-top: 20px;
+            background: #2ecc71;
+        }
+        .save-all:hover {
+            background: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        <h2>G2 Releases Database Image Generator</h2>
+        <p>Click the buttons below to generate and save the images. The images will be saved with exact dimensions.</p>
+    </div>
+
+    <div class="controls">
+        <button onclick="generateAndSave('placeholder', 400, 400)">Generate & Save Placeholder (400x400)</button>
+        <button onclick="generateAndSave('icon-192', 192, 192)">Generate & Save Icon 192x192</button>
+        <button onclick="generateAndSave('icon-512', 512, 512)">Generate & Save Icon 512x512</button>
+        <button class="save-all" onclick="generateAndSaveAll()">Generate & Save All Images</button>
+    </div>
+
+    <div class="preview" id="preview">
+        <!-- Previews will be shown here -->
+    </div>
+
+    <script>
+        function createCanvas(width, height, type) {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, '#2a2a2a');
+            gradient.addColorStop(1, '#1a1a1a');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw icon
+            ctx.font = `${width * 0.4}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🪀', width/2, height/2 - width * 0.15);
+
+            // Draw text
+            if (type === 'placeholder') {
+                // Draw "G2 Releases"
+                ctx.font = `bold ${width * 0.15}px Arial`;
+                ctx.fillStyle = '#4a90e2';
+                ctx.fillText('G2 Releases', width/2, height/2 + width * 0.1);
+
+                // Draw "Loading image..."
+                ctx.font = `${width * 0.08}px Arial`;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.fillText('Loading image...', width/2, height/2 + width * 0.25);
+            } else {
+                // Draw "G2" for icons
+                ctx.font = `bold ${width * 0.2}px Arial`;
+                ctx.fillStyle = '#4a90e2';
+                ctx.fillText('G2', width/2, height/2 + width * 0.15);
+            }
+
+            return canvas;
+        }
+
+        function saveCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function generateAndSave(type, width, height) {
+            const canvas = createCanvas(width, height, type);
+            const filename = type === 'placeholder' ? 'placeholder.png' : `${type}.png`;
+            saveCanvas(canvas, filename);
+            
+            // Add preview
+            const preview = document.getElementById('preview');
+            const previewItem = document.createElement('div');
+            previewItem.className = 'preview-item';
+            previewItem.innerHTML = `
+                <img src="${canvas.toDataURL('image/png')}" alt="${type}" width="${width}" height="${height}">
+                <div>${filename}</div>
+            `;
+            preview.appendChild(previewItem);
+        }
+
+        function generateAndSaveAll() {
+            // Clear previous previews
+            document.getElementById('preview').innerHTML = '';
+            
+            // Generate and save all images
+            generateAndSave('placeholder', 400, 400);
+            generateAndSave('icon-192', 192, 192);
+            generateAndSave('icon-512', 512, 512);
+        }
+
+        // Generate placeholder by default
+        generateAndSave('placeholder', 400, 400);
+    </script>
+</body>
+</html> 
