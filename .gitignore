@@ -22,3 +22,6 @@ build/
 
 # Logs
 *.log 
+
+# Local Only Tools
+/manual_entry_tools/

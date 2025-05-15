@@ -1,4 +1,28 @@
-const DEBUG = false;
+// Debug flags
+const DEBUG = true; // Master switch
+const DEBUG_PWA = false;
+const DEBUG_CACHE = true;
+const DEBUG_DATA = false;
+const DEBUG_UI = false;
+const DEBUG_MODAL = false;
+const DEBUG_INSTALL = false;
+const DEBUG_NETWORK = false;
+
+function debugLog(area, ...args) {
+  if (!DEBUG) return;
+  const enabled = {
+    pwa: DEBUG_PWA,
+    cache: DEBUG_CACHE,
+    data: DEBUG_DATA,
+    ui: DEBUG_UI,
+    modal: DEBUG_MODAL,
+    install: DEBUG_INSTALL,
+    network: DEBUG_NETWORK,
+  };
+  if (enabled[area]) {
+    console.log(...args);
+  }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   // Ensure APP_CONFIG is loaded
@@ -16,28 +40,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize CACHE_CONFIG object
   const CACHE_CONFIG = {
-    yoyosCacheKey: window.APP_CONFIG.CACHE.KEYS.YOYOS,
-    specsCacheKey: window.APP_CONFIG.CACHE.KEYS.SPECS,
+    yoyosCacheKey: `${window.APP_CONFIG.APP_NAME}_${window.APP_CONFIG.CACHE.KEYS.YOYOS}_v${window.APP_CONFIG.VERSION}`,
+    specsCacheKey: `${window.APP_CONFIG.APP_NAME}_${window.APP_CONFIG.CACHE.KEYS.SPECS}_v${window.APP_CONFIG.VERSION}`,
     cacheExpiration: window.APP_CONFIG.CACHE.EXPIRATION
   };
 
-  if (DEBUG) {
-    console.log('App initialized:', {
-      version: window.APP_CONFIG.VERSION,
-      name: window.APP_CONFIG.APP_NAME,
-      config: CONFIG,
-      cacheConfig: CACHE_CONFIG
-    });
-  }
+  debugLog('data', 'App initialized:', {
+    version: window.APP_CONFIG.VERSION,
+    name: window.APP_CONFIG.APP_NAME,
+    config: CONFIG,
+    cacheConfig: CACHE_CONFIG
+  });
 
   // Register service worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      if (DEBUG) console.log('Registering service worker...');
+      debugLog('pwa', 'Registering service worker...');
       
       navigator.serviceWorker.register('sw.js')
         .then(registration => {
-          if (DEBUG) console.log('Service worker registered:', registration.scope);
+          debugLog('pwa', 'Service worker registered:', registration.scope);
           
           // Check for updates every hour
           setInterval(() => {
@@ -48,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
           let refreshing = false;
           navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (!refreshing) {
-              if (DEBUG) console.log('New service worker activated, reloading...');
+              debugLog('pwa', 'New service worker activated, reloading...');
               refreshing = true;
               window.location.reload();
             }
@@ -77,8 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const DISPLAY_FLEX = 'flex';
 
   // Check PWA installation criteria
-  if (DEBUG) {
-    console.log('PWA Installation Criteria:', {
+  if (DEBUG_PWA) {
+    debugLog('pwa', 'PWA Installation Criteria:', {
       hasServiceWorker: 'serviceWorker' in navigator,
       isHTTPS: window.location.protocol === 'https:',
       hasManifest: document.querySelector('link[rel="manifest"]') !== null,
@@ -246,12 +268,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.body.appendChild(confirmModal);
 
   // Add click handler
-  if (DEBUG) console.log('Adding click handler to close button');
+  if (DEBUG_PWA) debugLog('pwa', 'Adding click handler to close button');
   const confirmCloseButton = document.getElementById('close-confirm-modal');
   if (confirmCloseButton) {
     confirmCloseButton.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevent triggering the install prompt
-      if (DEBUG) console.log('Close button clicked');
+      if (DEBUG_PWA) debugLog('pwa', 'Close button clicked');
       confirmModal.classList.add('hidden');
     });
   } else {
@@ -265,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (remindLaterBtn) {
     remindLaterBtn.addEventListener('click', () => {
-      if (DEBUG) console.log('Setting reminder for later');
+      if (DEBUG_PWA) debugLog('pwa', 'Setting reminder for later');
       const timestamp = Date.now();
       localStorage.setItem(INSTALL_PROMPT_DISMISSED_KEY, timestamp.toString());
       installButton.style.display = DISPLAY_NONE;
@@ -276,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (neverShowBtn) {
     neverShowBtn.addEventListener('click', () => {
-      if (DEBUG) console.log('Never showing again');
+      if (DEBUG_PWA) debugLog('pwa', 'Never showing again');
       localStorage.setItem(INSTALL_PROMPT_DISMISSED_KEY, 'never');
       installButton.style.display = DISPLAY_NONE;
       confirmModal.classList.add('hidden');
@@ -286,31 +308,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (cancelDismissBtn) {
     cancelDismissBtn.addEventListener('click', () => {
-      if (DEBUG) console.log('Cancelled dismissal');
+      if (DEBUG_PWA) debugLog('pwa', 'Cancelled dismissal');
       confirmModal.classList.add('hidden');
       trackEvent('Engagement', 'Dismiss Install Prompt', 'Cancelled');
     });
   }
 
   // Add button to install prompt
-  if (DEBUG) console.log('Appending close button to install button');
+  if (DEBUG_PWA) debugLog('pwa', 'Appending close button to install button');
   installButton.appendChild(closeButton);
 
   // Add install button to document
-  if (DEBUG) console.log('Appending install button to document body');
+  if (DEBUG_PWA) debugLog('pwa', 'Appending install button to document body');
   document.body.appendChild(installButton);
 
   // Add debug logging for beforeinstallprompt
-  if (DEBUG) {
-    console.log('Setting up beforeinstallprompt listener');
-    console.log('Current display mode:', window.matchMedia('(display-mode: standalone)').matches);
-    console.log('Current standalone:', window.navigator.standalone);
+  if (DEBUG_PWA) {
+    debugLog('pwa', 'Setting up beforeinstallprompt listener');
+    debugLog('pwa', 'Current display mode:', window.matchMedia('(display-mode: standalone)').matches);
+    debugLog('pwa', 'Current standalone:', window.navigator.standalone);
   }
 
   // Modify the beforeinstallprompt handler
   window.addEventListener('beforeinstallprompt', (e) => {
-    if (DEBUG) {
-      console.log('Install prompt state:', {
+    if (DEBUG_PWA) {
+      debugLog('pwa', 'Install prompt state:', {
         isStandalone: window.matchMedia('(display-mode: standalone)').matches,
         lastDismissed: localStorage.getItem(INSTALL_PROMPT_DISMISSED_KEY),
         buttonDisplay: installButton.style.display,
@@ -324,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if the app is already installed
     if (window.matchMedia('(display-mode: standalone)').matches || 
         window.navigator.standalone === true) {
-      if (DEBUG) console.log('App already installed, hiding install button');
+      if (DEBUG_PWA) debugLog('pwa', 'App already installed, hiding install button');
       installButton.style.display = DISPLAY_NONE;
       return;
     }
@@ -334,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // If 'never' was selected, don't show the prompt
     if (lastDismissed === 'never') {
-      if (DEBUG) console.log('User chose to never show the prompt');
+      if (DEBUG_PWA) debugLog('pwa', 'User chose to never show the prompt');
       installButton.style.display = DISPLAY_NONE;
       return;
     }
@@ -342,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (lastDismissed) {
       const timeSinceDismissed = Date.now() - parseInt(lastDismissed);
       if (timeSinceDismissed < INSTALL_REMINDER_DELAY) {
-        if (DEBUG) console.log('Within reminder delay, hiding install button');
+        if (DEBUG_PWA) debugLog('pwa', 'Within reminder delay, hiding install button');
         installButton.style.display = DISPLAY_NONE;
         return;
       }
@@ -351,21 +373,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Only stash the event if we're going to show the prompt
     deferredPrompt = e;
     // Show the install button
-    if (DEBUG) console.log('Showing install button');
+    if (DEBUG_PWA) debugLog('pwa', 'Showing install button');
     installButton.style.display = DISPLAY_FLEX;
   });
 
   // Add a check for standalone mode on page load
   if (window.matchMedia('(display-mode: standalone)').matches || 
       window.navigator.standalone === true) {
-    if (DEBUG) console.log('App is running in standalone mode, hiding install button');
+    if (DEBUG_PWA) debugLog('pwa', 'App is running in standalone mode, hiding install button');
     installButton.style.display = DISPLAY_NONE;
   }
 
   // Add a check for why beforeinstallprompt might not fire
   window.addEventListener('load', () => {
-    if (DEBUG && !deferredPrompt) {
-      console.log('beforeinstallprompt did not fire. Possible reasons:', {
+    if (DEBUG_PWA && !deferredPrompt) {
+      debugLog('pwa', 'beforeinstallprompt did not fire. Possible reasons:', {
         isHTTPS: window.location.protocol === 'https:',
         hasManifest: document.querySelector('link[rel="manifest"]') !== null,
         isStandalone: window.matchMedia('(display-mode: standalone)').matches,
@@ -454,10 +476,207 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Helper function for deep object comparison
+  function normalizeField(key, value) {
+    // Normalize fields that can be blank/null
+    const normalizeToNull = ['release_date', 'type', 'quantity', 'additional_images', 'description', 'og_caption', 'created_at', 'last_modified'
+  ,];
+    if (normalizeToNull.includes(key)) {
+      if (value === undefined || value === null || value === '' || value === 'null' || (Array.isArray(value) && value.length === 0)) {
+        return null;
+      }
+      if (typeof value === 'string' && value.trim() === '') {
+        return null;
+      }
+      return value;
+    }
+    return value;
+  }
+
+  function objectsAreEqual(obj1, obj2) {
+    if (obj1 === null || obj1 === undefined || obj2 === null || obj2 === undefined) {
+      return obj1 === obj2;
+    }
+    if (typeof obj1 !== 'object' || typeof obj2 !== 'object') {
+      return obj1 === obj2;
+    }
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+    keys1.sort();
+    keys2.sort();
+    for (let i = 0; i < keys1.length; i++) {
+      const key = keys1[i];
+      if (keys1[i] !== keys2[i]) {
+        return false;
+      }
+      let val1 = obj1[key];
+      let val2 = obj2[key];
+      // Normalize fields before comparison
+      val1 = normalizeField(key, val1);
+      val2 = normalizeField(key, val2);
+      const areObjects = typeof val1 === 'object' && val1 !== null && typeof val2 === 'object' && val2 !== null;
+      if (areObjects) {
+        if (!objectsAreEqual(val1, val2)) {
+          return false;
+        }
+      } else {
+        if (String(val1).trim() !== String(val2).trim()) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  function getItemKey(item) {
+    // Use model+colorway as the primary key, fallback to image_url for duplicates
+    const model = item.model || '';
+    const colorway = item.colorway || '';
+    const imageUrl = item.image_url || '';
+    return `${model}|||${colorway}|||${imageUrl}`;
+  }
+
+  function setCachedData(key, data) {
+    // Get the previous cached data for comparison
+    const previousCacheJSON = localStorage.getItem(key);
+    let previousDataArray = null;
+    let changes = [];
+    let actualContentChanged = false; // Flag to track if content really changed
+
+    if (previousCacheJSON) {
+      try {
+        const parsedCache = JSON.parse(previousCacheJSON);
+        previousDataArray = parsedCache.data; // This is an array of yoyo/spec objects
+
+        if (Array.isArray(data) && Array.isArray(previousDataArray)) {
+          // Use composite key for matching
+          const currentDataMap = new Map(data.map(item => [getItemKey(item), item]));
+          const previousDataMap = new Map(previousDataArray.map(item => [getItemKey(item), item]));
+
+          // Find added items
+          const added = data.filter(item => {
+            const keyVal = getItemKey(item);
+            return !previousDataMap.has(keyVal);
+          });
+
+          // Find removed items
+          const removed = previousDataArray.filter(item => {
+            const keyVal = getItemKey(item);
+            return !currentDataMap.has(keyVal);
+          });
+
+          // Find modified items
+          const modified = data.filter(newItem => {
+            const keyVal = getItemKey(newItem);
+            const prevItem = previousDataMap.get(keyVal);
+            return prevItem && !objectsAreEqual(newItem, prevItem);
+          });
+
+          if (added.length > 0) changes.push(`Added ${added.length} new item(s)`);
+          if (removed.length > 0) changes.push(`Removed ${removed.length} item(s)`);
+          if (modified.length > 0) changes.push(`Modified ${modified.length} item(s)`);
+
+          if (changes.length > 0) {
+            actualContentChanged = true; // Mark that content has indeed changed
+          }
+
+          if (DEBUG_CACHE && modified.length > 0) {
+            debugLog('cache', `Cache changes for ${key}: Found ${modified.length} modified item(s). Detailed comparison:`);
+            modified.slice(0, 5).forEach(newItem => { // Log details for the first 5 modified items
+              const keyVal = getItemKey(newItem);
+              const prevItem = previousDataMap.get(keyVal);
+              debugLog('cache', `Comparing modified item KEY: ${keyVal}:`);
+              let itemDiffFound = false;
+              const allKeys = new Set([...Object.keys(newItem), ...(prevItem ? Object.keys(prevItem) : [])]);
+
+              allKeys.forEach(k => {
+                const newVal = newItem.hasOwnProperty(k) ? newItem[k] : undefined;
+                const oldVal = prevItem && prevItem.hasOwnProperty(k) ? prevItem[k] : undefined;
+
+                const valIsNew = newItem.hasOwnProperty(k);
+                const valWasOld = prevItem && prevItem.hasOwnProperty(k);
+
+                if (!valIsNew && valWasOld) {
+                  debugLog('cache', `  -- Key '${k}' in OLD ('${oldVal}', type: ${typeof oldVal}) but not in NEW.`);
+                  itemDiffFound = true;
+                } else if (valIsNew && !valWasOld) {
+                  debugLog('cache', `  -- Key '${k}' in NEW ('${newVal}', type: ${typeof newVal}) but not in OLD.`);
+                  itemDiffFound = true;
+                } else if (valIsNew && valWasOld) {
+                  // Compare values only if key exists in both
+                  const areObjects = typeof newVal === 'object' && newVal !== null && typeof oldVal === 'object' && oldVal !== null;
+                  let valuesDiffer;
+                  if (areObjects) {
+                    valuesDiffer = !objectsAreEqual(newVal, oldVal);
+                  } else {
+                    if (newVal !== oldVal && String(newVal).trim() !== String(oldVal).trim()) {
+                        valuesDiffer = true;
+                        debugLog('cache', `    Primitive values differ with strict AND string comparison.`);
+                    } else if (String(newVal).trim() !== String(oldVal).trim()) {
+                        valuesDiffer = true;
+                        debugLog('cache', `    Primitive values differ with string comparison, but might be equal with strict type check or vice-versa.`);
+                    } else {
+                        valuesDiffer = false;
+                    }
+                  }
+
+                  if (valuesDiffer) {
+                    debugLog('cache', `  -- Difference in key '${k}': NEW='${newVal}' (type: ${typeof newVal}) vs OLD='${oldVal}' (type: ${typeof oldVal})`);
+                    itemDiffFound = true;
+                  }
+                }
+              });
+              if (!itemDiffFound) {
+                debugLog('cache', `  -- No specific property differences found by this debug logic for item ${keyVal}, yet item was marked modified. newItem:`, JSON.stringify(newItem), `prevItem:`, JSON.stringify(prevItem));
+              }
+            });
+            if (modified.length > 5) {
+                debugLog('cache', `... and ${modified.length - 5} more modified items.`);
+            }
+          }
+        }
+      } catch (e) {
+        console.error(`Error parsing or comparing previous cache for key ${key}:`, e);
+        previousDataArray = null; 
+        actualContentChanged = true; // Treat as change if old cache is corrupt
+      }
+    } else {
+      actualContentChanged = true; // No previous cache, so this is definitely a change
+    }
+
+    // Only update localStorage if there was no previous cache or if actual content changed
+    if (actualContentChanged) {
+      const cacheData = {
+        data,
+        timestamp: Date.now(),
+        version: getCurrentAppVersion()
+      };
+      localStorage.setItem(key, JSON.stringify(cacheData));
+      debugLog('cache', `Updated cache for key: ${key}. Version: ${cacheData.version}, Timestamp: ${new Date(cacheData.timestamp).toLocaleString()}`);
+      if (changes.length > 0) {
+        debugLog('cache', `Changes detected: ${changes.join(', ')}`);
+      } else if (!previousCacheJSON) {
+        debugLog('cache', `Initialized new cache for ${key}.`);
+      }
+    } else if (previousCacheJSON) {
+      // If no actual content change, but previous cache existed, log that no update was made to localStorage
+      const parsedCache = JSON.parse(previousCacheJSON);
+      debugLog('cache', `Data for key '${key}' (Version: ${parsedCache.version || 'unknown'}) is identical to fetched data. localStorage not updated.`);
+    }
+  }
+  
+  // Helper function to get the current app version
+  function getCurrentAppVersion() {
+    return window.APP_CONFIG.VERSION;
+  }
+
   function getCachedData(key) {
     const cached = localStorage.getItem(key);
     if (!cached) {
-      console.log(`No cache found for key: ${key}`);
+      if (DEBUG_CACHE) debugLog('cache', `No cache found for key: ${key}`);
       return null;
     }
     
@@ -467,120 +686,37 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Check if cache is expired
       if (Date.now() - timestamp > CACHE_CONFIG.cacheExpiration) {
-        console.log(`Cache expired for key: ${key}. Last updated: ${new Date(timestamp).toLocaleString()}`);
+        if (DEBUG_CACHE) debugLog('cache', `Cache expired for key: ${key}. Last updated: ${new Date(timestamp).toLocaleString()}`);
         localStorage.removeItem(key);
         return null;
       }
       
       // Check if cache version is outdated
-      if (version && version !== currentVersion) {
-        console.log(`Cache version mismatch for key: ${key}. Cached: ${version}, Current: ${currentVersion}`);
+      // Important: Only invalidate if 'version' exists in the cache and is different.
+      // This allows older caches without a version to still be used until they expire.
+      if (typeof version !== 'undefined' && version !== currentVersion) {
+        if (DEBUG_CACHE) debugLog('cache', `Cache version mismatch for key: ${key}. Cached: ${version}, Current: ${currentVersion}. Invalidating cache.`);
         localStorage.removeItem(key);
         return null;
       }
       
-      console.log(`Using cached data for key: ${key}. Version: ${version || 'unknown'}, Age: ${Math.round((Date.now() - timestamp) / 1000 / 60)} minutes`);
-      return data;
+      if (DEBUG_CACHE) debugLog('cache', `Using cached data for key: ${key}. Version: ${version || 'unknown'}, Age: ${Math.round((Date.now() - timestamp) / 1000 / 60)} minutes`);
+      return data; // This should be an array of yoyo/spec objects
     } catch (error) {
       console.error(`Error parsing cache for key: ${key}:`, error);
-      localStorage.removeItem(key);
+      localStorage.removeItem(key); // Remove corrupted cache
       return null;
     }
-  }
-
-  function setCachedData(key, data) {
-    // Get the previous cached data for comparison
-    const previousCache = localStorage.getItem(key);
-    let previousData = null;
-    let changes = [];
-    
-    if (previousCache) {
-      try {
-        const parsedCache = JSON.parse(previousCache);
-        previousData = parsedCache.data;
-        
-        // Compare data and identify changes
-        if (Array.isArray(data) && Array.isArray(previousData)) {
-          // For arrays (like yoyos and specs)
-          const prevIds = new Set(previousData.map(item => item.id || item.model));
-          const newIds = new Set(data.map(item => item.id || item.model));
-          
-          // Find added items
-          const added = data.filter(item => {
-            const id = item.id || item.model;
-            return !prevIds.has(id);
-          });
-          
-          // Find removed items
-          const removed = previousData.filter(item => {
-            const id = item.id || item.model;
-            return !newIds.has(id);
-          });
-          
-          // Find modified items
-          const modified = data.filter(newItem => {
-            const id = newItem.id || newItem.model;
-            const prevItem = previousData.find(item => (item.id || item.model) === id);
-            return prevItem && JSON.stringify(newItem) !== JSON.stringify(prevItem);
-          });
-          
-          if (added.length > 0) changes.push(`Added ${added.length} new items`);
-          if (removed.length > 0) changes.push(`Removed ${removed.length} items`);
-          if (modified.length > 0) changes.push(`Modified ${modified.length} items`);
-          
-          // Log details of changes if there are any
-          if (changes.length > 0) {
-            console.log(`Cache changes for ${key}:`, changes);
-            
-            if (DEBUG) {
-              // Log details of added items
-              if (added.length > 0) {
-                console.log('Added items:', added.map(item => item.model || item.id));
-              }
-              
-              // Log details of removed items
-              if (removed.length > 0) {
-                console.log('Removed items:', removed.map(item => item.model || item.id));
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.error('Error parsing previous cache:', e);
-      }
-    }
-    
-    const cacheData = {
-      data,
-      timestamp: Date.now(),
-      version: getCurrentAppVersion()
-    };
-    
-    localStorage.setItem(key, JSON.stringify(cacheData));
-    
-    // Log cache update with changes if any
-    if (changes.length > 0) {
-      console.log(`Updated cache for key: ${key}. Version: ${cacheData.version}, Timestamp: ${new Date(cacheData.timestamp).toLocaleString()}`);
-      console.log(`Changes detected: ${changes.join(', ')}`);
-    } else {
-      console.log(`Updated cache for key: ${key}. Version: ${cacheData.version}, Timestamp: ${new Date(cacheData.timestamp).toLocaleString()}`);
-      console.log(`No changes detected in data structure.`);
-    }
-  }
-  
-  // Helper function to get the current app version
-  function getCurrentAppVersion() {
-    return window.APP_CONFIG.VERSION;
   }
 
   async function fetchYoyoData() {
     const mainLoadingSpinner = document.getElementById('main-loading-spinner');
     const yoyoGrid           = document.getElementById('yoyo-grid');
 
-    if (DEBUG) {
-      console.log('Starting fetchYoyoData...');
-      console.log('CONFIG:', CONFIG);
-      console.log('yoyosDataUrl:', CONFIG.yoyosDataUrl);
+    if (DEBUG_DATA) {
+      debugLog('data', 'Starting fetchYoyoData...');
+      debugLog('data', 'CONFIG:', CONFIG);
+      debugLog('data', 'yoyosDataUrl:', CONFIG.yoyosDataUrl);
     }
 
     // 1) Show spinner & clear grid
@@ -597,50 +733,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2) If we have cached data, render it immediately
     if (hasCache) {
-      if (DEBUG) console.log('Using cached yoyo data');
+      if (DEBUG_CACHE) debugLog('cache', 'Using cached yoyo data');
       isLoading = false;
-      yoyoData   = cachedYoyos;
+      yoyoData   = cachedYoyos.filter(y => y && y.model && String(y.model).trim() !== '');
       populateModelFilter();
       populateColorwayFilter();
       displayYoyoCards();
       updateFavoritesAndOwnedCounts();
-      if (DEBUG) console.log('Loaded yoyos:', yoyoData, 'Count:', yoyoData.length);
+      if (DEBUG_DATA) debugLog('data', 'Loaded yoyos:', yoyoData, 'Count:', yoyoData.length);
     }
 
     // 3) Fetch fresh in background
     try {
-      if (DEBUG) {
-        console.log('Fetching latest yoyo data…');
-        console.log('URL:', CONFIG.yoyosDataUrl);
+      if (DEBUG_DATA) {
+        debugLog('data', 'Fetching latest yoyo data…');
+        debugLog('data', 'URL:', CONFIG.yoyosDataUrl);
       }
       const resp = await fetch(CONFIG.yoyosDataUrl);
       if (!resp.ok) {
         throw new Error(`HTTP error! status: ${resp.status}`);
       }
       const fresh = await resp.json();
-      if (DEBUG) console.log('Received fresh data:', fresh);
+      if (DEBUG_DATA) debugLog('data', 'Received fresh data:', fresh);
 
-      // 4) If no cache yet, or the payload actually changed, update UI
-      if (!hasCache || JSON.stringify(fresh) !== JSON.stringify(cachedYoyos)) {
-        if (DEBUG) {
-          console.log('New yoyo data received, updating cache & UI');
-          console.log(`Cache update: ${hasCache ? 'Updating existing cache' : 'Creating new cache'}`);
+      // Fast length check: if cached and fresh data have the same length, skip cache update and UI reload
+      if (hasCache && Array.isArray(fresh) && Array.isArray(cachedYoyos) && fresh.length === cachedYoyos.length) {
+        debugLog('cache', 'Cached and fetched data lengths match, skipping cache update and UI reload.');
+        if (mainLoadingSpinner) mainLoadingSpinner.style.display = 'none';
+        isLoading = false;
+        return;
+      }
+
+      // 4) If no cache yet, update UI
+      if (!hasCache) {
+        if (DEBUG_DATA) {
+          debugLog('data', 'No cache found, updating cache & UI');
         }
         gotFreshUpdate = true;
-        yoyoData = fresh;
+        yoyoData = fresh.filter(y => y && y.model && String(y.model).trim() !== '');
         // Defensive: ensure yoyoData is always an array
         if (!Array.isArray(yoyoData)) {
           console.error('Received non-array data:', yoyoData);
           yoyoData = [];
         }
-        setCachedData(cacheKey, fresh);
+        setCachedData(cacheKey, yoyoData);
         populateModelFilter();
         populateColorwayFilter();
         displayYoyoCards();
         updateFavoritesAndOwnedCounts();
-        if (DEBUG) console.log('Loaded yoyos:', yoyoData, 'Count:', yoyoData.length);
+        if (DEBUG_DATA) debugLog('data', 'Loaded yoyos:', yoyoData, 'Count:', yoyoData.length);
       } else {
-        if (DEBUG) console.log('Yoyo data unchanged — skipping redraw');
+        if (DEBUG_DATA) debugLog('data', 'Yoyo data unchanged — skipping redraw');
       }
     } catch (err) {
       console.error('Error fetching yoyo data:', err);
@@ -668,29 +811,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const cacheKey    = CACHE_CONFIG.specsCacheKey;
     const cachedSpecs = getCachedData(cacheKey);
     if (cachedSpecs) {
-      if (DEBUG) console.log('Using cached specs data');
-      specsData = cachedSpecs;
+      if (DEBUG_CACHE) debugLog('cache', 'Using cached specs data');
+      specsData = cachedSpecs.filter(s => s && s.model && String(s.model).trim() !== '');
       populateModelFilter();
       populateColorwayFilter();
-      if (DEBUG) console.log('Loaded specs:', specsData, 'Count:', specsData.length);
+      if (DEBUG_DATA) debugLog('data', 'Loaded specs:', specsData, 'Count:', specsData.length);
     }
 
     // 2) Always fetch fresh specs
     try {
-      if (DEBUG) console.log('Fetching latest specs data…');
+      if (DEBUG_DATA) debugLog('data', 'Fetching latest specs data…');
       const resp  = await fetch(CONFIG.specsDataUrl);
       const fresh = await resp.json();
 
       // 3) If no cache, or data changed, update cache & UI
       if (!cachedSpecs || JSON.stringify(fresh) !== JSON.stringify(cachedSpecs)) {
-        if (DEBUG) console.log('New specs data received, updating cache & UI');
-        specsData = fresh;
-        setCachedData(cacheKey, fresh);
+        if (DEBUG_DATA) debugLog('data', 'New specs data received, updating cache & UI');
+        specsData = fresh.filter(s => s && s.model && String(s.model).trim() !== '');
+        setCachedData(cacheKey, specsData);
         populateModelFilter();
         populateColorwayFilter();
-        if (DEBUG) console.log('Loaded specs:', specsData, 'Count:', specsData.length);
+        if (DEBUG_DATA) debugLog('data', 'Loaded specs:', specsData, 'Count:', specsData.length);
       } else {
-        if (DEBUG) console.log('Specs data unchanged');
+        if (DEBUG_DATA) debugLog('data', 'Specs data unchanged');
       }
     } catch (err) {
       console.error('Error fetching specs data:', err);
@@ -1131,8 +1274,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Log for debugging
-    if (DEBUG) {
-      console.log('Displaying yoyos:', {
+    if (DEBUG_UI) {
+      debugLog('ui', 'Displaying yoyos:', {
         currentPage,
         itemsPerPage,
         startIndex,
@@ -1200,9 +1343,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const details = document.createElement('div');
     details.classList.add('card-details');
     
-    const date = document.createElement('p');
-    date.textContent = `Released: ${formatDate(yoyo.release_date)}`;
-    details.appendChild(date);
+    const formattedDate = formatDate(yoyo.release_date);
+    if (yoyo.release_date && formattedDate !== 'Unknown') {
+      const date = document.createElement('p');
+      date.textContent = `Released: ${formattedDate}`;
+      details.appendChild(date);
+    }
 
     if (yoyo.quantity) {
       const quantity = document.createElement('p');
@@ -1572,10 +1718,12 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="modal-info">
-          <p class="modal-info-row">
-            <span class="modal-label">Released:</span>
-            <span class="modal-value">${formatDate(yoyo.release_date)}</span>
-          </p>
+          ${yoyo.release_date && formatDate(yoyo.release_date) !== 'Unknown' ? `
+            <p class="modal-info-row">
+              <span class="modal-label">Released:</span>
+              <span class="modal-value">${formatDate(yoyo.release_date)}</span>
+            </p>
+          ` : ''}
           ${yoyo.quantity ? `
             <p class="modal-info-row">
               <span class="modal-label">Quantity:</span>

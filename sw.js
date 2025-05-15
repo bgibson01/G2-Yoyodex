@@ -1,9 +1,9 @@
 // Import service worker config
-importScripts('sw-config.js');
+importScripts('config.js');
 
 // Version-based cache name
 const CACHE_VERSION = self.APP_CONFIG.VERSION;
-const CACHE_NAME = `yoyodex-cache-v${CACHE_VERSION}`;
+const CACHE_NAME = `${self.APP_CONFIG.APP_NAME}-static-v${self.APP_CONFIG.VERSION}`;
 
 // Assets to cache
 const ASSETS_TO_CACHE = [
@@ -12,7 +12,6 @@ const ASSETS_TO_CACHE = [
   './styles.css',
   './script.js',
   './config.js',
-  './sw-config.js',
   './manifest.json',
   './assets/g2-logo.png',
   './assets/placeholder.jpg',
