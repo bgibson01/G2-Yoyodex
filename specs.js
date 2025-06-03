@@ -16,7 +16,32 @@ function debugLog(area, ...args) {
   }
 }
 
+// Analytics helper function
+function trackEvent(category, action, label = null, value = null) {
+  if (typeof gtag === 'function') {
+    gtag('event', action, {
+      'event_category': category,
+      'event_label': label,
+      'value': value
+    });
+  }
+}
+
+// Track page views with additional parameters
+function trackPageView(pageTitle = document.title) {
+  if (typeof gtag === 'function') {
+    gtag('config', 'G-E9G3FZFQCX', {
+      'page_title': pageTitle,
+      'page_location': window.location.href,
+      'page_path': window.location.pathname,
+      'page_type': 'specs_comparison'
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  trackPageView();
+
   // Ensure APP_CONFIG is loaded
   if (!window.APP_CONFIG) {
     console.error('APP_CONFIG not loaded. Make sure config.js is loaded before specs.js');
@@ -340,6 +365,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
         });
+
+        if (select.value) {
+          trackEvent('Specs Comparison', 'Select Model', `${index + 1}: ${select.value}`);
+        }
       });
 
       // Add keyboard navigation
@@ -361,6 +390,10 @@ document.addEventListener('DOMContentLoaded', () => {
             defaultOption.textContent = select.value || `Select Model ${index + 1}${index === 2 ? ' (Optional)' : ''}`;
             updateTable();
             updateHeaders();
+
+            if (select.value) {
+              trackEvent('Specs Comparison', 'Select Model', `${index + 1}: ${select.value}`);
+            }
           }
         }
       });
@@ -378,6 +411,8 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTable();
         updateHeaders();
         populateModelSelects(); // Repopulate to update disabled states
+
+        trackEvent('Specs Comparison', 'Clear Model', `Model ${modelNum}`);
       });
     });
 
@@ -392,6 +427,8 @@ document.addEventListener('DOMContentLoaded', () => {
       updateTable();
       updateHeaders();
       populateModelSelects(); // Repopulate to update disabled states
+
+      trackEvent('Specs Comparison', 'Clear All Models');
     });
   }
 
@@ -486,5 +523,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     specsTable.querySelector('tbody').innerHTML = tableHtml;
+
+    // Track successful specs load
+    trackEvent('Specs Comparison', 'Load Specs', 'Success');
+  }
+
+  // Track when specs fail to load
+  function handleSpecsError(error) {
+    console.error('Error fetching specs data:', error);
+    
+    // Track error
+    trackEvent('Specs Comparison', 'Load Specs', 'Error', error.message);
   }
 }); 
