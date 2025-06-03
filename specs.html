@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="G² Releases Database - Model Specifications Comparison">
+  <title>G2 Model Specs Comparison</title>
+  
+  <!-- PWA Meta Tags -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="G2 Releases Database">
+  <meta name="apple-mobile-web-app-title" content="G2 Releases Database">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="msapplication-starturl" content="/">
+  
+  <!-- Cache Control -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
+  <!-- Google Analytics 4 -->
+  <link rel="canonical" href="https://g2releases.info/specs.html">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-E9G3FZFQCX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-E9G3FZFQCX', {
+      'cookie_domain': window.location.hostname,
+      'cookie_flags': 'SameSite=None;Secure',
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false,
+      'cookie_expires': 60 * 60 * 24 * 365
+    });
+  </script>
+  
+  <script src="config.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <meta name="theme-color" content="#1e1e1e">
+</head>
+<body class="app-body specs-page">
+  <main class="main-content">
+    <!-- Header Section -->
+    <header class="app-header" role="banner">
+      <h1>G2 Model Specs Comparison</h1>
+    </header>
+
+    <!-- Controls Container -->
+    <div class="controls-wrapper">
+      <div class="controls-container">
+        <div class="controls-flex">
+          <!-- Model Selection -->
+          <div class="model-selection">
+            <div class="model-select-container">
+              <select id="model1" class="model-select" data-tooltip="Select first model to compare">
+                <option value="">Select Model 1</option>
+              </select>
+              <button class="clear-model-btn" data-model="1" aria-label="Clear Model 1">×</button>
+            </div>
+            <div class="model-select-container">
+              <select id="model2" class="model-select" data-tooltip="Select second model to compare">
+                <option value="">Select Model 2</option>
+              </select>
+              <button class="clear-model-btn" data-model="2" aria-label="Clear Model 2">×</button>
+            </div>
+            <div class="model-select-container">
+              <select id="model3" class="model-select" data-tooltip="Select third model to compare (optional)">
+                <option value="">Select Model 3 (Optional)</option>
+              </select>
+              <button class="clear-model-btn" data-model="3" aria-label="Clear Model 3">×</button>
+            </div>
+            <button id="clear-all-models" class="clear-all-btn">Clear All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Specs Table -->
+    <div class="specs-table-container">
+      <table id="specs-table" class="specs-table">
+        <thead>
+          <tr>
+            <th>Specification</th>
+            <th id="model1-header">Model 1</th>
+            <th id="model2-header">Model 2</th>
+            <th id="model3-header">Model 3</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Will be populated by JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer" role="contentinfo">
+    <div class="footer-content">
+      <p>This is a community driven project by <span class="gradient-text model">G2 Nation</span> and <span class="gradient-text colorway">Sploozel</span><br>All data is collected from public sources</p>
+      <p class="footer-links">
+        <a href="https://www.gsquaredyoyos.com" target="_blank" rel="noopener">Visit the official site</a>
+        <span class="footer-separator">|</span>
+        <a href="index.html" class="footer-link-prominent">Back to Releases</a>
+        <span class="footer-separator">|</span>
+        <a href="privacy.html">Privacy Policy</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="specs.js"></script>
+</body>
+</html> 

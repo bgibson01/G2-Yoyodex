@@ -904,37 +904,144 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function populateModelFilter() {
-    const modelFilter = document.getElementById('model-filter');
-    let filteredYoyos = yoyoData;
-
-    // Get unique models from all yoyos, not filtered by colorway
-    const models = Array.from(new Set(filteredYoyos.map(y => y.model))).sort();
+    const modelSelect = document.getElementById('model-filter');
+    const models = Array.from(new Set(yoyoData.map(y => y.model))).sort();
+    
+    // Count colorways per model
     const modelCounts = {};
     models.forEach(model => {
-      modelCounts[model] = filteredYoyos.filter(y => y.model === model).length;
+      modelCounts[model] = yoyoData.filter(y => y.model === model).length;
     });
 
-    // Store current selection
-    const currentSelection = modelFilter.value;
+    // Debug logging
+    if (DEBUG_DATA) {
+      console.log('All models:', models);
+      console.log('First few yoyos with sort_key:', yoyoData.slice(0, 3).map(y => ({
+        model: y.model,
+        sort_key: y.sort_key
+      })));
+    }
 
-    modelFilter.innerHTML = `<option value="">All Models (${models.length})</option>`;
+    // Group models by their sort_key base name
+    const modelGroups = {};
     models.forEach(model => {
-      const opt = document.createElement('option');
-      opt.value = model;
-      opt.textContent = `${model} (${modelCounts[model]})`;
-      modelFilter.appendChild(opt);
+      const yoyo = yoyoData.find(y => y.model === model);
+      if (!yoyo) {
+        console.warn(`No yoyo found for model: ${model}`);
+        return;
+      }
+
+      // Get the base name from sort_key (part before underscore or space)
+      let baseName = null;
+      if (yoyo.sort_key) {
+        // Split by underscore first to get the full name before it
+        const parts = yoyo.sort_key.split('_');
+        const nameBeforeUnderscore = parts[0];
+        
+        // Special case for Loadout
+        if (nameBeforeUnderscore.includes('Loadout')) {
+          baseName = 'Loadout';
+        } else {
+          // Check if there are other models with similar names
+          const hasSimilarModels = models.some(m => {
+            if (m === model) return false;
+            const otherYoyo = yoyoData.find(y => y.model === m);
+            if (!otherYoyo || !otherYoyo.sort_key) return false;
+            
+            const otherWords = otherYoyo.sort_key.split('_')[0].split(' ');
+            const thisWords = nameBeforeUnderscore.split(' ');
+            
+            // Check if they share any significant words (excluding common prefixes/suffixes)
+            const skipWords = ['Mini', 'Wide', 'T52', 'SR', 'AL6', 'AL7', 'AL7075', 'Brass', 'Ti', 'SS'];
+            const thisSignificantWords = thisWords.filter(w => !skipWords.includes(w));
+            const otherSignificantWords = otherWords.filter(w => !skipWords.includes(w));
+            
+            return thisSignificantWords.some(word => otherSignificantWords.includes(word));
+          });
+
+          if (hasSimilarModels) {
+            // If similar models exist, use the main model name
+            const words = nameBeforeUnderscore.split(' ');
+            const mainModelName = words.find(word => {
+              const skipWords = ['Mini', 'Wide', 'T52', 'SR', 'AL6', 'AL7', 'AL7075', 'Brass', 'Ti', 'SS'];
+              return !skipWords.includes(word);
+            });
+            baseName = mainModelName || words[0];
+          } else {
+            // If no similar models, use the full name before underscore
+            baseName = nameBeforeUnderscore;
+          }
+        }
+      }
+      
+      if (DEBUG_DATA) {
+        console.log(`Processing model: ${model}`);
+        console.log(`- sort_key: ${yoyo.sort_key}`);
+        console.log(`- base name: ${baseName}`);
+      }
+      
+      if (!baseName) {
+        console.warn(`No valid sort_key for model: ${model}`);
+        return;
+      }
+
+      if (!modelGroups[baseName]) {
+        modelGroups[baseName] = [];
+      }
+      modelGroups[baseName].push(model);
     });
 
-    // Sort options based on current sort settings
-    const sortedOptions = sortOptions(modelFilter.options, modelSortType);
-    modelFilter.innerHTML = '';
-    sortedOptions.forEach(opt => modelFilter.appendChild(opt));
+    // Sort base names alphabetically
+    const sortedBaseNames = Object.keys(modelGroups).sort((a, b) => a.localeCompare(b));
     
-    // Restore selection if it still exists in the filtered list
-    if (currentSelection && models.includes(currentSelection)) {
-      modelFilter.value = currentSelection;
-    } else {
-      modelFilter.selectedIndex = 0;
+    if (DEBUG_DATA) {
+      console.log('Model Groups:', modelGroups);
+      console.log('Sorted Base Names:', sortedBaseNames);
+    }
+
+    // Store current value
+    const currentValue = modelSelect.value;
+    
+    // Clear the select
+    modelSelect.innerHTML = '';
+    
+    // Add default option with total count
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = currentValue || `All Models (${models.length})`;
+    modelSelect.appendChild(defaultOption);
+    
+    // Add top separator
+    const topSeparator = document.createElement('option');
+    topSeparator.disabled = true;
+    topSeparator.textContent = '────────── Models ──────────';
+    modelSelect.appendChild(topSeparator);
+    
+    // Add grouped models
+    sortedBaseNames.forEach(baseName => {
+      const variants = modelGroups[baseName];
+      
+      // Always add a group header, even for single models
+      const groupHeader = document.createElement('option');
+      groupHeader.disabled = true;
+      // Convert base name to uppercase
+      const capitalizedName = baseName.toUpperCase();
+      groupHeader.textContent = `── ${capitalizedName} ──`;
+      groupHeader.className = 'group-header';
+      modelSelect.appendChild(groupHeader);
+      
+      // Add all variants of this base model
+      variants.forEach(model => {
+        const opt = document.createElement('option');
+        opt.value = model;
+        opt.textContent = `${model} (${modelCounts[model]})`;
+        modelSelect.appendChild(opt);
+      });
+    });
+
+    // Restore the selected value
+    if (currentValue) {
+      modelSelect.value = currentValue;
     }
   }
 
@@ -955,7 +1062,10 @@ document.addEventListener('DOMContentLoaded', () => {
     colorways.forEach(colorway => {
       const opt = document.createElement('option');
       opt.value = colorway;
-      opt.textContent = `${colorway} (${colorwayCounts[colorway]})`;
+      // Only show count if there's more than one
+      opt.textContent = colorwayCounts[colorway] > 1 ? 
+        `${colorway} (${colorwayCounts[colorway]})` : 
+        colorway;
       colorwayFilter.appendChild(opt);
     });
 
@@ -1099,8 +1209,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // Clear colorway filter
     selectedColorway = "";
-    document.getElementById('colorway-filter').value = "";
-    populateColorwayFilter();
+    const colorwayFilter = document.getElementById('colorway-filter');
+    colorwayFilter.value = "";
+    populateColorwayFilter(); // Repopulate to restore counts
     currentPage = 1;
     updateClearFiltersButton();
     scrollToTopSmooth();
@@ -1122,8 +1233,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // Clear model filter
     selectedModel = "";
-    document.getElementById('model-filter').value = "";
-    populateModelFilter();
+    const modelFilter = document.getElementById('model-filter');
+    modelFilter.value = "";
+    populateModelFilter(); // Repopulate to restore counts
     currentPage = 1;
     updateClearFiltersButton();
     scrollToTopSmooth();
@@ -1842,7 +1954,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const specsSection = modalDetails.querySelector('.modal-specs');
     if (specsSection) {
         specsSection.innerHTML = `
-            <h3 class="modal-section-title">Specifications</h3>
+            <h3 class="modal-section-title">
+                Specifications
+                <a href="specs.html" class="specs-comparison-link" title="Compare specs across models">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                    Compare Specs
+                </a>
+            </h3>
             <div class="modal-specs-grid">
                 ${specHtml}
             </div>
