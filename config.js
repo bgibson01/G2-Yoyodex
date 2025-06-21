@@ -1,6 +1,6 @@
 // G2 Releases Database Configuration
 const CONFIG = {
-  VERSION: '2.2.15',
+  VERSION: '2.2.16',
   APP_NAME: 'G2 Releases Database',
   CACHE: {
     EXPIRATION: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
